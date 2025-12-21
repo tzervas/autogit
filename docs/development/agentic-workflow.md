@@ -4,11 +4,29 @@ This document describes the agentic development workflow used in AutoGit.
 
 ## Overview
 
-AutoGit uses an agentic workflow with specialized AI personas that work together to deliver high-quality code and documentation.
+AutoGit uses a **multiagent workflow** with specialized AI agents that work together to deliver high-quality code and documentation. Each agent has domain-specific expertise and responsibilities, coordinated by a root orchestrator agent.
 
-## Agentic Personas
+## Multiagent Architecture
 
-### Project Manager Persona
+The AutoGit agent system uses a hierarchical structure:
+
+- **Root Agent** (`.github/agents/agent.md`) - Orchestrates and delegates to specialized agents
+- **Shared Context** (`.github/agents/shared-context.md`) - Common project requirements and standards
+- **Specialized Agents** - Domain experts for specific areas:
+  - Project Manager (`.github/agents/project-manager.md`)
+  - Software Engineer (`.github/agents/software-engineer.md`)
+  - DevOps Engineer (`.github/agents/devops-engineer.md`)
+  - Security Engineer (`.github/agents/security-engineer.md`)
+  - Documentation Engineer (`.github/agents/documentation-engineer.md`)
+  - Evaluator (`.github/agents/evaluator.md`)
+
+This structure ensures that the right expert handles each type of task, leading to higher quality outcomes.
+
+## Specialized Agents
+
+### 1. Project Manager Agent
+
+**Configuration**: `.github/agents/project-manager.md`
 
 **Role**: Task coordination, dependency management, priority ordering
 
@@ -46,7 +64,9 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 - [ ] ADR (if architectural change)
 ```
 
-### Software Engineer Persona
+### 2. Software Engineer Agent
+
+**Configuration**: `.github/agents/software-engineer.md`
 
 **Role**: Implementation, code review, testing
 
@@ -62,7 +82,9 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 - See [Coding Standards](standards.md)
 - See [Testing Guide](testing.md)
 
-### DevOps Engineer Persona
+### 3. DevOps Engineer Agent
+
+**Configuration**: `.github/agents/devops-engineer.md`
 
 **Role**: Infrastructure, deployment, CI/CD
 
@@ -78,7 +100,9 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 - See [CI/CD Guide](ci-cd.md)
 - See [Operations Guide](../operations/README.md)
 
-### Security Engineer Persona
+### 4. Security Engineer Agent
+
+**Configuration**: `.github/agents/security-engineer.md`
 
 **Role**: Security review, hardening, compliance
 
@@ -93,7 +117,9 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 **Standards**:
 - See [Security Guide](../security/README.md)
 
-### Documentation Engineer Persona
+### 5. Documentation Engineer Agent
+
+**Configuration**: `.github/agents/documentation-engineer.md`
 
 **Role**: Documentation maintenance, consistency
 
@@ -108,7 +134,9 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 **Standards**:
 - See [Documentation Guidelines](documentation.md)
 
-### Evaluator Persona
+### 6. Evaluator Agent
+
+**Configuration**: `.github/agents/evaluator.md`
 
 **Role**: Quality assurance, testing, feedback
 
@@ -129,33 +157,35 @@ AutoGit uses an agentic workflow with specialized AI personas that work together
 
 ## Workflow Process
 
-### 1. Task Assignment
+The multiagent workflow follows these steps:
 
-**Project Manager** creates task with:
+### 1. Task Assignment (Root Agent → Project Manager)
+
+The **Root Agent** receives a request and delegates to the **Project Manager Agent** who creates tasks with:
 - Clear description
 - Acceptance criteria
 - Documentation requirements
 - Dependencies
 
-### 2. Implementation
+### 2. Implementation (Specialized Agent)
 
-**Assigned Persona** implements task:
+The **assigned specialized agent** (Software Engineer, DevOps Engineer, etc.) implements the task:
 - Follow coding standards
 - Write tests
 - Update documentation
 - Self-review before submitting
 
-### 3. Documentation Review
+### 3. Documentation Review (Documentation Engineer Agent)
 
-**Documentation Engineer** reviews:
+The **Documentation Engineer Agent** reviews:
 - Documentation completeness
 - Accuracy of examples
 - Link validity
 - INDEX.md updated
 
-### 4. Quality Review
+### 4. Quality Review (Evaluator Agent)
 
-**Evaluator** reviews:
+The **Evaluator Agent** reviews:
 - Code quality
 - Test coverage
 - Documentation
@@ -351,4 +381,12 @@ Track these metrics to improve workflow:
 - [Coding Standards](standards.md)
 - [Testing Guide](testing.md)
 - [Documentation Guidelines](documentation.md)
-- [Agent Configuration](../../.github/agents/agent.md)
+- **Agent Configurations**:
+  - [Root Agent](../../.github/agents/agent.md) - Orchestrator
+  - [Shared Context](../../.github/agents/shared-context.md) - Common requirements
+  - [Project Manager Agent](../../.github/agents/project-manager.md)
+  - [Software Engineer Agent](../../.github/agents/software-engineer.md)
+  - [DevOps Engineer Agent](../../.github/agents/devops-engineer.md)
+  - [Security Engineer Agent](../../.github/agents/security-engineer.md)
+  - [Documentation Engineer Agent](../../.github/agents/documentation-engineer.md)
+  - [Evaluator Agent](../../.github/agents/evaluator.md)

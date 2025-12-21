@@ -8,9 +8,13 @@ This document outlines the planned features and improvements for AutoGit.
 - [x] Basic project structure
 - [x] Documentation framework
 - [ ] Git server implementation (GitLab CE integration)
+  - [ ] AMD64 native support (MVP focus)
+  - [ ] Docker Compose deployment
+  - [ ] Basic authentication
+  - [ ] SSH and HTTP/HTTPS access
 - [ ] Basic runner coordinator
-- [ ] Docker Compose deployment
-- [ ] Single-architecture support (amd64)
+  - [ ] AMD64 native support (MVP focus)
+- [ ] Docker Compose deployment (AMD64 native - MVP)
 - [ ] Basic authentication
 
 ### Documentation
@@ -23,16 +27,27 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.1 - Multi-Architecture (Target: Q2 2025)
 
 ### Features
-- [ ] ARM64 native support
-- [ ] RISC-V emulation via QEMU
-- [ ] Multi-architecture Docker images
+- [ ] ARM64 native support (for ARM64 hosts/runners)
+- [ ] ARM64 QEMU emulation (on AMD64 hosts)
+- [ ] RISC-V emulation via QEMU (experimental)
+- [ ] Multi-architecture Docker images (AMD64, ARM64, RISC-V)
+- [ ] Architecture detection and auto-selection
 - [ ] Architecture-aware scheduling
 - [ ] Cross-compilation tooling
+- [ ] Platform-specific optimizations
+
+### Architecture Strategy
+- **Native Support**: AMD64 (MVP) and ARM64 (Phase 2)
+- **QEMU Emulation**: ARM64 fallback and RISC-V
+- **Testing**: AMD64 native (MVP), ARM64 and RISC-V post-deployment
+- **Documentation**: Multi-arch deployment guides
 
 ### Testing
-- [ ] Multi-architecture integration tests
+- [ ] Multi-architecture integration tests (post AMD64 MVP)
 - [ ] Performance benchmarks per architecture
 - [ ] Emulation overhead testing
+- [ ] Native vs QEMU comparison
+- [ ] Cross-platform compatibility validation
 
 ## Version 1.2 - GPU Support (Target: Q2 2025)
 

@@ -13,13 +13,18 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 ### Key Features
 
 - 🚀 **Dynamic Runner Autoscaling** - Automatically provisions right-sized runners based on job queue
-- 🏗️ **Multi-Architecture Support** - Native amd64/arm64, QEMU emulation for RISC-V
+- 🏗️ **Multi-Architecture Support** - AMD64 native (MVP), ARM64 native + QEMU emulation (planned), RISC-V QEMU (future)
 - 🎮 **GPU-Aware Scheduling** - Intelligent allocation of AMD, NVIDIA, and Intel GPUs
 - 🔐 **Centralized SSO** - Unified authentication with Authelia
 - 🔒 **Automated SSL/TLS** - Let's Encrypt integration via cert-manager
 - 🌐 **Self-Hosted DNS** - LAN-isolated access with CoreDNS
 - 📦 **Flexible Deployment** - Scale from Docker Compose to Kubernetes/Helm
 - ⚖️ **MIT Licensed** - Using only compatible FOSS components
+
+**Architecture Focus**: 
+- **MVP**: AMD64 native only (current testing)
+- **Phase 2**: ARM64 native support + QEMU fallback (post-deployment)
+- **Phase 3**: RISC-V QEMU emulation (future)
 
 ## Architecture
 
@@ -40,6 +45,7 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 - Docker 24.0+ or Kubernetes 1.28+
 - Debian 12+ or Ubuntu 22.04+ (host OS)
 - Minimum 8GB RAM, 50GB storage
+- **Architecture**: AMD64 (MVP), ARM64 native or QEMU (Phase 2+)
 - Optional: GPU for accelerated workloads
 
 ### Docker Compose (Development)

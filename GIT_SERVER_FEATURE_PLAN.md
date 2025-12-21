@@ -37,27 +37,61 @@ Implement a self-hosted Git server based on GitLab CE integration for the AutoGi
 └─────────────────────────────────────┘
 ```
 
+### Multi-Architecture Support
+
+**Phase 1 (MVP)**: AMD64 Native Only
+- Focus on AMD64 native implementation
+- Test and validate on AMD64 hosts
+- Ensure stable foundation
+
+**Phase 2 (Post-MVP)**: ARM64 Support
+- Native ARM64 for ARM64 hosts/runners
+- QEMU emulation fallback for AMD64 hosts
+
+**Phase 3 (Future)**: RISC-V Support
+- QEMU emulation for RISC-V
+- Support for future native RISC-V runners
+
 ## Subtasks
 
 ### 1. Docker Setup and Configuration
 **Branch**: `feature/git-server-implementation/docker-setup`
 
 **Tasks**:
-- [ ] Create Dockerfile for GitLab CE
+- [ ] Create Dockerfile for GitLab CE (AMD64 native for MVP)
 - [ ] Configure docker-compose.yml integration
 - [ ] Setup volume mounts for data persistence
 - [ ] Configure network settings
 - [ ] Setup environment variables
 - [ ] Configure resource limits
 - [ ] Add health checks
+- [ ] Add multi-arch build support (AMD64 native, ARM64 native + QEMU, RISC-V QEMU)
+- [ ] Document architecture detection and selection
+- [ ] Add architecture-specific configuration options
 
 **Deliverables**:
-- `services/git-server/Dockerfile`
-- Updated `docker-compose.yml`
-- `services/git-server/.env.example`
+- `services/git-server/Dockerfile` with multi-arch support
+- `services/git-server/Dockerfile.amd64` (AMD64 native - MVP focus)
+- `services/git-server/Dockerfile.arm64` (ARM64 native - future)
+- `services/git-server/Dockerfile.riscv` (RISC-V QEMU - future)
+- Updated `docker-compose.yml` with architecture selection
+- `services/git-server/.env.example` with ARCH variable
 - Health check endpoint
+- Architecture detection script
+- Multi-arch build documentation
 
-**Estimated Time**: 3-5 days
+**Architecture Support Strategy**:
+- **AMD64**: Native support (testing and MVP deployment)
+- **ARM64**: Native support when ARM64 runners/hosts available
+- **ARM64 on AMD64**: QEMU emulation fallback
+- **RISC-V**: QEMU emulation only (future testing)
+
+**Testing Priority**:
+1. AMD64 native (immediate - MVP)
+2. ARM64 native (post-deployment with ARM64 infrastructure)
+3. QEMU emulation (post-deployment validation)
+
+**Estimated Time**: 4-6 days (increased for multi-arch support)
 
 ### 2. Basic Authentication Setup
 **Branch**: `feature/git-server-implementation/authentication`
@@ -220,22 +254,44 @@ Implement a self-hosted Git server based on GitLab CE integration for the AutoGi
 
 ## Testing Strategy
 
+### Architecture-Specific Testing
+
+**Phase 1: MVP (AMD64 Native Only)**
+- Focus all testing on AMD64 native
+- Validate Docker builds on AMD64
+- Test deployments on AMD64 hosts
+- Ensure stable baseline
+
+**Phase 2: Post-Deployment (ARM64 + Emulation)**
+- Test ARM64 native when infrastructure available
+- Validate QEMU emulation for ARM64
+- Test QEMU emulation for RISC-V
+- Compare performance characteristics
+
 ### Unit Tests
 - API client functions
 - Configuration validation
 - Authentication helpers
+- Architecture detection logic
 
 ### Integration Tests
-- Docker container startup
+- Docker container startup (AMD64 native for MVP)
 - Service communication
 - Database connectivity
 - API endpoint responses
+- Multi-arch build process (validation only, AMD64 testing)
 
 ### E2E Tests
-- Complete user workflow
+- Complete user workflow (AMD64 native)
 - Repository creation and cloning
 - Push and pull operations
 - CI/CD pipeline execution
+
+### Future Multi-Arch Tests
+- ARM64 native runner workflows
+- QEMU emulation performance
+- Cross-architecture compatibility
+- Resource usage comparison
 
 ## Documentation Requirements
 
@@ -274,10 +330,22 @@ Implement a self-hosted Git server based on GitLab CE integration for the AutoGi
 
 ## Performance Requirements
 
+**AMD64 Native (MVP Target)**:
 - [ ] Container startup time < 30 seconds
 - [ ] API response time < 200ms
 - [ ] Git operations complete within 5s for small repos
 - [ ] Support for 100+ concurrent users
+
+**ARM64 Native (Post-Deployment)**:
+- [ ] Container startup time < 30 seconds
+- [ ] API response time < 200ms (native performance)
+- [ ] Git operations complete within 5s for small repos
+
+**QEMU Emulation (Post-Deployment)**:
+- [ ] Document performance characteristics
+- [ ] Acceptable startup time (may be slower)
+- [ ] Functional correctness validated
+- [ ] Resource overhead documented
 
 ## Monitoring and Logging
 

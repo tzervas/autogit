@@ -6,6 +6,18 @@ This document provides a high-level overview of AutoGit's architecture.
 
 AutoGit is a self-hosted GitOps platform built on a modular architecture with the following key components:
 
+### Multi-Architecture Support
+
+**Current Status (MVP)**: AMD64 Native Only
+**Planned**: ARM64 Native + QEMU, RISC-V QEMU
+
+AutoGit supports multiple CPU architectures:
+- **AMD64 (x86_64)**: Native support (MVP focus, testing active)
+- **ARM64 (aarch64)**: Native support (Phase 2) + QEMU emulation fallback
+- **RISC-V**: QEMU emulation only (future/experimental)
+
+See [Multi-Architecture Strategy](../../MULTI_ARCH_STRATEGY.md) for complete details.
+
 ### Core Components
 
 1. **Git Server** - Version control and repository management

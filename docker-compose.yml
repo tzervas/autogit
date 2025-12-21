@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Git server - provides version control functionality
+  git-server:
+    build:
+      context: ./services/git-server
+    container_name: autogit-git-server
+    ports:
+      - "2222:22"
+      - "3000:3000"
+    volumes:
+      - git-data:/data
+    environment:
+      - SERVICE_NAME=git-server
+    networks:
+      - autogit-network
+
+  # Runner coordinator - manages GPU and compute runners
+  runner-coordinator:
+    build:
+      context: ./services/runner-coordinator
+    container_name: autogit-runner-coordinator
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SERVICE_NAME=runner-coordinator
+    depends_on:
+      - git-server
+    networks:
+      - autogit-network
+
+networks:
+  autogit-network:
+    driver: bridge
+
+volumes:
+  git-data:

@@ -81,7 +81,7 @@ class RunnerManagerProtocol(Protocol):
         self,
         architecture: str,
         gpu_type: Optional[str] = None,
-        **kwargs: Dict[str, any]
+        **kwargs: Any
     ) -> str:
         """Provision a new runner instance.
         
@@ -142,10 +142,11 @@ class DockerRunnerManager:
         logger.info("Initialized DockerRunnerManager")
     
     def provision(
+    def provision(
         self,
         architecture: str,
         gpu_type: Optional[str] = None,
-        **kwargs: Dict[str, any]
+        **kwargs: Any
     ) -> str:
         """Provision a new runner instance.
         

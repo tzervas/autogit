@@ -27,6 +27,43 @@ All agents share common project context defined in `shared-context.md`:
 
 **IMPORTANT**: All sub-agents MUST read and follow `shared-context.md`
 
+## Copilot Web UI Multi-Agent Coordination
+
+**Note for Copilot**: This project uses a multiagent structure. For optimal performance:
+
+### Context Loading Strategy
+- **Always loaded**: This file (agent.md) + shared-context.md
+- **Load on demand**: Specialized agents based on task keywords
+- **User can explicitly request**: `@agent-name` to load specific agent
+
+### Agent Loading Keywords
+
+| User Request Contains | Load Agent File |
+|----------------------|-----------------|
+| "plan", "tasks", "breakdown", "coordinate", "organize" | project-manager.md |
+| "implement", "code", "function", "class", "test", "debug" | software-engineer.md |
+| "deploy", "docker", "kubernetes", "helm", "ci/cd", "pipeline" | devops-engineer.md |
+| "security", "vulnerability", "auth", "encrypt", "secrets" | security-engineer.md |
+| "document", "docs", "guide", "readme", "adr", "tutorial" | documentation-engineer.md |
+| "review", "approve", "quality", "evaluate", "feedback" | evaluator.md |
+
+### Multi-Agent Coordination Modes
+
+**Mode 1: Sequential (Default)**
+- Agents work one after another
+- Each agent's output feeds into the next
+- Clear progression, easy to follow
+
+**Mode 2: Checkpoint**
+- Pause after each agent for user review
+- User says "continue" to proceed
+- Allows course correction
+
+**Mode 3: Manual**
+- User explicitly invokes each agent
+- More control, slower but precise
+- Example: "@software-engineer: implement feature X"
+
 ## Your Role as Root Coordinator
 
 ### Primary Responsibilities

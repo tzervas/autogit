@@ -361,7 +361,6 @@ Examples:
         execute_parser.add_argument(
             "--interactive",
             action="store_true",
-            default=False,
             help="Enable interactive prompts (default: non-interactive)"
         )
         

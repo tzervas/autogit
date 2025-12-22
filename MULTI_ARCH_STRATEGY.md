@@ -408,6 +408,6 @@ services:
 
 ---
 
-**Last Updated**: 2024-12-21
+**Last Updated**: 2025-12-21
 **Status**: MVP (AMD64 Native Only)
 **Next Phase**: ARM64 Support (Post-Deployment)

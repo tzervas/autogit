@@ -1,0 +1,106 @@
+---
+name: Sync Dev to Feature Branches
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Specific branch to sync (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-to-features:
+    name: Sync Dev Changes to Feature Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get feature branches
+        id: get_branches
+        run: |
+          if [ -n "${{ inputs.target_branch }}" ]; then
+            echo "branches=${{ inputs.target_branch }}" >> $GITHUB_OUTPUT
+          else
+            # Get all feature branches
+            BRANCHES=$(git branch -r | grep 'origin/feature/' | sed 's|origin/||' | grep -v '/' | head -10)
+            echo "branches<<EOF" >> $GITHUB_OUTPUT
+            echo "$BRANCHES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sync branches
+        run: |
+          BRANCHES="${{ steps.get_branches.outputs.branches }}"
+
+          echo "Syncing dev to feature branches..."
+          echo "$BRANCHES" | while read -r branch; do
+            if [ -z "$branch" ]; then
+              continue
+            fi
+
+            echo ""
+            echo "Processing branch: $branch"
+
+            # Check if branch exists
+            if ! git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+              echo "  Branch $branch does not exist, skipping"
+              continue
+            fi
+
+            # Checkout the feature branch
+            git checkout -B "$branch" "origin/$branch" || {
+              echo "  Failed to checkout $branch"
+              continue
+            }
+
+            # Try to merge dev
+            if git merge origin/dev --no-edit --no-ff; then
+              echo "  ✓ Merged dev into $branch"
+
+              # Push changes
+              if git push origin "$branch"; then
+                echo "  ✓ Pushed $branch"
+              else
+                echo "  ✗ Failed to push $branch"
+              fi
+            else
+              echo "  ✗ Merge conflict detected in $branch"
+
+              # Abort merge
+              git merge --abort
+
+              # Create an issue to notify about conflict
+              gh issue create \
+                --title "Merge conflict: dev → $branch" \
+                --body "Automatic sync from dev to $branch failed due to merge conflicts. Please resolve manually.\n\nBranch: \`$branch\`\nTarget: \`dev\`" \
+                --label "merge-conflict,priority-high" || echo "  Failed to create issue"
+
+              echo "  Issue created for manual resolution"
+            fi
+
+            # Return to dev
+            git checkout dev
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "Sync complete. Check branches for updates."

@@ -148,7 +148,7 @@ When you make changes, check if these need updates:
 - [ ] **Security docs** - If adding security features/requirements
 ### Where to Find Documentation
 Refer to `docs/INDEX.md` for the complete documentation map. Key locations:
-```
+```text
 docs/
 
 ⭐ START HERE - Complete documentation map
@@ -328,6 +328,7 @@ When adding dependencies:
 - Coordinate with other personas
 - Report to Evaluator for quality checks
 **Task Format**:
+```markdown
 ## Task: [Task Name]
 **Priority**: High/Medium/Low
 **Dependencies**: [List task IDs]
@@ -481,7 +482,7 @@ docker_client.containers.run.assert_called_once()
 ## File Structure Standards
 **Documentation**: `docs/development/project-structure.md`
 ### Python Modules
-```
+```text
 src/fleeting-plugin/
 ├── README.md
 
@@ -588,7 +589,7 @@ src/fleeting-plugin/
 ├── test_provisioner.py
 └── fixtures/
 
-```
+```
 ## Key Technical Decisions
 **Documentation**: All decisions in `docs/architecture/adr/`
 ### ADR Index
@@ -743,6 +744,7 @@ push: false
 5. Update CHANGELOG.md
 6. Run `scripts/verify-doc-index.sh` (if available)
 ### PR Description Template
+```markdown
 ## Changes
 [Description of changes]
 ## Documentation Updates

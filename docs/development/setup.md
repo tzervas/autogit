@@ -347,7 +347,9 @@ Now that your development environment is set up:
 - **Issues**: [GitHub Issues](https://github.com/yourusername/autogit/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/autogit/discussions)
 - **Contributing**: See [CONTRIBUTING.md](../../CONTRIBUTING.md)
---**Documentation Version**: 1.0.0
+
+---
+
+**Documentation Version**: 1.0.0
 **Last Updated**: YYYY-MM-DD
 **Related Docs**: [Development Overview](README.md) | [Standards](standards.md) | [Testing](testing.md)
-```

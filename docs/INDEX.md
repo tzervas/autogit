@@ -309,7 +309,7 @@ When modifying code that affects documentation:
 - Total Documents: [Auto-generated count]
 - Last Updated: [Auto-generated timestamp]
 - Contributors: [Link to contributors]
---**Note**: This index is automatically validated by CI/CD. All links are checked on every commit.
-If you can't find what you're looking for, check the [FAQ](FAQ.md) or [open an issue]
-(https://github.com/yourusername/autogit/issues).
-```
+---
+
+**Note**: This index is automatically validated by CI/CD. All links are checked on every commit.
+If you can't find what you're looking for, check the [FAQ](FAQ.md) or [open an issue](https://github.com/yourusername/autogit/issues).

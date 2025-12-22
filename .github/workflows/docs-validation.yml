@@ -62,10 +62,18 @@ jobs:
           EOF
 
           # Check all markdown files
+          ERROR=0
           find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" | while read file; do
             echo "Checking $file"
-            markdown-link-check "$file" --config mlc_config.json || true
+            if ! markdown-link-check "$file" --config mlc_config.json; then
+              ERROR=1
+            fi
           done
+
+          if [ $ERROR -eq 1 ]; then
+            echo "⚠ Warning: Broken links found but not failing build"
+            echo "Please review and fix broken links when possible"
+          fi
 
   validate-markdown-structure:
     name: Validate Markdown Structure
@@ -111,7 +119,9 @@ jobs:
         run: |
           echo "Checking for unclosed code blocks in markdown files..."
 
-          ERROR=0
+          ERROR_FILE=$(mktemp)
+          echo "0" > "$ERROR_FILE"
+
           find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" | while read file; do
             # Count opening and closing code fences
             OPENING=$(grep -c '^```' "$file" || true)
@@ -119,13 +129,16 @@ jobs:
             # Check if count is even (each opening has a closing)
             if [ $((OPENING % 2)) -ne 0 ]; then
               echo "✗ $file has unclosed code block(s)"
-              ERROR=1
+              echo "1" > "$ERROR_FILE"
             else
               echo "✓ $file code blocks are balanced"
             fi
           done
 
-          if [ $ERROR -eq 1 ]; then
+          ERROR=$(cat "$ERROR_FILE")
+          rm -f "$ERROR_FILE"
+
+          if [ "$ERROR" -eq 1 ]; then
             exit 1
           fi
 

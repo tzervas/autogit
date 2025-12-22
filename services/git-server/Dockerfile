@@ -2,11 +2,14 @@
 # AMD64 native support (MVP focus)
 FROM gitlab/gitlab-ce:16.11.0-ce.0
 
+# Architecture argument for future multi-arch support
+ARG ARCH=amd64
+
 # Metadata
 LABEL maintainer="AutoGit Team"
 LABEL description="GitLab CE server for AutoGit platform - AMD64 native"
 LABEL version="1.0.0"
-LABEL architecture="amd64"
+LABEL architecture="${ARCH}"
 
 # Install additional utilities
 RUN apt-get update && apt-get install -y \

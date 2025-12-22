@@ -1,0 +1,147 @@
+---
+name: Documentation Validation
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+    paths:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+    paths:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  check-links:
+    name: Check for Broken Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check markdown links
+        run: |
+          # Create config to ignore common false positives
+          cat > mlc_config.json << 'EOF'
+          {
+            "ignorePatterns": [
+              {
+                "pattern": "^http://localhost"
+              },
+              {
+                "pattern": "^https://localhost"
+              },
+              {
+                "pattern": "^http://127.0.0.1"
+              }
+            ],
+            "timeout": "20s",
+            "retryOn429": true,
+            "retryCount": 3,
+            "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 403]
+          }
+          EOF
+
+          # Check all markdown files
+          find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" | while read file; do
+            echo "Checking $file"
+            markdown-link-check "$file" --config mlc_config.json || true
+          done
+
+  validate-markdown-structure:
+    name: Validate Markdown Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for required documentation
+        run: |
+          REQUIRED_DOCS=(
+            "README.md"
+            "CONTRIBUTING.md"
+            "docs/CONTRIBUTING.md"
+            "docs/development/README.md"
+            "docs/development/branching-strategy.md"
+          )
+
+          MISSING=0
+          for doc in "${REQUIRED_DOCS[@]}"; do
+            if [ -f "$doc" ]; then
+              echo "✓ $doc exists"
+            else
+              echo "✗ $doc is missing"
+              MISSING=1
+            fi
+          done
+
+          if [ $MISSING -eq 1 ]; then
+            echo ""
+            echo "Some required documentation files are missing"
+            exit 1
+          fi
+
+  check-code-blocks:
+    name: Check Code Block Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for unclosed code blocks
+        run: |
+          echo "Checking for unclosed code blocks in markdown files..."
+
+          ERROR=0
+          find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" | while read file; do
+            # Count opening and closing code fences
+            OPENING=$(grep -c '^```' "$file" || true)
+
+            # Check if count is even (each opening has a closing)
+            if [ $((OPENING % 2)) -ne 0 ]; then
+              echo "✗ $file has unclosed code block(s)"
+              ERROR=1
+            else
+              echo "✓ $file code blocks are balanced"
+            fi
+          done
+
+          if [ $ERROR -eq 1 ]; then
+            exit 1
+          fi
+
+  check-frontmatter:
+    name: Check Documentation Frontmatter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for consistent headers
+        run: |
+          echo "Checking documentation structure..."
+
+          # Check that main docs have titles
+          find docs -name "*.md" -type f | while read file; do
+            if ! head -n 5 "$file" | grep -q "^# "; then
+              echo "⚠ Warning: $file may be missing a title heading"
+            else
+              echo "✓ $file has a title"
+            fi
+          done

@@ -59,7 +59,14 @@ else
         branch=$(echo "$branch" | xargs) # Trim whitespace
         
         # Skip if protected
-        if [[ " ${PROTECTED_BRANCHES[@]} " =~ " ${branch} " ]]; then
+        IS_PROTECTED=false
+        for protected in "${PROTECTED_BRANCHES[@]}"; do
+            if [ "$branch" = "$protected" ]; then
+                IS_PROTECTED=true
+                break
+            fi
+        done
+        if [ "$IS_PROTECTED" = true ]; then
             continue
         fi
         
@@ -91,7 +98,14 @@ else
         branch=$(echo "$branch" | xargs) # Trim whitespace
         
         # Skip if protected
-        if [[ " ${PROTECTED_BRANCHES[@]} " =~ " ${branch} " ]]; then
+        IS_PROTECTED=false
+        for protected in "${PROTECTED_BRANCHES[@]}"; do
+            if [ "$branch" = "$protected" ]; then
+                IS_PROTECTED=true
+                break
+            fi
+        done
+        if [ "$IS_PROTECTED" = true ]; then
             continue
         fi
         

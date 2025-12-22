@@ -1,14 +1,17 @@
 ---
 name: Release
 
-# This workflow creates releases and publishes Docker images.
+# This workflow creates releases and publishes Docker images to GHCR.
 # It only runs when:
 # 1. A version tag (v*.*.*) is pushed to the repository
 # 2. Manually triggered via workflow_dispatch (requires version input)
 # 3. Push to dev branch (will validate and potentially create release)
 #
-# IMPORTANT: Container registry with caching must be configured before enabling image builds.
-# Currently builds without pushing to reduce redundant scratch builds.
+# Docker Images:
+# - Images are pushed to GitHub Container Registry (ghcr.io)
+# - Layer caching is enabled using both GHCR and GitHub Actions cache
+# - Only changed layers are rebuilt and pushed for efficiency
+# - Cache sources: dev images, previous releases, and dedicated cache tags
 #
 # For testing builds without releasing, use the "Release Test Build" workflow
 
@@ -172,9 +175,10 @@ jobs:
             type=semver,pattern={{version}},value=${{ needs.create-release.outputs.version }}
             type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.version }}
             type=semver,pattern={{major}},value=${{ needs.create-release.outputs.version }}
+            type=raw,value=latest
             type=sha
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (with layer caching)
         uses: docker/build-push-action@v5
         with:
           context: ./services/${{ matrix.service }}
@@ -182,8 +186,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=registry,ref=ghcr.io/${{ github.repository }}/${{ matrix.service }}:cache
+            type=registry,ref=ghcr.io/${{ github.repository }}/${{ matrix.service }}:dev
+            type=registry,ref=ghcr.io/${{ github.repository }}/${{ matrix.service }}:latest
+            type=gha
+          cache-to: |
+            type=registry,ref=ghcr.io/${{ github.repository }}/${{ matrix.service }}:cache,mode=max
+            type=gha,mode=max
 
       - name: Image published
         run: |

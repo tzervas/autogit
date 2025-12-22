@@ -1,21 +1,75 @@
 ---
 name: Release
 
+# This workflow creates releases and publishes Docker images.
+# It only runs when:
+# 1. A version tag (v*.*.*) is pushed to the repository
+# 2. Manually triggered via workflow_dispatch (requires version input)
+#
+# For testing builds without releasing, use the "Release Test Build" workflow
+
 on:
   push:
     tags:
       - 'v*.*.*'
+    branches:
+      - dev  # Allow releases from dev branch with manual tag creation
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., v1.0.0)'
+        description: 'Version to release (e.g., v0.2.0) - must be on dev branch'
         required: true
         type: string
+      create_tag:
+        description: 'Create tag if it does not exist'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
+  validate-release:
+    name: Validate Release Requirements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate branch
+        run: |
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "Current branch: $CURRENT_BRANCH"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$CURRENT_BRANCH" != "dev" ]; then
+              echo "❌ Manual releases must be triggered from dev branch"
+              echo "Current branch: $CURRENT_BRANCH"
+              exit 1
+            fi
+            echo "✅ Release triggered from dev branch"
+          fi
+
+      - name: Validate version format
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+            if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Invalid version format: $VERSION"
+              echo "Expected format: vX.Y.Z (e.g., v0.2.0)"
+              exit 1
+            fi
+            echo "✅ Version format valid: $VERSION"
+          fi
+
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    needs: validate-release
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     permissions:
       contents: write
     steps:
@@ -24,21 +78,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get version
+      - name: Get or create version tag
         id: get_version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="${{ inputs.version }}"
             # Check if tag exists
             if ! git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
-              echo "⚠️ Warning: Tag $VERSION does not exist. Creating it now..."
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              git tag -a "$VERSION" -m "Release $VERSION"
-              git push origin "$VERSION"
+              if [ "${{ inputs.create_tag }}" = "true" ]; then
+                echo "⚠️  Tag $VERSION does not exist. Creating it now..."
+                git config user.name "github-actions[bot]"
+                git config user.email "github-actions[bot]@users.noreply.github.com"
+                git tag -a "$VERSION" -m "Release $VERSION"
+                git push origin "$VERSION"
+                echo "✅ Created and pushed tag $VERSION"
+              else
+                echo "❌ Tag $VERSION does not exist and create_tag is false"
+                exit 1
+              fi
+            else
+              echo "✅ Tag $VERSION already exists"
             fi
           else
             VERSION=${GITHUB_REF#refs/tags/}
+            echo "✅ Using tag from push event: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
@@ -102,12 +165,12 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.service }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{version}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.create-release.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.create-release.outputs.version }}
             type=sha
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./services/${{ matrix.service }}
@@ -117,3 +180,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Image published
+        run: |
+          echo "✅ Published ${{ matrix.service }} image"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"

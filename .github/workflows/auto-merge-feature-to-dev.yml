@@ -20,7 +20,7 @@ jobs:
       github.event.pull_request.base.ref == 'dev' &&
       !contains(github.event.pull_request.labels.*.name, 'no-auto-merge')
     steps:
-      - name: Check if this is a feature→dev merge
+      - name: Check if this is a branch→dev merge
         id: check_merge_type
         run: |
           SOURCE="${{ github.event.pull_request.head.ref }}"
@@ -29,13 +29,14 @@ jobs:
           echo "Source: $SOURCE"
           echo "Target: $TARGET"
 
-          # Check if this is feature→dev (feature/x → dev)
-          if [[ "$SOURCE" =~ ^feature/([^/]+)$ ]] && [[ "$TARGET" == "dev" ]]; then
+          # Check if this is a dev-subsidiary branch → dev
+          # Supports conventional commit branch naming patterns
+          if [[ "$TARGET" == "dev" ]] && [[ "$SOURCE" =~ ^(feature|copilot|fix|bugfix|hotfix|chore|docs|refactor|perf|test|ci|build)/(.+)$ ]]; then
             echo "is_feature_to_dev=true" >> $GITHUB_OUTPUT
-            echo "✓ This is a feature→dev merge"
+            echo "✓ This is a ${BASH_REMATCH[1]}/→dev merge"
           else
             echo "is_feature_to_dev=false" >> $GITHUB_OUTPUT
-            echo "✗ Not a feature→dev merge"
+            echo "✗ Not a dev-subsidiary branch→dev merge"
           fi
 
       - name: Check for owner approval
@@ -95,23 +96,37 @@ jobs:
               pull_number: context.payload.pull_request.number
             });
 
-            // Check if all required checks have passed
+            // Check if all required checks have passed (ignore skipped checks)
             const { data: checkRuns } = await github.rest.checks.listForRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: pr.head.sha
             });
 
-            const allChecksPassed = checkRuns.check_runs.length > 0 &&
-              checkRuns.check_runs.every(run =>
-                run.status === 'completed' && run.conclusion === 'success'
+            // Filter to only completed checks (ignore skipped/cancelled)
+            const completedChecks = checkRuns.check_runs.filter(run =>
+              run.status === 'completed' && 
+              run.conclusion !== 'skipped' && 
+              run.conclusion !== 'cancelled'
+            );
+
+            // Check that all completed checks passed (success or neutral)
+            const allCompletedChecksPassed = completedChecks.length > 0 &&
+              completedChecks.every(run =>
+                run.conclusion === 'success' || run.conclusion === 'neutral'
               );
 
-            const canMerge = allChecksPassed && pr.mergeable;
+            const canMerge = allCompletedChecksPassed && pr.mergeable;
 
             core.setOutput('can_merge', canMerge);
-            core.setOutput('all_checks_passed', allChecksPassed);
+            core.setOutput('all_checks_passed', allCompletedChecksPassed);
             core.setOutput('mergeable', pr.mergeable);
+            core.setOutput('completed_checks_count', completedChecks.length);
+            core.setOutput('total_checks_count', checkRuns.check_runs.length);
+
+            console.log(`Check status: ${completedChecks.length} completed checks out of ${checkRuns.check_runs.length} total`);
+            console.log(`All completed checks passed: ${allCompletedChecksPassed}`);
+            console.log(`PR mergeable: ${pr.mergeable}`);
 
             return canMerge;
 
@@ -142,7 +157,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: `🤖 Automatically merged to dev after @${context.repo.owner} approval and passing all checks.`
+                body: `🤖 Automatically merged to dev after @${context.repo.owner} approval and passing all completed checks (${context.payload.pull_request.head.ref} → dev).`
               });
 
             } catch (error) {
@@ -171,7 +186,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: `⏳ Waiting for @${repoOwner} approval to auto-merge this feature to dev.\n\nOnce approved, this PR will automatically merge if all checks pass.\n\nAlternatively, add the \`owner-approved\` label to approve.`
+              body: `⏳ Waiting for @${repoOwner} approval to auto-merge this branch to dev.\n\nOnce approved, this PR will automatically merge if all completed checks pass (skipped checks are ignored).\n\nAlternatively, add the \`owner-approved\` label to approve.`
             });
 
       - name: Notify if waiting for checks
@@ -184,9 +199,13 @@ jobs:
           script: |
             const allChecksPassed = '${{ steps.check_ci.outputs.all_checks_passed }}' === 'true';
             const mergeable = '${{ steps.check_ci.outputs.mergeable }}' === 'true';
+            const completedChecks = '${{ steps.check_ci.outputs.completed_checks_count }}';
+            const totalChecks = '${{ steps.check_ci.outputs.total_checks_count }}';
 
             let issues = [];
-            if (!allChecksPassed) issues.push('all CI checks to pass');
+            if (!allChecksPassed) {
+              issues.push(`all completed CI checks to pass (${completedChecks}/${totalChecks} checks, skipped checks ignored)`);
+            }
             if (!mergeable) issues.push('merge conflicts to be resolved');
 
             if (issues.length > 0) {

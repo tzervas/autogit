@@ -1,0 +1,35 @@
+# GitLab CE Docker Image for AutoGit - ARM64 Native
+# This Dockerfile is for ARM64 (aarch64) architecture
+# Used when running on ARM64 hosts or runners (Phase 2+)
+
+FROM gitlab/gitlab-ce:16.11.0-ce.0
+
+# Metadata
+LABEL maintainer="AutoGit Team"
+LABEL description="GitLab CE server for AutoGit platform - ARM64 native"
+LABEL version="0.1.0"
+LABEL architecture="arm64"
+LABEL org.opencontainers.image.source="https://github.com/tzervas/autogit"
+
+# Install additional utilities for management and debugging
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    vim \
+    htop \
+    && rm -rf /var/lib/apt/lists/*
+
+# Internal container ports exposed by this image
+EXPOSE 22 80 443
+
+# Health check endpoint
+# Same health check as AMD64 - GitLab provides architecture-agnostic endpoints
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+    CMD curl -f http://localhost/-/health || exit 1
+
+# GitLab data persistence volumes
+VOLUME ["/etc/gitlab", "/var/log/gitlab", "/var/opt/gitlab"]
+
+# Performance note for ARM64:
+# GitLab CE runs natively on ARM64 with comparable performance to AMD64.
+# No special configuration needed for architecture.

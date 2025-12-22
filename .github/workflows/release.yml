@@ -5,6 +5,10 @@ name: Release
 # It only runs when:
 # 1. A version tag (v*.*.*) is pushed to the repository
 # 2. Manually triggered via workflow_dispatch (requires version input)
+# 3. Push to dev branch (will validate and potentially create release)
+#
+# IMPORTANT: Container registry with caching must be configured before enabling image builds.
+# Currently builds without pushing to reduce redundant scratch builds.
 #
 # For testing builds without releasing, use the "Release Test Build" workflow
 
@@ -13,7 +17,7 @@ on:
     tags:
       - 'v*.*.*'
     branches:
-      - dev  # Allow releases from dev branch with manual tag creation
+      - dev
   workflow_dispatch:
     inputs:
       version:

@@ -20,7 +20,7 @@ Each ADR follows this structure:
 **Technical Story**: [Link to issue/epic]
 ## Context
 
-[Describe the context and problem statement]
+[Describe the context and problem statement]
 ## Decision Drivers
 - [Driver 1]
 - [Driver 2]
@@ -60,7 +60,7 @@ Each ADR follows this structure:
 | [006](006-storage-architecture.md) | Storage Architecture | Accepted | 2025-12-21 |
 ## Creating a New ADR
 
-1. **Copy the template**:
+1. **Copy the template**:
 ```bash
 cp docs/architecture/adr/template.md docs/architecture/adr/XXX-your-title.md
 ```

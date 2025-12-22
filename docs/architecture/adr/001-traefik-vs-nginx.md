@@ -1,5 +1,5 @@
 
-# ADR-001: Traefik vs NGINX Ingress Controller
+# ADR-001: Traefik vs NGINX Ingress Controller
 **Status**: Accepted
 **Date**: 2025-12-21
 **Deciders**: Project Team
@@ -44,7 +44,7 @@ ingress controller must:
 - Lower learning curve for contributors
 - Future-proof (no EOL concerns)
 
-### Negative Consequences
+### Negative Consequences
 - Different from traditional NGINX (team familiarity)
 - Smaller ecosystem than NGINX (though growing)
 - Different configuration paradigm (labels vs ConfigMaps)

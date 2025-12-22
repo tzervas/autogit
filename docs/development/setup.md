@@ -1,7 +1,7 @@
 # Development Setup Guide
 This guide will help you set up a local development environment for AutoGit.
 
-**Related Documentation**:
+**Related Documentation**:
 - [Development Overview](README.md)
 - [Coding Standards](standards.md)
 - [Testing Guide](testing.md)
@@ -44,7 +44,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Create virtual environment and install dependencies
 uv sync
 
-# Activate virtual environment
+# Activate virtual environment
 source .venv/bin/activate
 ```
 ### 2. Install Pre-commit Hooks
@@ -86,7 +86,7 @@ uv run pytest
 # Run integration tests
 uv run pytest tests/integration/
 
-# Check code formatting
+# Check code formatting
 black --check src/
 flake8 src/
 mypy src/
@@ -134,7 +134,7 @@ git checkout -b feature/my-new-feature
 - Write tests alongside code (TDD)
 - Update documentation as you go
 
-4. **Run tests**:
+4. **Run tests**:
 ```bash
 # Unit tests
 uv run pytest tests/unit/
@@ -178,7 +178,7 @@ make test-coverage
 uv run pytest-watch
 ```
 
-### Code Quality Checks
+### Code Quality Checks
 ```bash
 # Format code
 make format
@@ -220,7 +220,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### Python Import Errors
+### Python Import Errors
 If you encounter import errors:
 ```bash
 # Ensure virtual environment is activated
@@ -308,7 +308,7 @@ make docs-serve
 
 # Serve docs locally
 
-make docs-check
+make docs-check
 
 # Check documentation links
 

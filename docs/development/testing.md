@@ -1,7 +1,7 @@
 # Testing Guide
 Comprehensive testing guide for AutoGit development.
 
-**Related Documentation**:
+**Related Documentation**:
 - [Development Overview](README.md)
 - [Coding Standards](standards.md)
 - [Development Setup](setup.md)
@@ -94,7 +94,7 @@ tests/
 
 # End-to-end tests
 
-│
+│
 
 ├── conftest.py
 
@@ -162,7 +162,7 @@ runner_id = manager.provision("amd64")
 # Assert
 assert runner_id == expected_id
 
-docker_client.containers.run.assert_called_once()
+docker_client.containers.run.assert_called_once()
 call_args = docker_client.containers.run.call_args
 assert call_args[1]["image"].endswith(":amd64")
 def test_provision_with_nvidia_gpu(self, manager, docker_client):
@@ -210,7 +210,7 @@ def test_provision_error(self):
 def test_something(self):
 # Arrange - Set up test data
 
-config = {"key": "value"}
+config = {"key": "value"}
 # Act - Execute the code under test
 result = function_under_test(config)
 # Assert - Verify the results
@@ -310,7 +310,7 @@ class TestDockerIntegration:
 """Integration tests with Docker."""
 def test_provision_real_runner(self, runner_manager):
 
-"""Test provisioning a real Docker container."""
+"""Test provisioning a real Docker container."""
 # Act
 runner_id = runner_manager.provision("amd64")
 # Assert
@@ -407,7 +407,7 @@ def wait_for_gitlab(timeout=300):
 start = time.time()
 while time.time() - start < timeout:
 
-try:
+try:
 response = requests.get("https://gitlab.test.local/-/health")
 if response.status_code == 200:
 return
@@ -454,7 +454,7 @@ project = create_test_project(autogit_instance)
 # Act - Push GPU job config
 push_gpu_job_config(project)
 
-# Assert - Job runs on GPU-enabled runner
+# Assert - Job runs on GPU-enabled runner
 pipeline = wait_for_pipeline(project)
 gpu_job = next(j for j in pipeline.jobs if "gpu" in j.name)
 assert "nvidia" in gpu_job.runner.tags or "amd" in gpu_job.runner.tags
@@ -500,7 +500,7 @@ raise AssertionError
 raise NotImplementedError
 if __name__ == .__main__.:
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:
 @abstractmethod
 ```
 ### Coverage Goals
@@ -590,7 +590,7 @@ project = create_project(config)
 assert project.name == config["project_name"]
 ```
 
-## Performance Testing
+## Performance Testing
 ### Load Testing
 ```python
 import pytest
@@ -635,7 +635,7 @@ mock.return_value = client
 client.containers.run.return_value.id = "test-container-id"
 client.containers.list.return_value = []
 
-yield client
+yield client
 ```
 ### Mocking Kubernetes API
 ```python
@@ -680,7 +680,7 @@ pytest --trace
 pytest --showlocals
 # Run specific test with verbose output
 
-pytest -vv tests/unit/test_runner_manager.py::TestRunnerManager::test_provision
+pytest -vv tests/unit/test_runner_manager.py::TestRunnerManager::test_provision
 ```
 ### Logging in Tests
 ```python
@@ -733,7 +733,7 @@ Before submitting a PR, ensure:
 - [ ] Test documentation updated
 ## Common Testing Pitfalls
 
-### 1. Flaky Tests
+### 1. Flaky Tests
 **Problem**: Tests that pass/fail randomly
 **Solution**: Avoid timing dependencies, use proper mocking
 ```python
@@ -785,7 +785,7 @@ RunnerManager({"invalid": "config"})
 ```
 ## Resources
 
-- **pytest Documentation**: https://docs.pytest.org/
+- **pytest Documentation**: https://docs.pytest.org/
 - **Testing Best Practices**: https://testdriven.io/blog/testing-best-practices/
 - **Coverage.py**: https://coverage.readthedocs.io/
 - **Factory Boy**: https://factoryboy.readthedocs.io/

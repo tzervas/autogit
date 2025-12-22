@@ -128,7 +128,7 @@ For complex tasks requiring multiple specializations:
 
 📋 Documentation Tracking Protocol
 
-**CRITICAL**: Before making ANY changes that affect project behavior, architecture, or standards:
+**CRITICAL**: Before making ANY changes that affect project behavior, architecture, or standards:
 1. **Check Documentation Index** at `docs/INDEX.md` to find relevant documentation
 2. **Update ALL affected documentation** in the same commit as code changes
 3. **Update Documentation Index** if adding/removing documentation
@@ -212,7 +212,7 @@ docs/
 - **DIP**: Dependency Inversion Principle - depend on abstractions
 - **DRY**: Don't Repeat Yourself
 
-- **KISS**: Keep It Simple, Stupid
+- **KISS**: Keep It Simple, Stupid
 - **YAGNI**: You Aren't Gonna Need It
 - **LoD**: Law of Demeter - minimal coupling
 - **SoC**: Separation of Concerns
@@ -264,7 +264,7 @@ docs/
 - Let's Encrypt ACME protocol
 - Automatic renewal
 
-- HTTP-01 and DNS-01 challenge support
+- HTTP-01 and DNS-01 challenge support
 ### 7. SSO Authentication
 **Documentation**: `docs/configuration/sso.md`, `docs/architecture/adr/004-sso-solution.md`
 - **Authelia** (Apache 2.0) - Primary choice for lightweight deployment
@@ -317,7 +317,7 @@ When adding dependencies:
 5. Avoid copyleft licenses (GPL, LGPL) unless as standalone services
 **UPDATE**: `docs/development/licensing.md` when adding new dependencies
 
-## Development Workflow
+## Development Workflow
 ### Agentic Persona System
 **Documentation**: `docs/development/agentic-workflow.md`
 #### Project Manager Persona
@@ -367,7 +367,7 @@ When adding dependencies:
 - Configure CI/CD pipelines
 - Implement monitoring and logging
 
-- Ensure idempotency and reproducibility
+- Ensure idempotency and reproducibility
 - **Update installation and operations docs**
 #### Security Engineer Persona
 **Role**: Security review, hardening, compliance
@@ -416,7 +416,7 @@ from typing import Protocol, Optional
 import logging
 logger = logging.getLogger(__name__)
 
-class RunnerManagerProtocol(Protocol):
+class RunnerManagerProtocol(Protocol):
 """Protocol defining runner manager interface.
 See docs/api/runner-manager.md for full API documentation.
 """
@@ -460,7 +460,7 @@ return DockerRunnerManager(docker_client, config_provider)
 def test_provision_amd64_runner(self, manager, docker_client):
 """Test provisioning amd64 runner without GPU."""
 
-runner_id = manager.provision("amd64")
+runner_id = manager.provision("amd64")
 assert runner_id is not None
 docker_client.containers.run.assert_called_once()
 ```
@@ -637,7 +637,7 @@ src/fleeting-plugin/
 - All public functions and classes
 - Edge cases and error conditions
 
-- Mock external dependencies
+- Mock external dependencies
 - Aim for 80%+ coverage
 ### Integration Tests
 - Component interactions
@@ -684,7 +684,7 @@ with:
 python-version: '3.11'
 - run: pip install black flake8 mypy
 
-- run: black --check .
+- run: black --check .
 - run: flake8 .
 - run: mypy src/
 test:
@@ -736,7 +736,7 @@ push: false
 2. Add inline comments referencing relevant documentation
 3. Create examples and test cases
 
-### Before Submitting PR
+### Before Submitting PR
 1. Run through Documentation Update Checklist
 2. Verify all affected docs are updated
 3. Check `docs/INDEX.md` is current

@@ -1,18 +1,29 @@
-version: '3.8'
-
 services:
-  # Git server - provides version control functionality
+  # Git server - GitLab CE provides version control functionality
   git-server:
     build:
       context: ./services/git-server
     container_name: autogit-git-server
+    hostname: gitlab.autogit.local
     ports:
-      - "2222:22"
-      - "3000:3000"
+      - "${GITLAB_HTTP_PORT:-3000}:80"      # HTTP
+      - "${GITLAB_HTTPS_PORT:-3443}:443"    # HTTPS
+      - "${GITLAB_SSH_PORT:-2222}:22"       # SSH
     volumes:
-      - git-data:/data
+      - ${GITLAB_CONFIG_VOLUME:-git-config}:/etc/gitlab
+      - ${GITLAB_LOGS_VOLUME:-git-logs}:/var/log/gitlab
+      - ${GITLAB_DATA_VOLUME:-git-data}:/var/opt/gitlab
     environment:
-      - SERVICE_NAME=git-server
+      - GITLAB_OMNIBUS_CONFIG=${GITLAB_OMNIBUS_CONFIG:-external_url "http://localhost:3000"}
+      - GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}
+    shm_size: '256m'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/-/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 180s
+      retries: 3
     networks:
       - autogit-network
 
@@ -37,4 +48,12 @@ networks:
     driver: bridge
 
 volumes:
+  git-config:
+    driver: local
+    name: autogit-git-config
+  git-logs:
+    driver: local
+    name: autogit-git-logs
   git-data:
+    driver: local
+    name: autogit-git-data

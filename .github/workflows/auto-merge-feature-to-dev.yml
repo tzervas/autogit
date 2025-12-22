@@ -95,23 +95,37 @@ jobs:
               pull_number: context.payload.pull_request.number
             });
 
-            // Check if all required checks have passed
+            // Check if all required checks have passed (ignore skipped checks)
             const { data: checkRuns } = await github.rest.checks.listForRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: pr.head.sha
             });
 
-            const allChecksPassed = checkRuns.check_runs.length > 0 &&
-              checkRuns.check_runs.every(run =>
-                run.status === 'completed' && run.conclusion === 'success'
+            // Filter to only completed checks (ignore skipped/cancelled)
+            const completedChecks = checkRuns.check_runs.filter(run =>
+              run.status === 'completed' && 
+              run.conclusion !== 'skipped' && 
+              run.conclusion !== 'cancelled'
+            );
+
+            // Check that all completed checks passed (success or neutral)
+            const allCompletedChecksPassed = completedChecks.length > 0 &&
+              completedChecks.every(run =>
+                run.conclusion === 'success' || run.conclusion === 'neutral'
               );
 
-            const canMerge = allChecksPassed && pr.mergeable;
+            const canMerge = allCompletedChecksPassed && pr.mergeable;
 
             core.setOutput('can_merge', canMerge);
-            core.setOutput('all_checks_passed', allChecksPassed);
+            core.setOutput('all_checks_passed', allCompletedChecksPassed);
             core.setOutput('mergeable', pr.mergeable);
+            core.setOutput('completed_checks_count', completedChecks.length);
+            core.setOutput('total_checks_count', checkRuns.check_runs.length);
+
+            console.log(`Check status: ${completedChecks.length} completed checks out of ${checkRuns.check_runs.length} total`);
+            console.log(`All completed checks passed: ${allCompletedChecksPassed}`);
+            console.log(`PR mergeable: ${pr.mergeable}`);
 
             return canMerge;
 
@@ -184,9 +198,13 @@ jobs:
           script: |
             const allChecksPassed = '${{ steps.check_ci.outputs.all_checks_passed }}' === 'true';
             const mergeable = '${{ steps.check_ci.outputs.mergeable }}' === 'true';
+            const completedChecks = '${{ steps.check_ci.outputs.completed_checks_count }}';
+            const totalChecks = '${{ steps.check_ci.outputs.total_checks_count }}';
 
             let issues = [];
-            if (!allChecksPassed) issues.push('all CI checks to pass');
+            if (!allChecksPassed) {
+              issues.push(`all completed CI checks to pass (${completedChecks}/${totalChecks} checks, skipped checks ignored)`);
+            }
             if (!mergeable) issues.push('merge conflicts to be resolved');
 
             if (issues.length > 0) {

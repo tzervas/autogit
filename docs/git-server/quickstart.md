@@ -199,11 +199,11 @@ docker-compose down -v
 
 ## Next Steps
 
-- [Configure HTTPS](configuration.md#https) for secure access
-- [Setup automated backups](backup-recovery.md#automated-backups)
-- [Integrate with runners](runner-integration.md)
-- [Setup webhooks](webhooks.md)
-- [Configure external authentication](external-auth.md)
+- [Configure HTTPS](configuration.md#https) *(coming soon)*
+- [Setup automated backups](backup-recovery.md#automated-backups) *(coming soon)*
+- [Integrate with runners](runner-integration.md) *(coming soon)*
+- [Setup webhooks](webhooks.md) *(coming soon)*
+- [Configure external authentication](external-auth.md) *(coming soon)*
 
 ## Troubleshooting
 
@@ -230,7 +230,7 @@ docker-compose down -v
 ## Support
 
 - [Full Documentation](README.md)
-- [Troubleshooting Guide](troubleshooting.md)
+- [Troubleshooting Guide](#troubleshooting) *(section above)*
 - [GitLab Community Forum](https://forum.gitlab.com/)
 
 ## Success! 🎉

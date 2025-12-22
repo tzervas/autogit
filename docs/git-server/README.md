@@ -6,62 +6,50 @@ Complete documentation for the AutoGit Git Server (GitLab CE integration).
 
 The Git Server component provides version control, CI/CD, and repository management capabilities through GitLab Community Edition.
 
-## Documentation Structure
+## Available Documentation
 
-### Getting Started
-- [Installation Guide](installation.md) - How to install and configure the Git Server
-- [Quick Start](quickstart.md) - Get up and running in 5 minutes
-- [Configuration](configuration.md) - Detailed configuration options
+- [Quick Start Guide](quickstart.md) - Get up and running in 5 minutes
 
-### User Guides
-- [Repository Management](repository-management.md) - Creating and managing repositories
-- [SSH Access](ssh-access.md) - Setting up SSH keys and access
-- [HTTP Access](http-access.md) - Using HTTP/HTTPS for Git operations
-- [CI/CD Integration](ci-cd-integration.md) - Setting up CI/CD pipelines
+## Documentation Roadmap
 
-### API Documentation
-- [API Reference](api-reference.md) - Complete REST API documentation
-- [API Examples](api-examples.md) - Common API usage patterns
-- [Webhooks](webhooks.md) - Event notifications and webhooks
+The following guides are planned for the Git Server component. They will be created as the implementation progresses.
 
-### Administration
-- [Admin Guide](admin-guide.md) - Administrative tasks and configuration
-- [User Management](user-management.md) - Managing users and permissions
-- [Backup and Recovery](backup-recovery.md) - Backup strategies and disaster recovery
-- [Security](security.md) - Security best practices and hardening
-- [Monitoring](monitoring.md) - Monitoring and observability
+### Getting Started (Planned)
+- Installation Guide - How to install and configure the Git Server
+- Configuration - Detailed configuration options
 
-### Troubleshooting
-- [Common Issues](troubleshooting.md) - Solutions to common problems
-- [Performance Tuning](performance.md) - Optimizing GitLab performance
-- [Logs and Debugging](logs-debugging.md) - Understanding logs and debugging issues
+### User Guides (Planned)
+- Repository Management - Creating and managing repositories
+- SSH Access - Setting up SSH keys and access
+- HTTP Access - Using HTTP/HTTPS for Git operations
+- CI/CD Integration - Setting up CI/CD pipelines
 
-### Architecture
-- [Architecture Overview](architecture.md) - System architecture and components
-- [Multi-Architecture Support](multi-arch.md) - AMD64, ARM64, and RISC-V support
-- [Scalability](scalability.md) - Scaling GitLab for production
+### API Documentation (Planned)
+- API Reference - Complete REST API documentation
+- API Examples - Common API usage patterns
+- Webhooks - Event notifications and webhooks
 
-### Integration
-- [Runner Integration](runner-integration.md) - Integrating with AutoGit runners
-- [External Authentication](external-auth.md) - LDAP, OAuth, and SSO integration
-- [Third-Party Tools](third-party.md) - Integrating with external tools
+### Administration (Planned)
+- Admin Guide - Administrative tasks and configuration
+- User Management - Managing users and permissions
+- Backup and Recovery - Backup strategies and disaster recovery
+- Security - Security best practices and hardening
+- Monitoring - Monitoring and observability
 
-## Quick Links
+### Troubleshooting (Planned)
+- Common Issues - Solutions to common problems
+- Performance Tuning - Optimizing GitLab performance
+- Logs and Debugging - Understanding logs and debugging issues
 
-### For Users
-- [Create Your First Repository](quickstart.md#create-repository)
-- [Clone a Repository](quickstart.md#clone-repository)
-- [Setup SSH Keys](ssh-access.md#setup-ssh-keys)
+### Architecture (Planned)
+- Architecture Overview - System architecture and components
+- Multi-Architecture Support - AMD64, ARM64, and RISC-V support
+- Scalability - Scaling GitLab for production
 
-### For Administrators
-- [Initial Setup](installation.md#initial-setup)
-- [Configure HTTPS](configuration.md#https)
-- [Setup Backups](backup-recovery.md#automated-backups)
-
-### For Developers
-- [API Authentication](api-reference.md#authentication)
-- [Create Project via API](api-examples.md#create-project)
-- [Setup Webhooks](webhooks.md#setup)
+### Integration (Planned)
+- Runner Integration - Integrating with AutoGit runners
+- External Authentication - LDAP, OAuth, and SSO integration
+- Third-Party Tools - Integrating with external tools
 
 ## Version Information
 

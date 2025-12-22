@@ -2,14 +2,11 @@
 # AMD64 native support (MVP focus)
 FROM gitlab/gitlab-ce:16.11.0-ce.0
 
-# Architecture argument for future multi-arch support
-ARG ARCH=amd64
-
 # Metadata
 LABEL maintainer="AutoGit Team"
 LABEL description="GitLab CE server for AutoGit platform - AMD64 native"
 LABEL version="1.0.0"
-LABEL architecture="${ARCH}"
+LABEL architecture="amd64"
 
 # Install additional utilities
 RUN apt-get update && apt-get install -y \
@@ -18,10 +15,11 @@ RUN apt-get update && apt-get install -y \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure GitLab ports
-# SSH: 2222 (mapped from internal 22)
-# HTTP: 3000 (mapped from internal 80)
-# HTTPS: 3443 (mapped from internal 443)
+# Internal container ports exposed by this image:
+#   SSH:   22
+#   HTTP:  80
+#   HTTPS: 443
+# Host port mappings (e.g., 2222->22, 3000->80, 3443->443) are defined in docker-compose.yml.
 EXPOSE 22 80 443
 
 # Health check endpoint

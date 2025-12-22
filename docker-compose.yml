@@ -1,12 +1,8 @@
-version: '3.8'
-
 services:
   # Git server - GitLab CE provides version control functionality
   git-server:
     build:
       context: ./services/git-server
-      args:
-        - ARCH=${ARCH:-amd64}
     container_name: autogit-git-server
     hostname: gitlab.autogit.local
     ports:
@@ -18,7 +14,7 @@ services:
       - git-logs:/var/log/gitlab
       - git-data:/var/opt/gitlab
     environment:
-      - GITLAB_OMNIBUS_CONFIG=${GITLAB_OMNIBUS_CONFIG:-external_url 'http://localhost:3000'}
+      - GITLAB_OMNIBUS_CONFIG=${GITLAB_OMNIBUS_CONFIG:-external_url "http://localhost:3000"}
       - GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}
     shm_size: '256m'
     restart: unless-stopped

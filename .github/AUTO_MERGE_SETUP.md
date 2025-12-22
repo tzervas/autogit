@@ -199,7 +199,7 @@ If you prefer to use the GitHub web interface:
      - Add status checks (same as main)
    - ✅ Require conversation resolution
    - ✅ Require linear history
-   - ❌ Do not allow bypassing (leave unchecked for auto-merge)
+   - ❌ Do not allow bypassing the above settings (must remain unchecked so github-actions bot can auto-merge)
 5. Click **Create**
 
 ### Feature Branch Protection

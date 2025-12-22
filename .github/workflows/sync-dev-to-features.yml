@@ -38,8 +38,8 @@ jobs:
           if [ -n "${{ inputs.target_branch }}" ]; then
             echo "branches=${{ inputs.target_branch }}" >> $GITHUB_OUTPUT
           else
-            # Get all feature branches
-            BRANCHES=$(git branch -r | grep 'origin/feature/' | sed 's|origin/||' | grep -v '/' | head -10)
+            # Get all feature branches (level 1 only, e.g., feature/foo but not feature/foo/bar)
+            BRANCHES=$(git branch -r | grep 'origin/feature/' | sed 's|origin/||' | grep -E '^feature/[^/]+$' | head -10)
             echo "branches<<EOF" >> $GITHUB_OUTPUT
             echo "$BRANCHES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT

@@ -140,3 +140,16 @@
 - name: long-term
   color: 'c5def5'
   description: Long-term or future goal
+
+# Automation Status Labels
+- name: needs-attention
+  color: 'd93f0b'
+  description: Failed multiple times and needs manual review
+
+- name: needs-manual-fix
+  color: 'd73a4a'
+  description: CI failures detected that require manual fixes
+
+- name: automated-fix
+  color: '0e8a16'
+  description: Contains automated fixes from CI failure recovery

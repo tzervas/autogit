@@ -81,7 +81,8 @@ jobs:
               ref: pr.head.sha
             });
 
-            const allChecksPassed = checkRuns.check_runs.every(run =>
+            const checkRunsArray = Array.isArray(checkRuns.check_runs) ? checkRuns.check_runs : [];
+            const allChecksPassed = checkRunsArray.length > 0 && checkRunsArray.every(run =>
               run.status === 'completed' && run.conclusion === 'success'
             );
 

@@ -68,7 +68,7 @@ jobs:
             }
 
       - name: Notify if max retries reached
-        if: github.event.workflow_run.run_attempt >= 2
+        if: github.event.workflow_run.run_attempt >= 3
         uses: actions/github-script@v7
         with:
           script: |
@@ -83,11 +83,33 @@ jobs:
                 body: `⚠️ ${workflowName} has failed ${context.payload.workflow_run.run_attempt} times. Manual intervention may be required.\n\nPlease review the workflow logs and fix any issues.`
               });
 
-              // Add needs-attention label
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                labels: ['needs-attention']
-              });
+              // Add needs-attention label with error handling
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: ['needs-attention']
+                });
+              } catch (error) {
+                if (error.status === 404) {
+                  // Label doesn't exist yet, create it
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: 'needs-attention',
+                    color: 'd93f0b',
+                    description: 'Failed multiple times and needs manual review'
+                  });
+
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    labels: ['needs-attention']
+                  });
+                } else {
+                  core.warning(`Failed to add "needs-attention" label: ${error.message}`);
+                }
+              }
             }

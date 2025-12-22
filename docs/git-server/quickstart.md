@@ -34,7 +34,7 @@ Get up and running with the AutoGit Git Server in 5 minutes.
 
 1. Start the Git Server:
    ```bash
-   cd /home/runner/work/autogit/autogit
+   # From the repository root
    docker-compose up -d git-server
    ```
 

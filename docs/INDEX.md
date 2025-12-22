@@ -215,6 +215,16 @@ users |
 | [Network Issues](troubleshooting/network.md) | Networking problems | Operators |
 | [Performance Issues](troubleshooting/performance.md) | Performance problems | Operators |
 | [Debugging Guide](troubleshooting/debugging.md) | General debugging techniques | Developers |
+### Project Management
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Task Tracker](../TASK_TRACKER.md) | Project task tracking and progress | Project Managers |
+| [QC Workflow](../QC_WORKFLOW.md) | Quality control procedures | All developers |
+| [Manager Delegation](../MANAGER_DELEGATION.md) | Current task delegation and assignments | All agents |
+| [Project Management Summary](../PROJECT_MANAGEMENT_SUMMARY.md) | Current project status summary | All stakeholders |
+| [Git Server Feature Plan](../GIT_SERVER_FEATURE_PLAN.md) | Detailed Git Server implementation plan | Developers |
+| [How to Start Next Feature](../HOW_TO_START_NEXT_FEATURE.md) | Feature workflow guide | Developers |
+
 ### Other
 | Document | Description | Audience |
 |----------|-------------|----------|

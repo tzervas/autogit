@@ -24,9 +24,7 @@ print_error() {
 
 # Default values
 ADMIN_USERNAME="${GITLAB_ROOT_USERNAME:-root}"
-ADMIN_EMAIL="${GITLAB_ROOT_EMAIL:-admin@autogit.local}"
 ADMIN_PASSWORD="${GITLAB_ROOT_PASSWORD:-}"
-ADMIN_NAME="${GITLAB_ROOT_NAME:-Administrator}"
 
 print_info "GitLab Admin User Setup Script"
 print_info "================================"
@@ -72,12 +70,11 @@ print_info "GitLab is ready!"
 
 # Reset root password
 print_info "Setting up admin user: $ADMIN_USERNAME"
-docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" <<EOF
+if docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" <<EOF
 ${ADMIN_PASSWORD}
 ${ADMIN_PASSWORD}
 EOF
-
-if [ $? -eq 0 ]; then
+then
     print_info "✅ Admin user password has been set successfully!"
     echo ""
     print_info "Login Details:"

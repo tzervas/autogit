@@ -59,7 +59,7 @@ create_user() {
 
     print_info "Creating user: $username ($email)"
     
-    docker compose exec -T git-server gitlab-rails runner <<EOF
+    if docker compose exec -T git-server gitlab-rails runner <<EOF
 user = User.new(
   username: '${username}',
   email: '${email}',
@@ -76,8 +76,7 @@ else
   exit 1
 end
 EOF
-
-    if [ $? -eq 0 ]; then
+    then
         print_info "✅ User created successfully!"
     else
         print_error "Failed to create user"

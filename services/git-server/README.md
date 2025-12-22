@@ -39,7 +39,16 @@ This service runs GitLab CE 16.11.0 in a Docker container with AMD64 native supp
    docker-compose logs -f git-server
    ```
 
-5. **Access GitLab**:
+5. **Setup admin user** (after GitLab is running):
+   ```bash
+   # Using the setup script (recommended)
+   export GITLAB_ROOT_PASSWORD="your-secure-password"
+   ./services/git-server/scripts/setup-admin.sh
+   
+   # Or the password will be set from .env automatically on first start
+   ```
+
+6. **Access GitLab**:
    - Web UI: http://localhost:3000
    - Username: `root`
    - Password: Value from `GITLAB_ROOT_PASSWORD` in .env

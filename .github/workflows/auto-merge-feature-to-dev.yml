@@ -20,7 +20,7 @@ jobs:
       github.event.pull_request.base.ref == 'dev' &&
       !contains(github.event.pull_request.labels.*.name, 'no-auto-merge')
     steps:
-      - name: Check if this is a feature→dev merge
+      - name: Check if this is a branch→dev merge
         id: check_merge_type
         run: |
           SOURCE="${{ github.event.pull_request.head.ref }}"
@@ -29,13 +29,14 @@ jobs:
           echo "Source: $SOURCE"
           echo "Target: $TARGET"
 
-          # Check if this is feature→dev (feature/x → dev)
-          if [[ "$SOURCE" =~ ^feature/([^/]+)$ ]] && [[ "$TARGET" == "dev" ]]; then
+          # Check if this is a dev-subsidiary branch → dev
+          # Supports conventional commit branch naming patterns
+          if [[ "$TARGET" == "dev" ]] && [[ "$SOURCE" =~ ^(feature|copilot|fix|bugfix|hotfix|chore|docs|refactor|perf|test|ci|build)/(.+)$ ]]; then
             echo "is_feature_to_dev=true" >> $GITHUB_OUTPUT
-            echo "✓ This is a feature→dev merge"
+            echo "✓ This is a ${BASH_REMATCH[1]}/→dev merge"
           else
             echo "is_feature_to_dev=false" >> $GITHUB_OUTPUT
-            echo "✗ Not a feature→dev merge"
+            echo "✗ Not a dev-subsidiary branch→dev merge"
           fi
 
       - name: Check for owner approval
@@ -156,7 +157,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: `🤖 Automatically merged to dev after @${context.repo.owner} approval and passing all checks.`
+                body: `🤖 Automatically merged to dev after @${context.repo.owner} approval and passing all completed checks (${context.payload.pull_request.head.ref} → dev).`
               });
 
             } catch (error) {
@@ -185,7 +186,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: `⏳ Waiting for @${repoOwner} approval to auto-merge this feature to dev.\n\nOnce approved, this PR will automatically merge if all checks pass.\n\nAlternatively, add the \`owner-approved\` label to approve.`
+              body: `⏳ Waiting for @${repoOwner} approval to auto-merge this branch to dev.\n\nOnce approved, this PR will automatically merge if all completed checks pass (skipped checks are ignored).\n\nAlternatively, add the \`owner-approved\` label to approve.`
             });
 
       - name: Notify if waiting for checks

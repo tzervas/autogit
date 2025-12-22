@@ -1,0 +1,127 @@
+# GitLab Configuration Template for AutoGit
+# This file will be copied to /etc/gitlab/gitlab.rb in the container
+# See https://docs.gitlab.com/omnibus/settings/configuration.html
+
+## GitLab URL
+## Ref: https://docs.gitlab.com/omnibus/settings/configuration.html#configuring-the-external-url-for-gitlab
+external_url ENV['GITLAB_EXTERNAL_URL'] || 'http://localhost:3000'
+
+## GitLab Email Server Settings (optional)
+## Uncomment and configure if you want email notifications
+# gitlab_rails['smtp_enable'] = true
+# gitlab_rails['smtp_address'] = "smtp.gmail.com"
+# gitlab_rails['smtp_port'] = 587
+# gitlab_rails['smtp_user_name'] = "your-email@gmail.com"
+# gitlab_rails['smtp_password'] = "your-app-password"
+# gitlab_rails['smtp_domain'] = "smtp.gmail.com"
+# gitlab_rails['smtp_authentication'] = "login"
+# gitlab_rails['smtp_enable_starttls_auto'] = true
+# gitlab_rails['smtp_tls'] = false
+# gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+
+## GitLab Email From Address
+# gitlab_rails['gitlab_email_from'] = 'gitlab@autogit.local'
+# gitlab_rails['gitlab_email_display_name'] = 'AutoGit GitLab'
+# gitlab_rails['gitlab_email_reply_to'] = 'noreply@autogit.local'
+
+## User and Session Settings
+gitlab_rails['gitlab_default_can_create_group'] = true
+gitlab_rails['gitlab_username_changing_enabled'] = false
+
+## Sign-up Settings
+## Set to false to disable new user registrations (recommended for private installations)
+gitlab_rails['gitlab_signup_enabled'] = false
+
+## Password Requirements
+gitlab_rails['gitlab_minimum_password_length'] = 12
+# Require at least one uppercase, lowercase, number, and symbol
+gitlab_rails['password_authentication_enabled_for_web'] = true
+gitlab_rails['password_authentication_enabled_for_git'] = true
+
+## Session Settings
+gitlab_rails['session_expire_delay'] = 10080  # 7 days in minutes
+
+## Rate Limiting (protects against brute force attacks)
+gitlab_rails['rack_attack_git_basic_auth'] = {
+  'enabled' => true,
+  'ip_whitelist' => [],
+  'maxretry' => 10,
+  'findtime' => 60,
+  'bantime' => 3600
+}
+
+## Two-Factor Authentication
+## Enable or disable 2FA requirement for all users
+# gitlab_rails['two_factor_authentication'] = {
+#   'enabled' => true,
+#   'grace_period_in_hours' => 48
+# }
+
+## LDAP/AD Integration (optional)
+## Uncomment and configure for enterprise directory integration
+# gitlab_rails['ldap_enabled'] = false
+# gitlab_rails['ldap_servers'] = YAML.load <<-EOS
+# main:
+#   label: 'LDAP'
+#   host: 'ldap.example.com'
+#   port: 389
+#   uid: 'sAMAccountName'
+#   bind_dn: 'CN=query user,CN=Users,DC=example,DC=com'
+#   password: 'password'
+#   encryption: 'plain'
+#   verify_certificates: true
+#   active_directory: true
+#   allow_username_or_email_login: true
+#   block_auto_created_users: false
+#   base: 'DC=example,DC=com'
+#   user_filter: ''
+# EOS
+
+## OAuth2 Providers (optional)
+## Uncomment and configure for SSO integration
+# gitlab_rails['omniauth_enabled'] = false
+# gitlab_rails['omniauth_allow_single_sign_on'] = ['github', 'google_oauth2']
+# gitlab_rails['omniauth_block_auto_created_users'] = false
+# gitlab_rails['omniauth_providers'] = [
+#   {
+#     "name" => "github",
+#     "app_id" => "YOUR_APP_ID",
+#     "app_secret" => "YOUR_APP_SECRET",
+#     "args" => { "scope" => "user:email" }
+#   }
+# ]
+
+## SSH Settings
+gitlab_rails['gitlab_shell_ssh_port'] = 2222
+
+## Git Settings
+gitlab_rails['gitlab_default_branch'] = 'main'
+
+## Backup Settings
+gitlab_rails['backup_keep_time'] = 604800  # 7 days
+
+## Monitoring
+prometheus['enable'] = true
+prometheus['monitor_kubernetes'] = false
+
+## Disable unused services to save resources
+## Uncomment these if you don't need specific features
+# registry['enable'] = false  # Container registry
+# pages['enable'] = false     # GitLab Pages
+# mattermost['enable'] = false # Mattermost chat
+
+## Performance Tuning
+## Adjust based on your server resources
+# postgresql['shared_buffers'] = "256MB"
+# postgresql['max_connections'] = 200
+# sidekiq['concurrency'] = 25
+
+## Security Headers
+nginx['proxy_set_headers'] = {
+  "X-Forwarded-Proto" => "https",
+  "X-Forwarded-Ssl" => "on"
+}
+
+## CORS Settings (if needed for API access from other domains)
+# gitlab_rails['rack_cors_enabled'] = false
+# gitlab_rails['rack_cors_origins'] = ['*']

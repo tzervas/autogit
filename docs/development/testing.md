@@ -259,7 +259,7 @@ with caplog.at_level(logging.WARNING):
 manager.provision("amd64", gpu_type="nvidia")
 assert "GPU not available" in caplog.text
 
-```
+```
 ### Testing Async Code
 ```python
 @pytest.mark.asyncio
@@ -361,7 +361,7 @@ assert len(active) == 0
 ```
 ### Database Integration Tests
 
-```python
+```python
 @pytest.fixture
 def database():
 """Test database fixture."""
@@ -543,7 +543,7 @@ run: uv run pytest --cov --cov-fail-under=80
 ## Test Data Management
 ### Using Factories
 
-```python
+```python
 # tests/utils/factories.py
 import factory
 from autogit.models import Runner, Job
@@ -797,4 +797,3 @@ RunnerManager({"invalid": "config"})
 --**Documentation Version**: 1.0.0
 **Last Updated**: YYYY-MM-DD
 **Related Docs**: [Development Overview](README.md) | [Standards](standards.md) | [CI/CD](ci-cd.md)
-```

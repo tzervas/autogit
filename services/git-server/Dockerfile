@@ -5,7 +5,7 @@ FROM gitlab/gitlab-ce:16.11.0-ce.0
 # Metadata
 LABEL maintainer="AutoGit Team"
 LABEL description="GitLab CE server for AutoGit platform - AMD64 native"
-LABEL version="1.0.0"
+LABEL version="0.1.0"
 LABEL architecture="amd64"
 
 # Install additional utilities

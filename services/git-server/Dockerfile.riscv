@@ -1,0 +1,46 @@
+# GitLab CE Docker Image for AutoGit - RISC-V via QEMU
+# This Dockerfile is for RISC-V architecture using QEMU emulation (Phase 3)
+# NOTE: This is experimental and runs via QEMU emulation on AMD64/ARM64 hosts
+
+# Use a RISC-V compatible base image
+# Note: GitLab doesn't officially support RISC-V yet, so this uses emulation
+FROM --platform=linux/riscv64 debian:bookworm-slim
+
+# Metadata
+LABEL maintainer="AutoGit Team"
+LABEL description="GitLab CE server for AutoGit platform - RISC-V QEMU emulation (experimental)"
+LABEL version="0.1.0-experimental"
+LABEL architecture="riscv64"
+LABEL org.opencontainers.image.source="https://github.com/tzervas/autogit"
+LABEL experimental="true"
+
+# Install GitLab dependencies and utilities
+# Note: Full GitLab CE is not available for RISC-V, this is a placeholder
+# for future compatibility when GitLab adds RISC-V support
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    openssh-server \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create placeholder directories matching GitLab structure
+RUN mkdir -p /etc/gitlab /var/log/gitlab /var/opt/gitlab
+
+# Internal container ports
+EXPOSE 22 80 443
+
+# Basic health check (placeholder)
+HEALTHCHECK --interval=60s --timeout=20s --start-period=300s --retries=5 \
+    CMD curl -f http://localhost/-/health 2>/dev/null || exit 1
+
+# Volumes for data persistence
+VOLUME ["/etc/gitlab", "/var/log/gitlab", "/var/opt/gitlab"]
+
+# Startup script (placeholder for future GitLab RISC-V support)
+CMD ["/bin/bash", "-c", "echo 'RISC-V GitLab support is experimental and not yet available. This is a placeholder for future compatibility.' && sleep infinity"]
+
+# IMPORTANT: This Dockerfile is for future RISC-V support planning only.
+# GitLab CE does not currently provide official RISC-V builds.
+# When RISC-V support becomes available, this file will be updated with proper
+# GitLab CE installation steps.

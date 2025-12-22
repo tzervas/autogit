@@ -1,0 +1,45 @@
+# GitLab CE Docker Image for AutoGit - AMD64 Native
+# This is the production Dockerfile for AMD64 (x86_64) architecture
+# Used for MVP and primary production deployments
+
+FROM gitlab/gitlab-ce:16.11.0-ce.0
+
+# Metadata
+LABEL maintainer="AutoGit Team"
+LABEL description="GitLab CE server for AutoGit platform - AMD64 native"
+LABEL version="0.1.0"
+LABEL architecture="amd64"
+LABEL org.opencontainers.image.source="https://github.com/tzervas/autogit"
+
+# Install additional utilities for management and debugging
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    vim \
+    htop \
+    && rm -rf /var/lib/apt/lists/*
+
+# Internal container ports exposed by this image:
+#   SSH:   22   - Git operations over SSH
+#   HTTP:  80   - Web UI and Git operations over HTTP
+#   HTTPS: 443  - Secure web UI and Git operations
+# Host port mappings (e.g., 2222->22, 3000->80, 3443->443) are defined in docker-compose.yml
+EXPOSE 22 80 443
+
+# Health check endpoint
+# GitLab provides built-in health checks at /-/health
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+    CMD curl -f http://localhost/-/health || exit 1
+
+# GitLab data persistence
+# Three separate volumes for better maintainability and upgrade capability:
+#   /etc/gitlab      - Configuration files and secrets
+#   /var/log/gitlab  - Application and access logs
+#   /var/opt/gitlab  - Primary data storage (repos, artifacts, DB, etc.)
+VOLUME ["/etc/gitlab", "/var/log/gitlab", "/var/opt/gitlab"]
+
+# Use GitLab's default entrypoint and command
+# Configuration is managed via:
+#   1. Environment variables (GITLAB_OMNIBUS_CONFIG, etc.)
+#   2. /etc/gitlab/gitlab.rb configuration file
+# No need to override ENTRYPOINT or CMD - use GitLab defaults

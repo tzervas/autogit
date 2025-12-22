@@ -1,0 +1,179 @@
+---
+name: Auto Create Fix PR
+
+on:
+  workflow_run:
+    workflows: ["CI", "Docker Build and Test"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  create-fix-pr:
+    name: Create Automatic Fix PR
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt >= 3 &&
+      github.event.workflow_run.pull_requests[0] != null
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Get PR details
+        id: pr_details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.workflow_run.pull_requests[0].number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            core.setOutput('pr_number', prNumber);
+            core.setOutput('pr_branch', pr.head.ref);
+            core.setOutput('pr_base', pr.base.ref);
+            core.setOutput('pr_title', pr.title);
+
+            return pr;
+
+      - name: Create fix branch
+        id: create_branch
+        run: |
+          PR_BRANCH="${{ steps.pr_details.outputs.pr_branch }}"
+          FIX_BRANCH="${PR_BRANCH}/autofix-ci-$(date +%s)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$FIX_BRANCH"
+
+          echo "fix_branch=$FIX_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Apply automatic fixes
+        id: apply_fixes
+        run: |
+          FIXES_APPLIED=false
+
+          # Fix trailing whitespace
+          if find . -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.md" \) -not -path "./.git/*" -exec grep -l '[[:space:]]$' {} \; | head -1 | grep -q .; then
+            echo "Fixing trailing whitespace..."
+            find . -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.md" \) -not -path "./.git/*" -exec sed -i 's/[[:space:]]*$//' {} \;
+            FIXES_APPLIED=true
+          fi
+
+          # Fix file permissions for scripts
+          if [ -d "scripts" ]; then
+            for script in scripts/*.sh; do
+              if [ -f "$script" ] && [ ! -x "$script" ]; then
+                echo "Making $script executable..."
+                chmod +x "$script"
+                FIXES_APPLIED=true
+              fi
+            done
+          fi
+
+          # Run auto-formatters if available
+          if command -v black &> /dev/null; then
+            if find . -name "*.py" -type f -not -path "./.git/*" | head -1 | grep -q .; then
+              echo "Running black formatter..."
+              black . || true
+              FIXES_APPLIED=true
+            fi
+          fi
+
+          echo "fixes_applied=$FIXES_APPLIED" >> $GITHUB_OUTPUT
+
+      - name: Commit and push fixes
+        if: steps.apply_fixes.outputs.fixes_applied == 'true'
+        run: |
+          git add -A
+          git commit -m "fix: Auto-apply CI fixes
+
+          - Fix trailing whitespace
+          - Fix script permissions
+          - Apply auto-formatting
+
+          Fixes automatically applied by CI failure recovery workflow."
+
+          git push -u origin "${{ steps.create_branch.outputs.fix_branch }}"
+
+      - name: Create fix PR
+        if: steps.apply_fixes.outputs.fixes_applied == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_details.outputs.pr_number }};
+            const prBranch = '${{ steps.pr_details.outputs.pr_branch }}';
+            const fixBranch = '${{ steps.create_branch.outputs.fix_branch }}';
+            const prTitle = '${{ steps.pr_details.outputs.pr_title }}';
+
+            const { data: fixPr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `fix: Auto-fixes for ${prTitle}`,
+              head: fixBranch,
+              base: prBranch,
+              body: `## Auto-generated Fix PR
+
+          This PR contains automatic fixes for CI failures in #${prNumber}.
+
+          ### Fixes Applied
+          - ✅ Fixed trailing whitespace in YAML/Markdown files
+          - ✅ Fixed script file permissions
+          - ✅ Applied auto-formatting where available
+
+          ### Auto-Merge
+          This PR will automatically merge once all CI checks pass, as it contains only automated fixes.
+
+          ---
+          🤖 Generated automatically by CI failure recovery workflow`
+            });
+
+            // Add auto-merge label to trigger automatic merge
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: fixPr.number,
+              labels: ['auto-merge', 'automated-fix']
+            });
+
+            // Comment on original PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🤖 Created automatic fix PR #${fixPr.number} to address CI failures.\n\nThe fix PR will auto-merge once checks pass, then this PR's CI will be re-run.`
+            });
+
+            console.log(`✓ Created fix PR #${fixPr.number}`);
+
+      - name: No fixes available
+        if: steps.apply_fixes.outputs.fixes_applied != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_details.outputs.pr_number }};
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `⚠️ CI failures detected but no automatic fixes could be applied.\n\nPlease review the workflow logs and fix the issues manually:\n- Check for syntax errors\n- Review linting violations\n- Ensure tests are passing\n\nWorkflow: ${{ github.event.workflow_run.name }}\nRun: ${{ github.event.workflow_run.html_url }}`
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: ['needs-manual-fix']
+            });

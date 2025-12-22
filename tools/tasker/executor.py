@@ -28,13 +28,15 @@ class TaskExecutor:
         """
         self.repo_path = Path(repo_path)
     
-    def create_branch_for_task(self, task: Task, base_branch: str = "dev") -> bool:
+    def create_branch_for_task(self, task: Task, base_branch: str = "dev", 
+                              interactive: bool = True) -> bool:
         """
         Create a git branch for the given task.
         
         Args:
             task: The task to create a branch for
             base_branch: The base branch to branch from (default: dev)
+            interactive: Whether to prompt user for input (default: True)
         
         Returns:
             True if successful, False otherwise
@@ -72,15 +74,24 @@ class TaskExecutor:
             if result.returncode == 0:
                 print(f"ℹ️  Branch '{branch_name}' already exists")
                 
-                # Ask if user wants to checkout
-                response = input(f"Checkout existing branch '{branch_name}'? (y/n): ")
-                if response.lower() == 'y':
+                # Ask if user wants to checkout (only in interactive mode)
+                if interactive:
+                    response = input(f"Checkout existing branch '{branch_name}'? (y/n): ")
+                    if response.lower() == 'y':
+                        subprocess.run(
+                            ["git", "checkout", branch_name],
+                            cwd=self.repo_path,
+                            check=True
+                        )
+                        print(f"✅ Checked out branch: {branch_name}")
+                else:
+                    # Non-interactive: just checkout the existing branch
                     subprocess.run(
                         ["git", "checkout", branch_name],
                         cwd=self.repo_path,
                         check=True
                     )
-                    print(f"✅ Checked out branch: {branch_name}")
+                    print(f"✅ Checked out existing branch: {branch_name}")
                 return True
             
             # Fetch latest changes
@@ -208,7 +219,8 @@ class TaskExecutor:
         return summary_text
     
     def execute_task(self, task: Task, create_branch: bool = True, 
-                    generate_summary: bool = True, base_branch: str = "dev") -> bool:
+                    generate_summary: bool = True, base_branch: str = "dev",
+                    interactive: bool = True) -> bool:
         """
         Execute the complete workflow for starting work on a task.
         
@@ -217,6 +229,7 @@ class TaskExecutor:
             create_branch: Whether to create a git branch
             generate_summary: Whether to generate a task summary file
             base_branch: The base branch to branch from
+            interactive: Whether to allow interactive prompts (default: True)
         
         Returns:
             True if successful, False otherwise
@@ -228,7 +241,7 @@ class TaskExecutor:
         
         # Create branch
         if create_branch:
-            if not self.create_branch_for_task(task, base_branch):
+            if not self.create_branch_for_task(task, base_branch, interactive):
                 success = False
                 print("⚠️  Branch creation failed, but continuing...")
         

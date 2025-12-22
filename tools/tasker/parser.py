@@ -48,7 +48,7 @@ class TaskTrackerParser:
     
     def _extract_metadata(self, lines: List[str], key: str) -> Optional[str]:
         """Extract metadata value from the header section."""
-        pattern = rf"\*\*{key}\*\*:\s*(.+)"
+        pattern = rf"\*\*{re.escape(key)}\*\*:\s*(.+)"
         for line in lines[:20]:  # Check first 20 lines
             match = re.search(pattern, line)
             if match:
@@ -272,7 +272,7 @@ class TaskTrackerParser:
     
     def _extract_value(self, line: str, key: str) -> Optional[str]:
         """Extract value from a key-value line."""
-        pattern = rf"\*\*{key}\*\*:\s*(.+)"
+        pattern = rf"\*\*{re.escape(key)}\*\*:\s*(.+)"
         match = re.search(pattern, line)
         if match:
             return match.group(1).strip()

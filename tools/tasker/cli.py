@@ -265,7 +265,8 @@ class TaskerCLI:
             task,
             create_branch=not args.no_branch,
             generate_summary=not args.no_summary,
-            base_branch=args.base_branch
+            base_branch=args.base_branch,
+            interactive=args.interactive
         )
         
         return 0 if success else 1
@@ -356,6 +357,12 @@ Examples:
             "--base-branch",
             default="dev",
             help="Base branch to branch from (default: dev)"
+        )
+        execute_parser.add_argument(
+            "--interactive",
+            action="store_true",
+            default=False,
+            help="Enable interactive prompts (default: non-interactive)"
         )
         
         args = parser.parse_args()

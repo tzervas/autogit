@@ -323,7 +323,7 @@ When contributing agent changes:
 
 ## Version History
 
-- **v1.0.0** (2024-12-21): Initial multiagent structure
+- **v1.0.0** (2025-12-21): Initial multiagent structure
   - Decomposed monolithic agent.md into 6 specialized agents
   - Added root orchestrator and shared context
   - Created Copilot web UI guides

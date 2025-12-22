@@ -219,11 +219,11 @@ Have suggestions for the roadmap? We'd love to hear from you!
 
 ## Version History
 
-- **2024-12-21**: Initial roadmap created
+- **2025-12-21**: Initial roadmap created
 - **YYYY-MM-DD**: [Future updates]
 
 ---
 
 *This roadmap is subject to change based on community feedback, technical constraints, and project priorities. Dates are estimates and may shift.*
 
-*Last updated: 2024-12-21*
+*Last updated: 2025-12-21*

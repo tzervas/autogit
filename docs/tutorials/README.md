@@ -173,4 +173,4 @@ Found an issue with a tutorial? Have suggestions?
 
 *New tutorials are added regularly. Watch the repository for updates!*
 
-*Last updated: 2024-12-21*
+*Last updated: 2025-12-21*

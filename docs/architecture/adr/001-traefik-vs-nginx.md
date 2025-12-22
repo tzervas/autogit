@@ -1,7 +1,7 @@
 
 # ADR-001: Traefik vs NGINX Ingress Controller
 **Status**: Accepted
-**Date**: 2024-12-21
+**Date**: 2025-12-21
 **Deciders**: Project Team
 **Technical Story**: Core infrastructure selection
 ## Context
@@ -112,7 +112,7 @@ ports:
 None (initial decision)
 ## Superseded By
 None (current)
---**Last Updated**: 2024-12-21
+--**Last Updated**: 2025-12-21
 **Status**: Accepted and Implemented
 ```
 

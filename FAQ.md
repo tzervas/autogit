@@ -311,4 +311,4 @@ Not currently, but may be available in the future. Check back for updates.
 
 **Don't see your question?** Open a [GitHub Discussion](https://github.com/tzervas/autogit/discussions) or add it to this FAQ by submitting a PR!
 
-*Last updated: 2024-12-21*
+*Last updated: 2025-12-21*

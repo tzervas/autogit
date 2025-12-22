@@ -1,0 +1,26 @@
+# CODEOWNERS file for AutoGit
+# This file defines who is responsible for code review and approval
+
+# Default owner for everything
+* @tzervas
+
+# Feature branches to dev require owner approval
+/dev @tzervas
+
+# Main branch requires owner approval
+/main @tzervas
+
+# Critical infrastructure
+/.github/ @tzervas
+/docker-compose.yml @tzervas
+/scripts/ @tzervas
+
+# Services - can be reviewed by specialists but owner has final say
+/services/git-server/ @tzervas
+/services/runner-coordinator/ @tzervas
+
+# Documentation can be reviewed by documentation team
+/docs/ @tzervas
+
+# Workflows require owner review
+/.github/workflows/ @tzervas

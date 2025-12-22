@@ -1,0 +1,142 @@
+---
+# GitHub Labels Configuration for AutoGit
+# This file defines the labels used across the repository
+
+# Priority Labels
+- name: priority-critical
+  color: 'b60205'
+  description: Critical priority - needs immediate attention
+
+- name: priority-high
+  color: 'd93f0b'
+  description: High priority
+
+- name: priority-medium
+  color: 'fbca04'
+  description: Medium priority
+
+- name: priority-low
+  color: '0e8a16'
+  description: Low priority
+
+# Type Labels
+- name: feature
+  color: '1d76db'
+  description: New feature or request
+
+- name: bug
+  color: 'd73a4a'
+  description: Something isn't working
+
+- name: enhancement
+  color: 'a2eeef'
+  description: Improvement to existing functionality
+
+- name: hotfix
+  color: 'b60205'
+  description: Critical fix for production
+
+- name: release
+  color: '5319e7'
+  description: Release-related changes
+
+# Area Labels
+- name: git-server
+  color: '006b75'
+  description: Related to GitLab CE git server
+
+- name: runner-coordinator
+  color: '006b75'
+  description: Related to runner coordinator service
+
+- name: docker
+  color: '0db7ed'
+  description: Docker or containerization related
+
+- name: documentation
+  color: '0075ca'
+  description: Documentation improvements or additions
+
+- name: github-actions
+  color: '2088ff'
+  description: GitHub Actions workflows
+
+- name: api
+  color: 'd4c5f9'
+  description: API related changes
+
+- name: security
+  color: 'd93f0b'
+  description: Security related issue or fix
+
+# Status Labels
+- name: work-in-progress
+  color: 'fbca04'
+  description: Work in progress, not ready for review
+
+- name: blocked
+  color: 'd93f0b'
+  description: Blocked by another issue or dependency
+
+- name: stale
+  color: 'ededed'
+  description: No recent activity
+
+- name: needs-review
+  color: '0e8a16'
+  description: Ready for review
+
+- name: needs-testing
+  color: '0e8a16'
+  description: Needs testing before merge
+
+- name: auto-merge
+  color: '0e8a16'
+  description: Enable automatic merging when checks pass
+
+- name: no-auto-merge
+  color: 'd93f0b'
+  description: Prevent automatic merging
+
+- name: owner-approved
+  color: '0e8a16'
+  description: Approved by repository owner for merge to dev
+
+- name: merge-conflict
+  color: 'b60205'
+  description: Has merge conflicts that need resolution
+
+# Target Branch Labels
+- name: to-main
+  color: '5319e7'
+  description: Pull request targeting main branch
+
+- name: to-dev
+  color: '1d76db'
+  description: Pull request targeting dev branch
+
+# Automation Labels
+- name: dependencies
+  color: '0366d6'
+  description: Dependency updates
+
+- name: copilot
+  color: '8b5cf6'
+  description: Created or modified by GitHub Copilot
+
+# Special Labels
+- name: pinned
+  color: 'c5def5'
+  description: Should not be auto-closed
+
+- name: good-first-issue
+  color: '7057ff'
+  description: Good for newcomers
+
+- name: help-wanted
+  color: '008672'
+  description: Extra attention is needed
+
+- name: long-term
+  color: 'c5def5'
+  description: Long-term or future goal

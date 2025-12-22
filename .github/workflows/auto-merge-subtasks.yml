@@ -1,0 +1,159 @@
+---
+name: Auto Merge Subtasks
+
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [labeled, unlabeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge-work-to-subtask:
+    name: Auto-merge Work Branch to Subtask
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.base.ref != 'dev' &&
+      github.event.pull_request.base.ref != 'main' &&
+      !contains(github.event.pull_request.labels.*.name, 'no-auto-merge')
+    steps:
+      - name: Check if this is a work→subtask merge
+        id: check_merge_type
+        run: |
+          SOURCE="${{ github.event.pull_request.head.ref }}"
+          TARGET="${{ github.event.pull_request.base.ref }}"
+
+          echo "Source: $SOURCE"
+          echo "Target: $TARGET"
+
+          # Check if this is work→subtask (feature/x/y/z → feature/x/y)
+          if [[ "$SOURCE" =~ ^feature/([^/]+)/([^/]+)/([^/]+)$ ]]; then
+            EXPECTED="feature/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+            if [[ "$TARGET" == "$EXPECTED" ]]; then
+              echo "merge_type=work-to-subtask" >> $GITHUB_OUTPUT
+              echo "can_auto_merge=true" >> $GITHUB_OUTPUT
+            fi
+          # Check if this is subtask→feature (feature/x/y → feature/x)
+          elif [[ "$SOURCE" =~ ^feature/([^/]+)/([^/]+)$ ]]; then
+            EXPECTED="feature/${BASH_REMATCH[1]}"
+            if [[ "$TARGET" == "$EXPECTED" ]]; then
+              echo "merge_type=subtask-to-feature" >> $GITHUB_OUTPUT
+              echo "can_auto_merge=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "can_auto_merge=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check PR status
+        if: steps.check_merge_type.outputs.can_auto_merge == 'true'
+        id: check_status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            // Check if PR is approved by evaluator or has auto-merge label
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const hasEvaluatorApproval = reviews.some(review =>
+              review.state === 'APPROVED' &&
+              (review.user.login.includes('evaluator') || review.user.login === context.repo.owner)
+            );
+
+            const hasAutoMergeLabel = pr.labels.some(label => label.name === 'auto-merge');
+
+            // Check if all checks have passed
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha
+            });
+
+            const allChecksPassed = checkRuns.check_runs.every(run =>
+              run.status === 'completed' && run.conclusion === 'success'
+            );
+
+            const canMerge = (hasEvaluatorApproval || hasAutoMergeLabel) && allChecksPassed && pr.mergeable;
+
+            core.setOutput('can_merge', canMerge);
+            core.setOutput('all_checks_passed', allChecksPassed);
+            core.setOutput('has_approval', hasEvaluatorApproval || hasAutoMergeLabel);
+
+            return canMerge;
+
+      - name: Auto-merge PR
+        if: steps.check_status.outputs.can_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mergeType = '${{ steps.check_merge_type.outputs.merge_type }}';
+
+            console.log(`Auto-merging ${mergeType} PR #${context.payload.pull_request.number}`);
+
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                merge_method: 'squash',
+                commit_title: `${context.payload.pull_request.title} (#${context.payload.pull_request.number})`,
+                commit_message: `Auto-merged ${mergeType}\n\n${context.payload.pull_request.body || ''}`
+              });
+
+              console.log('✓ Auto-merge successful');
+
+              // Add comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🤖 Automatically merged ${mergeType} after approval and passing all checks.`
+              });
+
+            } catch (error) {
+              console.error('✗ Auto-merge failed:', error);
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `⚠️ Auto-merge failed: ${error.message}\n\nPlease merge manually.`
+              });
+
+              throw error;
+            }
+
+      - name: Add waiting label if not ready
+        if: |
+          steps.check_merge_type.outputs.can_auto_merge == 'true' &&
+          steps.check_status.outputs.can_merge != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allChecksPassed = '${{ steps.check_status.outputs.all_checks_passed }}' === 'true';
+            const hasApproval = '${{ steps.check_status.outputs.has_approval }}' === 'true';
+
+            let waitingFor = [];
+            if (!allChecksPassed) waitingFor.push('checks to pass');
+            if (!hasApproval) waitingFor.push('evaluator approval');
+
+            if (waitingFor.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `⏳ This PR will auto-merge when: ${waitingFor.join(' and ')}\n\nAdd \`auto-merge\` label or get evaluator approval to proceed.`
+              });
+            }

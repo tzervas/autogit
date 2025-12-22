@@ -1,0 +1,56 @@
+---
+name: Stale PR and Issue Management
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Mark Stale Items
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          # Stale issue configuration
+          days-before-issue-stale: 60
+          days-before-issue-close: 7
+          stale-issue-label: 'stale'
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed if no further activity occurs within
+            7 days. Thank you for your contributions.
+
+          # Stale PR configuration
+          days-before-pr-stale: 30
+          days-before-pr-close: 7
+          stale-pr-label: 'stale'
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not
+            had recent activity. It will be closed if no further activity occurs within
+            7 days. Please rebase if needed and continue work on this PR.
+
+          # Close message
+          close-issue-message: |
+            This issue was automatically closed due to inactivity.
+            If this is still relevant, please reopen and provide updates.
+
+          close-pr-message: |
+            This pull request was automatically closed due to inactivity.
+            If you would like to continue this work, please reopen the PR and rebase.
+
+          # Exemptions
+          exempt-issue-labels: 'pinned,security,enhancement,long-term'
+          exempt-pr-labels: 'pinned,security,work-in-progress,blocked'
+          exempt-all-milestones: true
+          exempt-draft-pr: true
+
+          # Operation limits
+          operations-per-run: 50

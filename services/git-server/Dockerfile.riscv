@@ -38,9 +38,10 @@ HEALTHCHECK --interval=60s --timeout=20s --start-period=300s --retries=5 \
 VOLUME ["/etc/gitlab", "/var/log/gitlab", "/var/opt/gitlab"]
 
 # Startup script (placeholder for future GitLab RISC-V support)
-CMD ["/bin/bash", "-c", "echo 'RISC-V GitLab support is experimental and not yet available. This is a placeholder for future compatibility.' && sleep infinity"]
+CMD ["/bin/bash", "-c", "echo 'ERROR: RISC-V GitLab support is experimental and not yet available.' && echo 'This is a placeholder for future compatibility.' && echo 'GitLab CE does not currently provide official RISC-V builds.' && exit 1"]
 
 # IMPORTANT: This Dockerfile is for future RISC-V support planning only.
 # GitLab CE does not currently provide official RISC-V builds.
 # When RISC-V support becomes available, this file will be updated with proper
 # GitLab CE installation steps.
+# Container will exit with error code 1 to prevent misleading "running" status.

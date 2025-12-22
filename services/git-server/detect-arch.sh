@@ -30,7 +30,8 @@ print_error() {
 
 # Detect architecture
 detect_architecture() {
-    local arch=$(uname -m)
+    local arch
+    arch=$(uname -m)
     
     case "$arch" in
         x86_64|amd64)
@@ -123,11 +124,11 @@ main() {
     fi
     
     # Display detection results
-    print_success "Detected Architecture: $(get_arch_display_name $DETECTED_ARCH)"
-    print_info "Support Status: $(get_arch_support $DETECTED_ARCH)"
+    print_success "Detected Architecture: $(get_arch_display_name "$DETECTED_ARCH")"
+    print_info "Support Status: $(get_arch_support "$DETECTED_ARCH")"
     
     # Get Dockerfile path
-    DOCKERFILE=$(get_dockerfile $DETECTED_ARCH)
+    DOCKERFILE=$(get_dockerfile "$DETECTED_ARCH")
     
     # Check if Dockerfile exists
     if [ ! -f "$DOCKERFILE" ]; then

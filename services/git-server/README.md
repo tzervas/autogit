@@ -133,7 +133,7 @@ Minimum recommended resources:
 
 - **CPU**: 2 cores
 - **Memory**: 4 GB RAM
-- **Disk**: 10 GB for application, additional space for repositories
+- **Disk**: 2.5 GB for GitLab application, plus space for repositories and data (recommend 10 GB minimum total)
 - **Architecture**: AMD64 (x86_64)
 
 ## Health Checks

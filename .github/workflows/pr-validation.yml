@@ -9,6 +9,9 @@ on:
       - dev
       - 'feature/**'
 
+permissions:
+  contents: read
+
 jobs:
   validate-branch-naming:
     name: Validate Branch Naming Convention

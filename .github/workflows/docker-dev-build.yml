@@ -48,7 +48,7 @@ jobs:
             type=raw,value=cache
 
       - name: Build and push Git Server
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/git-server
           file: ./services/git-server/Dockerfile
@@ -95,7 +95,7 @@ jobs:
             type=raw,value=cache
 
       - name: Build and push Runner Coordinator
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/runner-coordinator
           file: ./services/runner-coordinator/Dockerfile

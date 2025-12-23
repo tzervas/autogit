@@ -14,7 +14,7 @@ Previously had **3 separate workflows** with overlapping responsibilities:
 ❌ OLD SETUP (Duplicates):
 ├─ ci.yml (5 jobs)
 │  ├─ lint-shell
-│  ├─ lint-yaml  
+│  ├─ lint-yaml
 │  ├─ lint-markdown
 │  ├─ validate-docker
 │  └─ check-scripts-executable
@@ -115,7 +115,7 @@ You can verify no duplicates exist by running:
 ```bash
 # Check for duplicate job names
 cd .github/workflows
-for f in *.yml; do 
+for f in *.yml; do
     if [[ "$f" != *.disabled ]]; then
         echo "=== $f ==="
         grep "^  [a-z-]" "$f" | grep -v "    "
@@ -162,7 +162,7 @@ concurrency:
 
 **Current status**: Not enabled (each commit gets full validation)
 
-**Trade-off**: 
+**Trade-off**:
 - ❌ More compute on rapid commits
 - ✅ Complete validation history for each commit
 
@@ -247,7 +247,7 @@ jobs:
 ✅ **Current State: Optimized**
 
 - **1 primary PR validation workflow** with 13 jobs
-- **0 duplicate steps** across all workflows  
+- **0 duplicate steps** across all workflows
 - **Path filtering** for Docker-specific checks
 - **Parallel execution** for all independent jobs
 - **~5-6 minute** total validation time

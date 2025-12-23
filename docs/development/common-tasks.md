@@ -29,7 +29,7 @@ Quick reference guide for common development tasks in AutoGit.
    ```bash
    # Create test file
    touch src/new-component/tests/test_component.py
-   
+
    # Run tests
    pytest src/new-component/tests/
    ```
@@ -62,7 +62,7 @@ Quick reference guide for common development tasks in AutoGit.
    # src/fleeting-plugin/core/plugin.py
    def new_feature(self, param: str) -> Result:
        """Implement new feature.
-       
+
        See docs/runners/new-feature.md for details.
        """
        ...
@@ -111,13 +111,13 @@ Quick reference guide for common development tasks in AutoGit.
    ```python
    # src/gpu-detector/detectors/intel.py
    from .base import GPUDetector
-   
+
    class IntelGPUDetector(GPUDetector):
        """Detector for Intel GPUs.
-       
+
        See docs/gpu/intel.md for details.
        """
-       
+
        def detect(self) -> List[GPU]:
            # Implementation
            ...
@@ -172,27 +172,27 @@ from unittest.mock import Mock, patch
 
 class TestMyComponent:
     """Tests for MyComponent."""
-    
+
     @pytest.fixture
     def component(self):
         """Create component instance."""
         return MyComponent()
-    
+
     @pytest.fixture
     def mock_dependency(self):
         """Mock external dependency."""
         return Mock()
-    
+
     def test_basic_functionality(self, component):
         """Test basic functionality works."""
         result = component.do_something()
         assert result is not None
-    
+
     def test_error_handling(self, component):
         """Test error handling."""
         with pytest.raises(ValueError):
             component.do_something_invalid()
-    
+
     @patch('my_module.external_call')
     def test_with_mock(self, mock_external, component):
         """Test with mocked external call."""
@@ -209,29 +209,29 @@ from testcontainers.postgres import PostgresContainer
 
 class TestRunnerLifecycle:
     """Integration tests for runner lifecycle."""
-    
+
     @pytest.fixture(scope="class")
     def postgres(self):
         """Start PostgreSQL container."""
         with PostgresContainer() as pg:
             yield pg
-    
+
     @pytest.fixture
     def runner_manager(self, postgres):
         """Create runner manager with real database."""
         config = create_config(postgres.get_connection_url())
         return RunnerManager(config)
-    
+
     def test_provision_and_deprovision(self, runner_manager):
         """Test full runner lifecycle."""
         # Provision
         runner = runner_manager.provision("amd64")
         assert runner.status == "running"
-        
+
         # Verify
         found = runner_manager.get(runner.id)
         assert found.id == runner.id
-        
+
         # Deprovision
         runner_manager.deprovision(runner.id)
         assert runner_manager.get(runner.id) is None

@@ -44,7 +44,7 @@ This service runs GitLab CE 16.11.0 in a Docker container with AMD64 native supp
    # Using the setup script (recommended)
    export GITLAB_ROOT_PASSWORD="your-secure-password"
    ./services/git-server/scripts/setup-admin.sh
-   
+
    # Or the password will be set from .env automatically on first start
    ```
 
@@ -74,11 +74,11 @@ GitLab data is persisted in three separate Docker named volumes, enabling easy v
 - **git-config** (`autogit-git-config`): GitLab configuration files (/etc/gitlab)
   - Recommended size: 1 GB
   - Contains: gitlab.rb, SSL certificates, GitLab secrets
-  
+
 - **git-logs** (`autogit-git-logs`): Application and access logs (/var/log/gitlab)
   - Recommended size: 5 GB minimum
   - Contains: nginx logs, GitLab Rails logs, Sidekiq logs, PostgreSQL logs
-  
+
 - **git-data** (`autogit-git-data`): Primary storage for all repository content (/var/opt/gitlab)
   - **Recommended size: 50 GB minimum** (100+ GB for active teams, 500+ GB for large orgs)
   - Contains:

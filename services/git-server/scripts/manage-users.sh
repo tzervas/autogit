@@ -33,7 +33,7 @@ check_gitlab_running() {
 # List all users
 list_users() {
     print_info "Listing all GitLab users:"
-    docker compose exec git-server gitlab-rails runner "User.all.each { |u| puts \"ID: #{u.id}, Username: #{u.username}, Email: #{u.email}, Admin: #{u.admin}\" }"
+    docker compose exec git-server gitlab-rails runner 'User.all.each { |u| puts "ID: #{u.id}, Username: #{u.username}, Email: #{u.email}, Admin: #{u.admin}" }'
 }
 
 # Create a new user
@@ -58,8 +58,8 @@ create_user() {
     fi
 
     print_info "Creating user: $username ($email)"
-    
-    if docker compose exec -T git-server gitlab-rails runner <<EOF
+
+    if docker compose exec -T git-server gitlab-rails runner <<EOF; then
 user = User.new(
   username: '${username}',
   email: '${email}',
@@ -76,7 +76,6 @@ else
   exit 1
 end
 EOF
-    then
         print_info "✅ User created successfully!"
     else
         print_error "Failed to create user"
@@ -87,7 +86,7 @@ EOF
 # Delete a user
 delete_user() {
     local username=$1
-    
+
     if [ -z "$username" ]; then
         print_error "Usage: $0 delete <username>"
         exit 1
@@ -109,7 +108,7 @@ EOF
 # Block a user
 block_user() {
     local username=$1
-    
+
     if [ -z "$username" ]; then
         print_error "Usage: $0 block <username>"
         exit 1
@@ -131,7 +130,7 @@ EOF
 # Unblock a user
 unblock_user() {
     local username=$1
-    
+
     if [ -z "$username" ]; then
         print_error "Usage: $0 unblock <username>"
         exit 1
@@ -184,28 +183,28 @@ EOF
 check_gitlab_running
 
 case "$1" in
-    list)
-        list_users
-        ;;
-    create)
-        create_user "$2" "$3" "$4" "$5" "$6"
-        ;;
-    delete)
-        delete_user "$2"
-        ;;
-    block)
-        block_user "$2"
-        ;;
-    unblock)
-        unblock_user "$2"
-        ;;
-    help|--help|-h)
-        show_help
-        ;;
-    *)
-        print_error "Unknown command: $1"
-        echo ""
-        show_help
-        exit 1
-        ;;
+list)
+    list_users
+    ;;
+create)
+    create_user "$2" "$3" "$4" "$5" "$6"
+    ;;
+delete)
+    delete_user "$2"
+    ;;
+block)
+    block_user "$2"
+    ;;
+unblock)
+    unblock_user "$2"
+    ;;
+help | --help | -h)
+    show_help
+    ;;
+*)
+    print_error "Unknown command: $1"
+    echo ""
+    show_help
+    exit 1
+    ;;
 esac

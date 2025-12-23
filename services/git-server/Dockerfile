@@ -1,6 +1,6 @@
 # GitLab CE Docker Image for AutoGit
 # AMD64 native support (MVP focus)
-FROM gitlab/gitlab-ce:16.11.0-ce.0
+FROM gitlab/gitlab-ce:18.7.0-ce.0
 
 # Metadata
 LABEL maintainer="AutoGit Team"

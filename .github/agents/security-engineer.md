@@ -123,7 +123,7 @@ def create_user(username: str) -> None:
     # Validate input
     if not re.match(r'^[a-zA-Z0-9_]{3,32}$', username):
         raise ValueError("Invalid username format")
-    
+
     # Use parameterized query
     conn.execute(
         "INSERT INTO users (username) VALUES (?)",
@@ -269,17 +269,17 @@ spec:
   - Remote code execution
   - Authentication bypass
   - Data breach
-  
+
 - **High**: Urgent fix needed (< 1 week)
   - Privilege escalation
   - SQL injection
   - XSS vulnerabilities
-  
+
 - **Medium**: Fix in next release (< 1 month)
   - Information disclosure
   - CSRF
   - DoS vulnerabilities
-  
+
 - **Low**: Fix when convenient
   - Minor information leaks
   - Security best practice violations

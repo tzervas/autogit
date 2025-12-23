@@ -212,23 +212,23 @@ logger = logging.getLogger(__name__)
 
 class RunnerManagerProtocol(Protocol):
     """Protocol defining runner manager interface.
-    
+
     See docs/api/runner-manager.md for full API documentation.
     """
-    
+
     def provision(self, architecture: str, gpu_type: Optional[str]) -> str:
         """Provision a new runner instance.
-        
+
         Args:
             architecture: Target architecture (amd64, arm64, riscv)
             gpu_type: Optional GPU type (nvidia, amd, intel)
-            
+
         Returns:
             Runner instance ID
-            
+
         Raises:
             ProvisionError: If provisioning fails
-            
+
         Documentation:
             - docs/runners/provisioning.md
             - docs/gpu/README.md

@@ -382,7 +382,7 @@ services:
 **A**: RISC-V is experimental for future-proofing. Not recommended for production.
 
 ### Q: Which architecture should I choose?
-**A**: 
+**A**:
 - **Production**: AMD64 native (MVP) or ARM64 native (Phase 2+)
 - **Development**: Your native architecture
 - **Testing**: Any architecture via QEMU

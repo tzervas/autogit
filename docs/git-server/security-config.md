@@ -1,7 +1,7 @@
 # GitLab Security Configuration Guide
 
-**Component**: Git Server (GitLab CE)  
-**Focus**: Security and Access Control  
+**Component**: Git Server (GitLab CE)
+**Focus**: Security and Access Control
 **Last Updated**: 2025-12-22
 
 ## Overview
@@ -72,7 +72,7 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
   'enabled' => true,
   'ip_whitelist' => [],
   'maxretry' => 10,      # Max failed attempts
-  'findtime' => 60,      # Within 60 seconds  
+  'findtime' => 60,      # Within 60 seconds
   'bantime' => 3600      # Ban for 1 hour
 }
 ```

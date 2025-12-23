@@ -26,7 +26,7 @@ print_error() {
 # Function to validate branch name
 validate_branch_name() {
     local name=$1
-    if [[ ! "$name" =~ ^[a-z0-9-]+$ ]]; then
+    if [[ ! $name =~ ^[a-z0-9-]+$ ]]; then
         print_error "Branch name must contain only lowercase letters, numbers, and hyphens"
         return 1
     fi
@@ -34,7 +34,7 @@ validate_branch_name() {
 }
 
 # Check if we're in a git repository
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
     print_error "Not in a git repository"
     exit 1
 fi
@@ -79,7 +79,7 @@ git push -u origin "$FEATURE_BRANCH"
 # Create subtask branches if provided
 if [ ${#SUBTASKS[@]} -gt 0 ]; then
     print_info "Creating sub-feature branches..."
-    
+
     for subtask in "${SUBTASKS[@]}"; do
         SUBTASK_BRANCH="feature/$FEATURE_NAME/$subtask"
         print_info "Creating sub-feature branch: $SUBTASK_BRANCH"
@@ -87,7 +87,7 @@ if [ ${#SUBTASKS[@]} -gt 0 ]; then
         git checkout -b "$SUBTASK_BRANCH"
         git push -u origin "$SUBTASK_BRANCH"
     done
-    
+
     # Return to feature branch
     git checkout "$FEATURE_BRANCH"
 fi

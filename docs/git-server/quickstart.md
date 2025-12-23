@@ -25,7 +25,7 @@ Get up and running with the AutoGit Git Server in 5 minutes.
    ```bash
    # Open .env in your editor
    vim .env
-   
+
    # Change this line:
    GITLAB_ROOT_PASSWORD=your_secure_password_here
    ```
@@ -148,7 +148,7 @@ git push origin main
 ## Verify Everything Works
 
 1. **Check web UI**: Refresh your browser and verify the README appears
-2. **Check API**: 
+2. **Check API**:
    ```bash
    curl --header "PRIVATE-TOKEN: your_token" \
      "http://localhost:3000/api/v4/projects/1"

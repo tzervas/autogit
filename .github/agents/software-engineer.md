@@ -73,10 +73,10 @@ logger = logging.getLogger(__name__)
 
 class RunnerManagerProtocol(Protocol):
     """Protocol defining runner manager interface.
-    
+
     See docs/api/runner-manager.md for full API documentation.
     """
-    
+
     def provision(
         self,
         architecture: str,
@@ -84,24 +84,24 @@ class RunnerManagerProtocol(Protocol):
         **kwargs: Any
     ) -> str:
         """Provision a new runner instance.
-        
+
         Args:
             architecture: Target architecture (amd64, arm64, riscv)
             gpu_type: Optional GPU type (nvidia, amd, intel)
             **kwargs: Additional provisioning options
-            
+
         Returns:
             Runner instance ID
-            
+
         Raises:
             ProvisionError: If provisioning fails
             ValueError: If architecture is invalid
-            
+
         Example:
             >>> manager = DockerRunnerManager()
             >>> runner_id = manager.provision("amd64", gpu_type="nvidia")
             >>> print(f"Created runner: {runner_id}")
-            
+
         Documentation:
             - docs/runners/provisioning.md
             - docs/gpu/README.md
@@ -111,28 +111,28 @@ class RunnerManagerProtocol(Protocol):
 
 class DockerRunnerManager:
     """Manages Docker-based GitLab runners.
-    
+
     This implementation provisions runners as Docker containers with
     support for multiple architectures and GPU types.
-    
+
     Attributes:
         docker_client: Docker API client
         config: Runner configuration
-        
+
     Documentation: docs/runners/docker-manager.md
     """
-    
+
     def __init__(
         self,
         docker_client: docker.DockerClient,
         config: RunnerConfig
     ) -> None:
         """Initialize Docker runner manager.
-        
+
         Args:
             docker_client: Configured Docker client
             config: Runner configuration
-            
+
         Raises:
             ConnectionError: If cannot connect to Docker daemon
         """
@@ -140,7 +140,7 @@ class DockerRunnerManager:
         self._config = config
         self._active_runners: Dict[str, str] = {}
         logger.info("Initialized DockerRunnerManager")
-    
+
     def provision(
     def provision(
         self,
@@ -149,54 +149,54 @@ class DockerRunnerManager:
         **kwargs: Any
     ) -> str:
         """Provision a new runner instance.
-        
+
         Implementation of RunnerManagerProtocol.provision().
-        
+
         Args:
             architecture: Target architecture (amd64, arm64, riscv)
             gpu_type: Optional GPU type (nvidia, amd, intel)
             **kwargs: Additional provisioning options
-            
+
         Returns:
             Runner instance ID
-            
+
         Raises:
             ProvisionError: If provisioning fails
             ValueError: If architecture is invalid
         """
         logger.info(f"Provisioning runner: arch={architecture}, gpu={gpu_type}")
-        
+
         # Validate inputs
         if architecture not in ["amd64", "arm64", "riscv"]:
             raise ValueError(f"Invalid architecture: {architecture}")
-        
+
         try:
             # Provision runner
             container = self._create_container(architecture, gpu_type)
             runner_id = container.id
             self._active_runners[runner_id] = architecture
-            
+
             logger.info(f"Provisioned runner {runner_id}")
             return runner_id
-            
+
         except docker.errors.DockerException as e:
             logger.error(f"Failed to provision runner: {e}")
             raise ProvisionError(f"Provisioning failed: {e}") from e
-    
+
     def _create_container(
         self,
         architecture: str,
         gpu_type: Optional[str]
     ) -> docker.models.containers.Container:
         """Create and start a Docker container for the runner.
-        
+
         Args:
             architecture: Target architecture
             gpu_type: Optional GPU type
-            
+
         Returns:
             Started Docker container
-            
+
         Raises:
             docker.errors.DockerException: If container creation fails
         """
@@ -223,17 +223,17 @@ from autogit.models import RunnerConfig
 
 class TestDockerRunnerManager:
     """Test suite for DockerRunnerManager.
-    
+
     See docs/development/testing.md for testing guidelines.
     """
-    
+
     @pytest.fixture
     def docker_client(self) -> Mock:
         """Mock Docker client fixture."""
         client = Mock(spec=docker.DockerClient)
         client.containers = Mock()
         return client
-    
+
     @pytest.fixture
     def config(self) -> RunnerConfig:
         """Runner configuration fixture."""
@@ -242,7 +242,7 @@ class TestDockerRunnerManager:
             network="autogit",
             labels={"app": "runner"}
         )
-    
+
     @pytest.fixture
     def manager(
         self,
@@ -251,7 +251,7 @@ class TestDockerRunnerManager:
     ) -> DockerRunnerManager:
         """DockerRunnerManager instance fixture."""
         return DockerRunnerManager(docker_client, config)
-    
+
     def test_provision_amd64_runner_success(
         self,
         manager: DockerRunnerManager,
@@ -262,15 +262,15 @@ class TestDockerRunnerManager:
         mock_container = Mock()
         mock_container.id = "test-runner-123"
         docker_client.containers.run.return_value = mock_container
-        
+
         # Act
         runner_id = manager.provision("amd64")
-        
+
         # Assert
         assert runner_id == "test-runner-123"
         docker_client.containers.run.assert_called_once()
         assert "amd64" in manager._active_runners.values()
-    
+
     def test_provision_with_nvidia_gpu(
         self,
         manager: DockerRunnerManager,
@@ -281,16 +281,16 @@ class TestDockerRunnerManager:
         mock_container = Mock()
         mock_container.id = "gpu-runner-456"
         docker_client.containers.run.return_value = mock_container
-        
+
         # Act
         runner_id = manager.provision("amd64", gpu_type="nvidia")
-        
+
         # Assert
         assert runner_id == "gpu-runner-456"
         call_args = docker_client.containers.run.call_args
         # Verify GPU runtime was specified
         assert "nvidia" in str(call_args)
-    
+
     def test_provision_invalid_architecture(
         self,
         manager: DockerRunnerManager
@@ -299,7 +299,7 @@ class TestDockerRunnerManager:
         # Act & Assert
         with pytest.raises(ValueError, match="Invalid architecture"):
             manager.provision("invalid-arch")
-    
+
     def test_provision_docker_failure(
         self,
         manager: DockerRunnerManager,
@@ -310,11 +310,11 @@ class TestDockerRunnerManager:
         docker_client.containers.run.side_effect = docker.errors.DockerException(
             "Docker daemon not available"
         )
-        
+
         # Act & Assert
         with pytest.raises(ProvisionError, match="Provisioning failed"):
             manager.provision("amd64")
-    
+
     @pytest.mark.parametrize("architecture", ["amd64", "arm64", "riscv"])
     def test_provision_all_architectures(
         self,
@@ -327,10 +327,10 @@ class TestDockerRunnerManager:
         mock_container = Mock()
         mock_container.id = f"{architecture}-runner"
         docker_client.containers.run.return_value = mock_container
-        
+
         # Act
         runner_id = manager.provision(architecture)
-        
+
         # Assert
         assert runner_id == f"{architecture}-runner"
         assert architecture in manager._active_runners.values()

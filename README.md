@@ -21,7 +21,7 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 - 📦 **Flexible Deployment** - Scale from Docker Compose to Kubernetes/Helm
 - ⚖️ **MIT Licensed** - Using only compatible FOSS components
 
-**Architecture Focus**: 
+**Architecture Focus**:
 - **MVP**: AMD64 native only (current testing)
 - **Phase 2**: ARM64 native support + QEMU fallback (post-deployment)
 - **Phase 3**: RISC-V QEMU emulation (future)

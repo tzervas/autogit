@@ -46,7 +46,7 @@ For complete documentation, see [tools/tasker/README.md](../../tools/tasker/READ
 
 ### Daily Workflow
 1. Check what task is next
-2. Execute the task workflow  
+2. Execute the task workflow
 3. Begin working on the task
 
 ### Project Management

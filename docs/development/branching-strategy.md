@@ -29,7 +29,7 @@ Feature branches are created for major features or tasks from the roadmap.
 - **Source**: Created from `dev`
 - **Target**: Merge back into `dev`
 - **Naming Convention**: `feature/<task-name>`
-- **Examples**: 
+- **Examples**:
   - `feature/git-server-implementation`
   - `feature/multi-architecture-support`
   - `feature/gpu-scheduling`
@@ -127,12 +127,12 @@ main
    # After approval and merge, move to parent
    git checkout feature/gpu-scheduling/detection-service
    git pull origin feature/gpu-scheduling/detection-service
-   
+
    # After all sub-work is done, create PR: detection-service -> gpu-scheduling
    # After approval and merge
    git checkout feature/gpu-scheduling
    git pull origin feature/gpu-scheduling
-   
+
    # After all sub-features done, create PR: gpu-scheduling -> dev
    ```
 
@@ -261,7 +261,7 @@ Closes #123
 ```
 fix(auth): resolve token expiration issue
 
-Fixes issue where authentication tokens were expiring 
+Fixes issue where authentication tokens were expiring
 prematurely due to incorrect timezone handling.
 
 Fixes #456

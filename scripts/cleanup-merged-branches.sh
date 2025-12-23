@@ -23,7 +23,7 @@ print_error() {
 }
 
 # Check if we're in a git repository
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
     print_error "Not in a git repository"
     exit 1
 fi
@@ -57,7 +57,7 @@ if [ -z "$MERGED_INTO_DEV" ]; then
 else
     echo "$MERGED_INTO_DEV" | while read -r branch; do
         branch=$(echo "$branch" | xargs) # Trim whitespace
-        
+
         # Skip if protected
         IS_PROTECTED=false
         for protected in "${PROTECTED_BRANCHES[@]}"; do
@@ -69,13 +69,13 @@ else
         if [ "$IS_PROTECTED" = true ]; then
             continue
         fi
-        
+
         # Skip if current branch
         if [ "$branch" == "$CURRENT_BRANCH" ]; then
             print_warn "  Skipping current branch: $branch"
             continue
         fi
-        
+
         if [ "$DRY_RUN" = true ]; then
             print_info "  Would delete: $branch"
         else
@@ -96,7 +96,7 @@ if [ -z "$MERGED_INTO_MAIN" ]; then
 else
     echo "$MERGED_INTO_MAIN" | while read -r branch; do
         branch=$(echo "$branch" | xargs) # Trim whitespace
-        
+
         # Skip if protected
         IS_PROTECTED=false
         for protected in "${PROTECTED_BRANCHES[@]}"; do
@@ -108,18 +108,18 @@ else
         if [ "$IS_PROTECTED" = true ]; then
             continue
         fi
-        
+
         # Skip if current branch
         if [ "$branch" == "$CURRENT_BRANCH" ]; then
             print_warn "  Skipping current branch: $branch"
             continue
         fi
-        
+
         # Skip if already deleted in previous step
-        if ! git rev-parse --verify "$branch" > /dev/null 2>&1; then
+        if ! git rev-parse --verify "$branch" >/dev/null 2>&1; then
             continue
         fi
-        
+
         if [ "$DRY_RUN" = true ]; then
             print_info "  Would delete: $branch"
         else

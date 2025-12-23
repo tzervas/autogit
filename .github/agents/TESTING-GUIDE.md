@@ -155,7 +155,7 @@ ROOT AGENT:
 
 **Test Steps**:
 ```markdown
-User: "I need to add a new configuration option for runner timeout. 
+User: "I need to add a new configuration option for runner timeout.
 Please coordinate across all relevant agents to implement this fully."
 
 Expected Workflow:
@@ -222,7 +222,7 @@ Verify: All agents give consistent answers based on shared context
 
 **Test Steps**:
 ```markdown
-User: "We need to implement runner autoscaling based on job queue depth. 
+User: "We need to implement runner autoscaling based on job queue depth.
 The system should:
 - Monitor GitLab job queue
 - Provision runners when queue > 10

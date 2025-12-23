@@ -224,7 +224,7 @@ The tool can be integrated into CI/CD pipelines:
 - name: Identify next task
   run: |
     python3 -m tools.tasker next
-    
+
 - name: Execute task
   run: |
     python3 -m tools.tasker execute --no-branch

@@ -23,7 +23,7 @@ print_error() {
 }
 
 # Check if we're in a git repository
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
     print_error "Not in a git repository"
     exit 1
 fi
@@ -41,48 +41,48 @@ fi
 # Determine base branch based on branch name
 get_base_branch() {
     local branch=$1
-    
+
     # Protected branches sync with origin
-    if [[ "$branch" == "main" ]]; then
+    if [[ $branch == "main" ]]; then
         echo "origin/main"
         return
     fi
-    
-    if [[ "$branch" == "dev" ]]; then
+
+    if [[ $branch == "dev" ]]; then
         echo "origin/dev"
         return
     fi
-    
+
     # Feature branches sync with dev
-    if [[ "$branch" =~ ^feature/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/[a-z0-9-]+$ ]]; then
         echo "dev"
         return
     fi
-    
+
     # Sub-feature branches sync with parent feature
-    if [[ "$branch" =~ ^feature/([a-z0-9-]+)/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/([a-z0-9-]+)/[a-z0-9-]+$ ]]; then
         echo "feature/${BASH_REMATCH[1]}"
         return
     fi
-    
+
     # Work branches sync with parent sub-feature
-    if [[ "$branch" =~ ^feature/([a-z0-9-]+)/([a-z0-9-]+)/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/([a-z0-9-]+)/([a-z0-9-]+)/[a-z0-9-]+$ ]]; then
         echo "feature/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
         return
     fi
-    
+
     # Hotfix branches sync with main
-    if [[ "$branch" =~ ^hotfix/ ]]; then
+    if [[ $branch =~ ^hotfix/ ]]; then
         echo "main"
         return
     fi
-    
+
     # Release branches sync with dev
-    if [[ "$branch" =~ ^release/ ]]; then
+    if [[ $branch =~ ^release/ ]]; then
         echo "dev"
         return
     fi
-    
+
     # Default to dev for unknown patterns
     print_warn "Unknown branch pattern, defaulting to dev"
     echo "dev"
@@ -97,7 +97,7 @@ print_info "Fetching latest changes..."
 git fetch origin
 
 # Update base branch if it's local
-if [[ ! "$BASE_BRANCH" =~ ^origin/ ]]; then
+if [[ ! $BASE_BRANCH =~ ^origin/ ]]; then
     print_info "Updating base branch: $BASE_BRANCH"
     git checkout "$BASE_BRANCH"
     git pull origin "$BASE_BRANCH"

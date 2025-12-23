@@ -43,7 +43,7 @@ jobs:
           if [[ "$BRANCH_NAME" =~ ^(main|dev)$ ]] || \
              [[ "$BRANCH_NAME" =~ ^feature/[a-z0-9-]+(/[a-z0-9-]+)?(/[a-z0-9-]+)?$ ]] || \
              [[ "$BRANCH_NAME" =~ ^hotfix/[a-z0-9-]+$ ]] || \
-             [[ "$BRANCH_NAME" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+             [[ "$BRANCH_NAME" =~ ^release/v?[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
              [[ "$BRANCH_NAME" =~ ^copilot/[a-z0-9-]+$ ]]; then
             echo "✓ Branch name is valid"
           else

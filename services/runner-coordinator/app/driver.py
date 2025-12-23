@@ -25,11 +25,22 @@ class DockerDriver:
         mem_limit: str = "1g",
         network: str = "autogit-network",
         environment: Optional[Dict[str, str]] = None,
-        platform: Optional[str] = None
+        platform: Optional[str] = None,
+        gpu_vendor: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Spawn a new runner container.
         """
+        device_requests = []
+        devices = []
+
+        if gpu_vendor == "nvidia":
+            device_requests = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])]
+        elif gpu_vendor == "amd":
+            devices = ["/dev/kfd:/dev/kfd", "/dev/dri:/dev/dri"]
+        elif gpu_vendor == "intel":
+            devices = ["/dev/dri:/dev/dri"]
+
         try:
             container = self.client.containers.run(
                 image=image,
@@ -41,6 +52,8 @@ class DockerDriver:
                 network=network,
                 environment=environment or {},
                 platform=platform,
+                device_requests=device_requests,
+                devices=devices,
                 restart_policy={"Name": "unless-stopped"},
                 volumes={
                     "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"}

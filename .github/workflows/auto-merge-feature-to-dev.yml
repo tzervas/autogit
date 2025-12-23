@@ -42,7 +42,7 @@ jobs:
       - name: Check for owner approval
         if: steps.check_merge_type.outputs.is_feature_to_dev == 'true'
         id: check_approval
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: reviews } = await github.rest.pulls.listReviews({
@@ -87,7 +87,7 @@ jobs:
           steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
           steps.check_approval.outputs.has_owner_approval == 'true'
         id: check_ci
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
@@ -135,7 +135,7 @@ jobs:
           steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
           steps.check_approval.outputs.has_owner_approval == 'true' &&
           steps.check_ci.outputs.can_merge == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             console.log(`Auto-merging feature→dev PR #${context.payload.pull_request.number}`);
@@ -177,7 +177,7 @@ jobs:
         if: |
           steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
           steps.check_approval.outputs.has_owner_approval != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const repoOwner = '${{ steps.check_approval.outputs.repo_owner }}';
@@ -194,7 +194,7 @@ jobs:
           steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
           steps.check_approval.outputs.has_owner_approval == 'true' &&
           steps.check_ci.outputs.can_merge != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const allChecksPassed = '${{ steps.check_ci.outputs.all_checks_passed }}' === 'true';

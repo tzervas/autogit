@@ -51,7 +51,7 @@ jobs:
       - name: Check PR status
         if: steps.check_merge_type.outputs.can_auto_merge == 'true'
         id: check_status
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
@@ -96,7 +96,7 @@ jobs:
 
       - name: Auto-merge PR
         if: steps.check_status.outputs.can_merge == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const mergeType = '${{ steps.check_merge_type.outputs.merge_type }}';
@@ -140,7 +140,7 @@ jobs:
         if: |
           steps.check_merge_type.outputs.can_auto_merge == 'true' &&
           steps.check_status.outputs.can_merge != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const allChecksPassed = '${{ steps.check_status.outputs.all_checks_passed }}' === 'true';

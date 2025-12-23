@@ -33,7 +33,7 @@ jobs:
           sleep 30
 
       - name: Retry failed workflow
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const runId = ${{ github.event.workflow_run.id }};
@@ -69,7 +69,7 @@ jobs:
 
       - name: Notify if max retries reached
         if: github.event.workflow_run.run_attempt >= 3
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             if (context.payload.workflow_run.pull_requests.length > 0) {

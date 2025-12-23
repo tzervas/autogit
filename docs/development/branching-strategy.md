@@ -359,7 +359,7 @@ Helper scripts available in `/scripts/`:
 
 ## Updates
 
-- **2024-12-21**: Initial branching strategy documented
+- **2025-12-21**: Initial branching strategy documented
 - **YYYY-MM-DD**: [Future updates]
 
 ---

@@ -1,0 +1,330 @@
+---
+name: Auto Create Fix PR
+
+on:
+  workflow_run:
+    workflows: ["CI", "Docker Build and Test"]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      add_automated_fix_label:
+        description: 'Add automated-fix label to the fix PR'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  create-fix-pr:
+    name: Create Automatic Fix PR
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt >= 3 &&
+      github.event.workflow_run.pull_requests[0] != null
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Get PR details
+        id: pr_details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.workflow_run.pull_requests[0].number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            core.setOutput('pr_number', prNumber);
+            core.setOutput('pr_branch', pr.head.ref);
+            core.setOutput('pr_base', pr.base.ref);
+            core.setOutput('pr_title', pr.title);
+
+            return pr;
+
+      - name: Create fix branch
+        id: create_branch
+        run: |
+          PR_BRANCH="${{ steps.pr_details.outputs.pr_branch }}"
+          FIX_BRANCH="${PR_BRANCH}/autofix-ci-$(date +%s)"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$FIX_BRANCH"
+
+          echo "fix_branch=$FIX_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Apply automatic fixes
+        id: apply_fixes
+        run: |
+          FIXES_APPLIED=false
+          FIX_SUMMARY=""
+
+          # Fix trailing whitespace
+          if find . -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.md" \) -not -path "./.git/*" -exec grep -l '[[:space:]]$' {} \; | head -1 | grep -q .; then
+            echo "Fixing trailing whitespace..."
+            WHITESPACE_FILES=$(find . -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.md" \) -not -path "./.git/*" -exec grep -l '[[:space:]]$' {} \; | wc -l)
+            find . -type f \( -name "*.yml" -o -name "*.yaml" -o -name "*.md" \) -not -path "./.git/*" -exec sed -i 's/[[:space:]]*$//' {} \;
+            FIXES_APPLIED=true
+            echo "whitespace_fixed=true" >> $GITHUB_ENV
+            echo "whitespace_files=$WHITESPACE_FILES" >> $GITHUB_ENV
+            FIX_SUMMARY="${FIX_SUMMARY}Whitespace: Fixed trailing whitespace in $WHITESPACE_FILES file(s)\n"
+          fi
+
+          # Fix file permissions for scripts
+          PERMISSION_COUNT=0
+          if [ -d "scripts" ]; then
+            for script in scripts/*.sh; do
+              if [ -f "$script" ] && [ ! -x "$script" ]; then
+                echo "Making $script executable..."
+                chmod +x "$script"
+                FIXES_APPLIED=true
+                PERMISSION_COUNT=$((PERMISSION_COUNT + 1))
+              fi
+            done
+            if [ $PERMISSION_COUNT -gt 0 ]; then
+              echo "permissions_fixed=true" >> $GITHUB_ENV
+              echo "permission_count=$PERMISSION_COUNT" >> $GITHUB_ENV
+              FIX_SUMMARY="${FIX_SUMMARY}Permissions: Made $PERMISSION_COUNT script(s) executable\n"
+            fi
+          fi
+
+          # Run auto-formatters if available
+          if command -v black &> /dev/null; then
+            if find . -name "*.py" -type f -not -path "./.git/*" | head -1 | grep -q .; then
+              echo "Running black formatter..."
+              if black .; then
+                if ! git diff --quiet; then
+                  FIXES_APPLIED=true
+                  BLACK_CHANGED=$(git diff --name-only | grep '\.py$' | wc -l || echo "0")
+                  echo "black_applied=true" >> $GITHUB_ENV
+                  echo "black_files=$BLACK_CHANGED" >> $GITHUB_ENV
+                  FIX_SUMMARY="${FIX_SUMMARY}Formatting: Applied Black formatting to $BLACK_CHANGED Python file(s)\n"
+                fi
+              else
+                echo "black failed; not marking fixes as applied."
+              fi
+            fi
+          fi
+
+          echo "fixes_applied=$FIXES_APPLIED" >> $GITHUB_OUTPUT
+          echo "fix_summary<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$FIX_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Commit and push fixes
+        if: steps.apply_fixes.outputs.fixes_applied == 'true'
+        run: |
+          git add -A
+
+          # Build commit message based on what was actually fixed
+          COMMIT_MSG="fix: Auto-apply CI fixes"
+          COMMIT_BODY=""
+
+          if git diff --cached --name-only | grep -qE '\.(ya?ml|md)$'; then
+            COMMIT_BODY="${COMMIT_BODY}\n- Fix trailing whitespace in YAML/Markdown files"
+          fi
+
+          if git diff --cached --name-only | xargs -r git diff --cached | grep -q '^+.*chmod'; then
+            COMMIT_BODY="${COMMIT_BODY}\n- Fix script permissions"
+          fi
+
+          if [ -n "${{ env.black_applied }}" ]; then
+            COMMIT_BODY="${COMMIT_BODY}\n- Apply Python auto-formatting (black)"
+          fi
+
+          if [ -z "$COMMIT_BODY" ]; then
+            COMMIT_BODY="\n- Applied automated fixes"
+          fi
+
+          printf "%s\n%s\n\nFixes automatically applied by CI failure recovery workflow." \
+            "$COMMIT_MSG" "$COMMIT_BODY" | git commit -F -
+
+          git push -u origin "${{ steps.create_branch.outputs.fix_branch }}"
+
+      - name: Create fix PR
+        if: steps.apply_fixes.outputs.fixes_applied == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_details.outputs.pr_number }};
+            const prBranch = '${{ steps.pr_details.outputs.pr_branch }}';
+            const fixBranch = '${{ steps.create_branch.outputs.fix_branch }}';
+            const prTitle = '${{ steps.pr_details.outputs.pr_title }}';
+
+            // Build dynamic fix summary
+            const fixSummary = `${{ steps.apply_fixes.outputs.fix_summary }}`.trim();
+            const whitespaceFixed = '${{ env.whitespace_fixed }}' === 'true';
+            const permissionsFixed = '${{ env.permissions_fixed }}' === 'true';
+            const blackApplied = '${{ env.black_applied }}' === 'true';
+
+            const fixesList = [];
+            if (whitespaceFixed) {
+              const fileCount = '${{ env.whitespace_files }}';
+              fixesList.push(`✅ **Trailing Whitespace**: Fixed in ${fileCount} file(s)`);
+            }
+            if (permissionsFixed) {
+              const permCount = '${{ env.permission_count }}';
+              fixesList.push(`✅ **Script Permissions**: Made ${permCount} script(s) executable`);
+            }
+            if (blackApplied) {
+              const blackFiles = '${{ env.black_files }}';
+              fixesList.push(`✅ **Python Formatting**: Applied Black to ${blackFiles} file(s)`);
+            }
+
+            const prBody = [
+              '## 🤖 Auto-generated Fix PR',
+              '',
+              `This PR contains automatic fixes for CI failures detected in #${prNumber}.`,
+              '',
+              '### ✨ Fixes Applied',
+              '',
+              ...fixesList,
+              '',
+              '### 📊 Status',
+              '',
+              `- **Source PR**: #${prNumber}`,
+              `- **Base Branch**: \`${prBranch}\``,
+              `- **Fix Branch**: \`${fixBranch}\``,
+              `- **Total Fixes**: ${fixesList.length}`,
+              '',
+              '### 🔄 Auto-Merge',
+              '',
+              'This PR will automatically merge once all CI checks pass. It contains only automated fixes that are safe to merge without manual review.',
+              '',
+              '### 📝 What Happens Next',
+              '',
+              '1. CI checks will run on this fix PR',
+              '2. If all checks pass, this PR will auto-merge into the source PR',
+              '3. The source PR (#' + prNumber + ') CI will automatically re-run',
+              '',
+              '---',
+              '',
+              '🤖 *Generated automatically by CI failure recovery workflow*'
+            ].join('\n');
+
+            const { data: fixPr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `fix: Auto-fixes for ${prTitle}`,
+              head: fixBranch,
+              base: prBranch,
+              body: prBody
+            });
+
+            // Add labels to trigger automatic merge and mark as automated fix
+            const addAutomatedFixLabel = '${{ inputs.add_automated_fix_label }}' !== 'false';
+            const labelsToAdd = ['auto-merge'];
+            if (addAutomatedFixLabel) {
+              labelsToAdd.push('automated-fix');
+            }
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: fixPr.number,
+                labels: labelsToAdd
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                // Labels don't exist yet, create them
+                for (const label of labelsToAdd) {
+                  try {
+                    await github.rest.issues.getLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label
+                    });
+                  } catch (getLabelError) {
+                    if (getLabelError.status === 404) {
+                      const labelConfig = {
+                        'auto-merge': { color: '0e8a16', description: 'Enable automatic merging when checks pass' },
+                        'automated-fix': { color: '0e8a16', description: 'Contains automated fixes from CI failure recovery' }
+                      };
+                      await github.rest.issues.createLabel({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        name: label,
+                        color: labelConfig[label].color,
+                        description: labelConfig[label].description
+                      });
+                    }
+                  }
+                }
+
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: fixPr.number,
+                  labels: labelsToAdd
+                });
+              } else {
+                core.warning(`Failed to add labels: ${error.message}`);
+              }
+            }
+
+            // Comment on original PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🤖 Created automatic fix PR #${fixPr.number} to address CI failures.\n\nThe fix PR will auto-merge once checks pass, then this PR's CI will be re-run.`
+            });
+
+            console.log(`✓ Created fix PR #${fixPr.number}`);
+
+      - name: No fixes available
+        if: steps.apply_fixes.outputs.fixes_applied != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr_details.outputs.pr_number }};
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `⚠️ CI failures detected but no automatic fixes could be applied.\n\nPlease review the workflow logs and fix the issues manually:\n- Check for syntax errors\n- Review linting violations\n- Ensure tests are passing\n\nWorkflow: ${{ github.event.workflow_run.name }}\nRun: ${{ github.event.workflow_run.html_url }}`
+            });
+
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['needs-manual-fix']
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                // Label doesn't exist yet, create it
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'needs-manual-fix',
+                  color: 'd73a4a',
+                  description: 'CI failures detected that require manual fixes'
+                });
+
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: ['needs-manual-fix']
+                });
+              } else {
+                core.warning(`Failed to add "needs-manual-fix" label to PR #${prNumber}: ${error.message}`);
+              }
+            }

@@ -1,0 +1,110 @@
+---
+name: Release Test Build
+
+# This workflow validates that Docker images can be built successfully
+# without actually publishing them. It runs on PRs to dev and can be
+# manually triggered for testing.
+
+on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - 'services/**'
+      - '.github/workflows/release-test.yml'
+  workflow_dispatch:
+    inputs:
+      test_version:
+        description: 'Version to test (e.g., v0.2.0)'
+        required: false
+        type: string
+        default: 'v0.0.0-test'
+
+jobs:
+  validate-version:
+    name: Validate Version Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check version format
+        run: |
+          VERSION="${{ inputs.test_version || 'v0.0.0-test' }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "❌ Invalid version format: $VERSION"
+            echo "Expected format: vX.Y.Z or vX.Y.Z-suffix"
+            exit 1
+          fi
+          echo "✅ Version format valid: $VERSION"
+
+  test-build-images:
+    name: Test Build Docker Images
+    runs-on: ubuntu-latest
+    needs: validate-version
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        service: [git-server, runner-coordinator]
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract test metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=test-${{ github.sha }}
+            type=raw,value=${{ inputs.test_version || 'v0.0.0-test' }}
+
+      - name: Build Docker image (test only - no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/${{ matrix.service }}
+          file: ./services/${{ matrix.service }}/Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/${{ matrix.service }}.tar
+
+      - name: Load and inspect image
+        run: |
+          docker load --input /tmp/${{ matrix.service }}.tar
+          echo "✅ Successfully built ${{ matrix.service }} image"
+          docker images | grep "${{ matrix.service }}" || true
+
+      - name: Test image can run
+        run: |
+          # Try to run the image briefly to ensure it starts
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing image: $IMAGE_TAG"
+          timeout 10s docker run --rm $IMAGE_TAG || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -eq 124 ]; then
+            echo "✅ Image started successfully (timed out as expected)"
+          elif [ ${EXIT_CODE:-0} -eq 0 ]; then
+            echo "✅ Image ran and exited cleanly"
+          else
+            echo "⚠️  Image exited with code $EXIT_CODE (may be expected)"
+          fi
+
+  test-build-summary:
+    name: Test Build Summary
+    runs-on: ubuntu-latest
+    needs: test-build-images
+    if: always()
+    steps:
+      - name: Check build results
+        run: |
+          if [ "${{ needs.test-build-images.result }}" != "success" ]; then
+            echo "❌ Test build failed - images cannot be built successfully"
+            echo "Fix the build issues before creating a release"
+            exit 1
+          fi
+          echo "✅ Test build passed - all images built successfully"
+          echo "Images are ready for release when merged to dev"

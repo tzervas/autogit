@@ -1,16 +1,33 @@
-FROM alpine:3.19
+# GitLab CE Docker Image for AutoGit
+# AMD64 native support (MVP focus)
+FROM gitlab/gitlab-ce:16.11.0-ce.0
 
-# Install basic dependencies
-RUN apk add --no-cache \
-    git \
-    openssh \
-    bash
+# Metadata
+LABEL maintainer="AutoGit Team"
+LABEL description="GitLab CE server for AutoGit platform - AMD64 native"
+LABEL version="0.1.0"
+LABEL architecture="amd64"
 
-# Create service user
-RUN adduser -D -h /app git
+# Install additional utilities
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Internal container ports exposed by this image:
+#   SSH:   22
+#   HTTP:  80
+#   HTTPS: 443
+# Host port mappings (e.g., 2222->22, 3000->80, 3443->443) are defined in docker-compose.yml.
+EXPOSE 22 80 443
 
-EXPOSE 22 3000
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+    CMD curl -f http://localhost/-/health || exit 1
 
-CMD ["sh", "-c", "echo 'Git server placeholder - implement as needed'"]
+# GitLab data will be stored in volumes
+VOLUME ["/etc/gitlab", "/var/log/gitlab", "/var/opt/gitlab"]
+
+# Use GitLab's default entrypoint
+# Configuration via environment variables and /etc/gitlab/gitlab.rb

@@ -1,0 +1,218 @@
+---
+name: Auto Merge Feature to Dev
+
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge-feature-to-dev:
+    name: Auto-merge Feature to Dev (After Owner Approval)
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.base.ref == 'dev' &&
+      !contains(github.event.pull_request.labels.*.name, 'no-auto-merge')
+    steps:
+      - name: Check if this is a branch→dev merge
+        id: check_merge_type
+        run: |
+          SOURCE="${{ github.event.pull_request.head.ref }}"
+          TARGET="${{ github.event.pull_request.base.ref }}"
+
+          echo "Source: $SOURCE"
+          echo "Target: $TARGET"
+
+          # Check if this is a dev-subsidiary branch → dev
+          # Supports conventional commit branch naming patterns
+          if [[ "$TARGET" == "dev" ]] && [[ "$SOURCE" =~ ^(feature|copilot|fix|bugfix|hotfix|chore|docs|refactor|perf|test|ci|build)/(.+)$ ]]; then
+            echo "is_feature_to_dev=true" >> $GITHUB_OUTPUT
+            echo "✓ This is a ${BASH_REMATCH[1]}/→dev merge"
+          else
+            echo "is_feature_to_dev=false" >> $GITHUB_OUTPUT
+            echo "✗ Not a dev-subsidiary branch→dev merge"
+          fi
+
+      - name: Check for owner approval
+        if: steps.check_merge_type.outputs.is_feature_to_dev == 'true'
+        id: check_approval
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const { data: repo } = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            const repoOwner = repo.owner.login;
+
+            // Check if owner has approved
+            const ownerApproval = reviews.find(review =>
+              review.state === 'APPROVED' &&
+              review.user.login === repoOwner
+            );
+
+            // Check if PR has owner-approved label
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const hasOwnerApprovedLabel = pr.labels.some(label =>
+              label.name === 'owner-approved'
+            );
+
+            const hasOwnerApproval = !!ownerApproval || hasOwnerApprovedLabel;
+
+            core.setOutput('has_owner_approval', hasOwnerApproval);
+            core.setOutput('repo_owner', repoOwner);
+
+            return hasOwnerApproval;
+
+      - name: Check CI status
+        if: |
+          steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
+          steps.check_approval.outputs.has_owner_approval == 'true'
+        id: check_ci
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            // Check if all required checks have passed (ignore skipped checks)
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: pr.head.sha
+            });
+
+            // Filter to only completed checks (ignore skipped/cancelled)
+            const completedChecks = checkRuns.check_runs.filter(run =>
+              run.status === 'completed' && 
+              run.conclusion !== 'skipped' && 
+              run.conclusion !== 'cancelled'
+            );
+
+            // Check that all completed checks passed (success or neutral)
+            const allCompletedChecksPassed = completedChecks.length > 0 &&
+              completedChecks.every(run =>
+                run.conclusion === 'success' || run.conclusion === 'neutral'
+              );
+
+            const canMerge = allCompletedChecksPassed && pr.mergeable;
+
+            core.setOutput('can_merge', canMerge);
+            core.setOutput('all_checks_passed', allCompletedChecksPassed);
+            core.setOutput('mergeable', pr.mergeable);
+            core.setOutput('completed_checks_count', completedChecks.length);
+            core.setOutput('total_checks_count', checkRuns.check_runs.length);
+
+            console.log(`Check status: ${completedChecks.length} completed checks out of ${checkRuns.check_runs.length} total`);
+            console.log(`All completed checks passed: ${allCompletedChecksPassed}`);
+            console.log(`PR mergeable: ${pr.mergeable}`);
+
+            return canMerge;
+
+      - name: Auto-merge feature to dev
+        if: |
+          steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
+          steps.check_approval.outputs.has_owner_approval == 'true' &&
+          steps.check_ci.outputs.can_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log(`Auto-merging feature→dev PR #${context.payload.pull_request.number}`);
+
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                merge_method: 'squash',
+                commit_title: `${context.payload.pull_request.title} (#${context.payload.pull_request.number})`,
+                commit_message: `Merged feature to dev after owner approval\n\n${context.payload.pull_request.body || ''}`
+              });
+
+              console.log('✓ Auto-merge successful');
+
+              // Add comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `🤖 Automatically merged to dev after @${context.repo.owner} approval and passing all completed checks (${context.payload.pull_request.head.ref} → dev).`
+              });
+
+            } catch (error) {
+              console.error('✗ Auto-merge failed:', error);
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `⚠️ Auto-merge failed: ${error.message}\n\nPlease merge manually.`
+              });
+
+              throw error;
+            }
+
+      - name: Notify if waiting for approval
+        if: |
+          steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
+          steps.check_approval.outputs.has_owner_approval != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const repoOwner = '${{ steps.check_approval.outputs.repo_owner }}';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `⏳ Waiting for @${repoOwner} approval to auto-merge this branch to dev.\n\nOnce approved, this PR will automatically merge if all completed checks pass (skipped checks are ignored).\n\nAlternatively, add the \`owner-approved\` label to approve.`
+            });
+
+      - name: Notify if waiting for checks
+        if: |
+          steps.check_merge_type.outputs.is_feature_to_dev == 'true' &&
+          steps.check_approval.outputs.has_owner_approval == 'true' &&
+          steps.check_ci.outputs.can_merge != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allChecksPassed = '${{ steps.check_ci.outputs.all_checks_passed }}' === 'true';
+            const mergeable = '${{ steps.check_ci.outputs.mergeable }}' === 'true';
+            const completedChecks = '${{ steps.check_ci.outputs.completed_checks_count }}';
+            const totalChecks = '${{ steps.check_ci.outputs.total_checks_count }}';
+
+            let issues = [];
+            if (!allChecksPassed) {
+              issues.push(`all completed CI checks to pass (${completedChecks}/${totalChecks} checks, skipped checks ignored)`);
+            }
+            if (!mergeable) issues.push('merge conflicts to be resolved');
+
+            if (issues.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `⏳ Owner approval received! Waiting for: ${issues.join(' and ')}\n\nThis PR will auto-merge once ready.`
+              });
+            }

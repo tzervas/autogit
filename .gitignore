@@ -32,3 +32,6 @@ Thumbs.db
 # Data
 data/
 *.db
+
+# Task summaries (generated files)
+TASK_SUMMARY_*.md

@@ -1,0 +1,123 @@
+---
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-shell:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts
+        run: |
+          if [ -d "scripts" ]; then
+            find scripts -type f -name "*.sh" -exec shellcheck {} +
+          else
+            echo "No scripts directory found"
+          fi
+
+  lint-yaml:
+    name: Lint YAML Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint -c .yamllint.yml . || true
+
+  lint-markdown:
+    name: Lint Markdown Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: |
+          markdownlint '**/*.md' --ignore node_modules --ignore .git || true
+
+  validate-docker:
+    name: Validate Docker Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose.yml
+        run: |
+          docker compose config > /dev/null
+
+      - name: Check Dockerfiles exist
+        run: |
+          if [ -f "services/git-server/Dockerfile" ]; then
+            echo "✓ Git server Dockerfile found"
+          else
+            echo "✗ Git server Dockerfile missing"
+            exit 1
+          fi
+
+          if [ -f "services/runner-coordinator/Dockerfile" ]; then
+            echo "✓ Runner coordinator Dockerfile found"
+          else
+            echo "✗ Runner coordinator Dockerfile missing"
+            exit 1
+          fi
+
+  check-scripts-executable:
+    name: Check Scripts are Executable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check script permissions
+        run: |
+          if [ -d "scripts" ]; then
+            for script in scripts/*.sh; do
+              if [ -f "$script" ]; then
+                if [ -x "$script" ]; then
+                  echo "✓ $script is executable"
+                else
+                  echo "✗ $script is not executable"
+                  chmod +x "$script"
+                  echo "  Fixed: made $script executable"
+                fi
+              fi
+            done
+          fi

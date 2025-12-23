@@ -9,7 +9,7 @@ information.
 ```
 docs/
 
-├── INDEX.md
+├── INDEX.md
 
 # This file - complete documentation map
 
@@ -107,7 +107,7 @@ users |
 | [Component Design](architecture/components.md) | Individual component designs | Developers |
 | [Networking](architecture/networking.md) | Network architecture and policies | Operators |
 
-| [Data Flow](architecture/data-flow.md) | How data flows through the system | Developers |
+| [Data Flow](architecture/data-flow.md) | How data flows through the system | Developers |
 | [Scaling Strategy](architecture/scaling.md) | Horizontal and vertical scaling | Architects |
 | [High Availability](architecture/high-availability.md) | HA configuration | Operators |
 | [ADR Index](architecture/adr/README.md) | All architecture decisions | Architects |
@@ -157,7 +157,7 @@ users |
 | [Troubleshooting](gpu/troubleshooting.md) | GPU-related issues | All users |
 ### Security
 
-| Document | Description | Audience |
+| Document | Description | Audience |
 |----------|-------------|----------|
 | [Security Overview](security/README.md) | Security guidelines overview | All users |
 | [Hardening Guide](security/hardening.md) | System hardening checklist | Operators |
@@ -207,7 +207,7 @@ users |
 ### Troubleshooting
 | Document | Description | Audience |
 
-|----------|-------------|----------|
+|----------|-------------|----------|
 | [Troubleshooting Overview](troubleshooting/README.md) | Common issues and solutions | All users |
 | [Installation Issues](troubleshooting/installation.md) | Installation problems | All users |
 | [Runner Issues](troubleshooting/runners.md) | Runner-related problems | Operators |
@@ -215,6 +215,16 @@ users |
 | [Network Issues](troubleshooting/network.md) | Networking problems | Operators |
 | [Performance Issues](troubleshooting/performance.md) | Performance problems | Operators |
 | [Debugging Guide](troubleshooting/debugging.md) | General debugging techniques | Developers |
+### Project Management
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [Task Tracker](../TASK_TRACKER.md) | Project task tracking and progress | Project Managers |
+| [QC Workflow](../QC_WORKFLOW.md) | Quality control procedures | All developers |
+| [Manager Delegation](../MANAGER_DELEGATION.md) | Current task delegation and assignments | All agents |
+| [Project Management Summary](../PROJECT_MANAGEMENT_SUMMARY.md) | Current project status summary | All stakeholders |
+| [Git Server Feature Plan](../GIT_SERVER_FEATURE_PLAN.md) | Detailed Git Server implementation plan | Developers |
+| [How to Start Next Feature](../HOW_TO_START_NEXT_FEATURE.md) | Feature workflow guide | Developers |
+
 ### Other
 | Document | Description | Audience |
 |----------|-------------|----------|
@@ -259,7 +269,7 @@ users |
 3. [Scaling Strategy](architecture/scaling.md)
 4. [High Availability](architecture/high-availability.md)
 
-##
+##
 
 📝 Documentation Maintenance
 
@@ -299,7 +309,7 @@ When modifying code that affects documentation:
 - Total Documents: [Auto-generated count]
 - Last Updated: [Auto-generated timestamp]
 - Contributors: [Link to contributors]
---**Note**: This index is automatically validated by CI/CD. All links are checked on every commit.
-If you can't find what you're looking for, check the [FAQ](FAQ.md) or [open an issue]
-(https://github.com/yourusername/autogit/issues).
-```
+---
+
+**Note**: This index is automatically validated by CI/CD. All links are checked on every commit.
+If you can't find what you're looking for, check the [FAQ](FAQ.md) or [open an issue](https://github.com/yourusername/autogit/issues).

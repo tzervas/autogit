@@ -1,7 +1,7 @@
 
-# ADR-001: Traefik vs NGINX Ingress Controller
+# ADR-001: Traefik vs NGINX Ingress Controller
 **Status**: Accepted
-**Date**: 2024-12-21
+**Date**: 2025-12-21
 **Deciders**: Project Team
 **Technical Story**: Core infrastructure selection
 ## Context
@@ -44,7 +44,7 @@ ingress controller must:
 - Lower learning curve for contributors
 - Future-proof (no EOL concerns)
 
-### Negative Consequences
+### Negative Consequences
 - Different from traditional NGINX (team familiarity)
 - Smaller ecosystem than NGINX (though growing)
 - Different configuration paradigm (labels vs ConfigMaps)
@@ -90,7 +90,7 @@ helm install traefik traefik/traefik \
 ```
 ### Service Discovery Example
 
-```yaml
+```yaml
 # Services auto-discovered via annotations
 apiVersion: v1
 kind: Service
@@ -112,7 +112,6 @@ ports:
 None (initial decision)
 ## Superseded By
 None (current)
---**Last Updated**: 2024-12-21
+--**Last Updated**: 2025-12-21
 **Status**: Accepted and Implemented
-```
 

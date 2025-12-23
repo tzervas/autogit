@@ -20,7 +20,7 @@ Each ADR follows this structure:
 **Technical Story**: [Link to issue/epic]
 ## Context
 
-[Describe the context and problem statement]
+[Describe the context and problem statement]
 ## Decision Drivers
 - [Driver 1]
 - [Driver 2]
@@ -52,15 +52,15 @@ Each ADR follows this structure:
 ## ADR Index
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| [001](001-traefik-vs-nginx.md) | Traefik vs NGINX Ingress | Accepted | 2024-12-21 |
-| [002](002-fleeting-plugin.md) | Custom Fleeting Plugin Design | Accepted | 2024-12-21 |
-| [003](003-multi-architecture.md) | Multi-Architecture Strategy | Accepted | 2024-12-21 |
-| [004](004-sso-solution.md) | SSO Solution Selection | Accepted | 2024-12-21 |
-| [005](005-dns-management.md) | DNS Management Approach | Accepted | 2024-12-21 |
-| [006](006-storage-architecture.md) | Storage Architecture | Accepted | 2024-12-21 |
+| [001](001-traefik-vs-nginx.md) | Traefik vs NGINX Ingress | Accepted | 2025-12-21 |
+| [002](002-fleeting-plugin.md) | Custom Fleeting Plugin Design | Accepted | 2025-12-21 |
+| [003](003-multi-architecture.md) | Multi-Architecture Strategy | Accepted | 2025-12-21 |
+| [004](004-sso-solution.md) | SSO Solution Selection | Accepted | 2025-12-21 |
+| [005](005-dns-management.md) | DNS Management Approach | Accepted | 2025-12-21 |
+| [006](006-storage-architecture.md) | Storage Architecture | Accepted | 2025-12-21 |
 ## Creating a New ADR
 
-1. **Copy the template**:
+1. **Copy the template**:
 ```bash
 cp docs/architecture/adr/template.md docs/architecture/adr/XXX-your-title.md
 ```
@@ -92,6 +92,6 @@ Proposed → Accepted → [Deprecated | Superseded]
 - [ADR GitHub Organization](https://adr.github.io/)
 - [Documenting Architecture Decisions](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
 - [ADR Tools](https://github.com/npryce/adr-tools)
---**Last Updated**: 2024-12-21
+--**Last Updated**: 2025-12-21
 **Maintainer**: Project Team
 ```

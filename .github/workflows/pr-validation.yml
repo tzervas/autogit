@@ -1,0 +1,442 @@
+---
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # PR Metadata Validation
+  # ============================================================================
+  
+  validate-branch-naming:
+    name: Validate Branch Naming Convention
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Validating branch name: $BRANCH_NAME"
+
+          # Valid branch patterns:
+          # - main
+          # - dev
+          # - feature/<name>
+          # - feature/<name>/<subtask>
+          # - feature/<name>/<subtask>/<work-item>
+          # - hotfix/<name>
+          # - release/<version>
+
+          if [[ "$BRANCH_NAME" =~ ^(main|dev)$ ]] || \
+             [[ "$BRANCH_NAME" =~ ^feature/[a-z0-9-]+(/[a-z0-9-]+)?(/[a-z0-9-]+)?$ ]] || \
+             [[ "$BRANCH_NAME" =~ ^hotfix/[a-z0-9-]+$ ]] || \
+             [[ "$BRANCH_NAME" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+             [[ "$BRANCH_NAME" =~ ^copilot/[a-z0-9-]+$ ]]; then
+            echo "✓ Branch name is valid"
+          else
+            echo "✗ Invalid branch name: $BRANCH_NAME"
+            echo ""
+            echo "Valid patterns:"
+            echo "  - feature/<feature-name>"
+            echo "  - feature/<feature-name>/<subtask>"
+            echo "  - feature/<feature-name>/<subtask>/<work-item>"
+            echo "  - hotfix/<name>"
+            echo "  - release/<version>"
+            echo "  - copilot/<name>"
+            echo ""
+            echo "See docs/development/branching-strategy.md for details"
+            exit 1
+          fi
+
+  validate-pr-target:
+    name: Validate PR Target Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate PR target
+        run: |
+          SOURCE="${{ github.head_ref }}"
+          TARGET="${{ github.base_ref }}"
+
+          echo "Source branch: $SOURCE"
+          echo "Target branch: $TARGET"
+
+          # Validate merge hierarchy:
+          # - feature/x/y/z → feature/x/y (work → subtask)
+          # - feature/x/y → feature/x (subtask → feature)
+          # - feature/x → dev (feature → dev)
+          # - dev → main (release)
+          # - hotfix/x → main (hotfix)
+          # - release/x → main (release)
+
+          # Work branch → Subtask
+          if [[ "$SOURCE" =~ ^feature/([^/]+)/([^/]+)/([^/]+)$ ]]; then
+            EXPECTED="feature/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+            if [[ "$TARGET" == "$EXPECTED" ]]; then
+              echo "✓ Valid: work branch → subtask"
+              exit 0
+            fi
+          fi
+
+          # Subtask → Feature
+          if [[ "$SOURCE" =~ ^feature/([^/]+)/([^/]+)$ ]]; then
+            EXPECTED="feature/${BASH_REMATCH[1]}"
+            if [[ "$TARGET" == "$EXPECTED" ]]; then
+              echo "✓ Valid: subtask → feature"
+              exit 0
+            fi
+          fi
+
+          # Feature → Dev
+          if [[ "$SOURCE" =~ ^feature/([^/]+)$ ]]; then
+            if [[ "$TARGET" == "dev" ]]; then
+              echo "✓ Valid: feature → dev"
+              exit 0
+            fi
+          fi
+
+          # Dev → Main (release)
+          if [[ "$SOURCE" == "dev" ]] && [[ "$TARGET" == "main" ]]; then
+            echo "✓ Valid: dev → main (release)"
+            exit 0
+          fi
+
+          # Hotfix → Main
+          if [[ "$SOURCE" =~ ^hotfix/ ]] && [[ "$TARGET" == "main" ]]; then
+            echo "✓ Valid: hotfix → main"
+            exit 0
+          fi
+
+          # Release → Main
+          if [[ "$SOURCE" =~ ^release/ ]] && [[ "$TARGET" == "main" ]]; then
+            echo "✓ Valid: release → main"
+            exit 0
+          fi
+
+          # Copilot branches → dev (temporary)
+          if [[ "$SOURCE" =~ ^copilot/ ]] && [[ "$TARGET" == "dev" ]]; then
+            echo "✓ Valid: copilot → dev (temporary workflow)"
+            exit 0
+          fi
+
+          # If we get here, invalid hierarchy
+          echo "✗ Invalid PR target"
+          echo ""
+          echo "Source: $SOURCE"
+          echo "Target: $TARGET"
+          echo ""
+          echo "Valid merge patterns:"
+          echo "  - feature/x/y/z → feature/x/y (work → subtask)"
+          echo "  - feature/x/y → feature/x (subtask → feature)"
+          echo "  - feature/x → dev (feature → dev)"
+          echo "  - dev → main (release)"
+          echo "  - hotfix/x → main"
+          echo "  - release/x → main"
+          echo ""
+          echo "See docs/development/branching-strategy.md for details"
+          exit 1
+
+  check-pr-description:
+    name: Check PR Description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR has description
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ -z "$PR_BODY" ]] || [[ "$PR_BODY" == "null" ]]; then
+            echo "⚠ Warning: PR has no description"
+            echo "Consider adding a description using the appropriate PR template:"
+            echo "  - .github/PULL_REQUEST_TEMPLATE/work_template.md"
+            echo "  - .github/PULL_REQUEST_TEMPLATE/sub_feature_template.md"
+            echo "  - .github/PULL_REQUEST_TEMPLATE/feature_template.md"
+            echo "  - .github/PULL_REQUEST_TEMPLATE/release_template.md"
+          else
+            echo "✓ PR has description (${#PR_BODY} characters)"
+          fi
+          # Always succeed (description check is informational only)
+          exit 0
+
+  # ============================================================================
+  # Code Quality Checks (Linting)
+  # ============================================================================
+
+  lint-shell:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts
+        run: |
+          if [ -d "scripts" ]; then
+            find scripts -type f -name "*.sh" -exec shellcheck {} +
+          else
+            echo "No scripts directory found"
+          fi
+          
+          # Also check service scripts
+          if [ -d "services" ]; then
+            find services -type f -name "*.sh" -exec shellcheck {} +
+          fi
+
+  lint-yaml:
+    name: Lint YAML Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint -c .yamllint.yml . || true
+
+  lint-markdown:
+    name: Lint Markdown Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: |
+          markdownlint '**/*.md' --ignore node_modules --ignore .git || true
+
+  # ============================================================================
+  # Documentation Validation
+  # ============================================================================
+
+  check-code-blocks:
+    name: Check Code Block Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for unclosed code blocks
+        run: |
+          echo "Checking for unclosed code blocks in markdown files..."
+
+          ERROR=0
+          # Avoid subshell by using process substitution
+          while IFS= read -r file; do
+            # Count opening and closing code fences
+            OPENING=$(grep -c '^```' "$file" || true)
+
+            # Check if count is even (each opening has a closing)
+            if [ $((OPENING % 2)) -ne 0 ]; then
+              echo "✗ $file has unclosed code block(s)"
+              ERROR=1
+            else
+              echo "✓ $file code blocks are balanced"
+            fi
+          done < <(find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*")
+
+          if [ "$ERROR" -eq 1 ]; then
+            exit 1
+          fi
+
+  check-links:
+    name: Check for Broken Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdown-link-check
+        run: npm install -g markdown-link-check
+
+      - name: Check markdown links
+        run: |
+          # Create config to ignore common false positives
+          cat > mlc_config.json << 'EOF'
+          {
+            "ignorePatterns": [
+              {
+                "pattern": "^http://localhost"
+              },
+              {
+                "pattern": "^https://localhost"
+              },
+              {
+                "pattern": "^http://127.0.0.1"
+              }
+            ],
+            "timeout": "20s",
+            "retryOn429": true,
+            "retryCount": 3,
+            "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 403]
+          }
+          EOF
+
+          # Check all markdown files (using process substitution to avoid subshell)
+          ERROR=0
+          while IFS= read -r file; do
+            echo "Checking $file"
+            if ! markdown-link-check "$file" --config mlc_config.json; then
+              ERROR=1
+            fi
+          done < <(find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*")
+
+          if [ $ERROR -eq 1 ]; then
+            echo "⚠ Warning: Broken links found but not failing build"
+            echo "Please review and fix broken links when possible"
+          fi
+
+  validate-markdown-structure:
+    name: Validate Markdown Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for required documentation
+        run: |
+          REQUIRED_DOCS=(
+            "README.md"
+            "CONTRIBUTING.md"
+            "docs/CONTRIBUTING.md"
+            "docs/development/README.md"
+            "docs/development/branching-strategy.md"
+          )
+
+          MISSING=0
+          for doc in "${REQUIRED_DOCS[@]}"; do
+            if [ -f "$doc" ]; then
+              echo "✓ $doc exists"
+            else
+              echo "✗ $doc is missing"
+              MISSING=1
+            fi
+          done
+
+          if [ $MISSING -eq 1 ]; then
+            echo ""
+            echo "Some required documentation files are missing"
+            exit 1
+          fi
+
+  check-frontmatter:
+    name: Check Documentation Frontmatter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for consistent headers
+        run: |
+          echo "Checking documentation structure..."
+
+          # Check that main docs have titles (using process substitution to avoid subshell)
+          while IFS= read -r file; do
+            if ! head -n 5 "$file" | grep -q "^# "; then
+              echo "⚠ Warning: $file may be missing a title heading"
+            else
+              echo "✓ $file has a title"
+            fi
+          done < <(find docs -name "*.md" -type f)
+
+  # ============================================================================
+  # Docker & Infrastructure Validation
+  # ============================================================================
+
+  validate-docker:
+    name: Validate Docker Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose.yml
+        run: |
+          docker compose config > /dev/null
+
+      - name: Check Dockerfiles exist
+        run: |
+          if [ -f "services/git-server/Dockerfile" ]; then
+            echo "✓ Git server Dockerfile found"
+          else
+            echo "✗ Git server Dockerfile missing"
+            exit 1
+          fi
+
+          if [ -f "services/runner-coordinator/Dockerfile" ]; then
+            echo "✓ Runner coordinator Dockerfile found"
+          else
+            echo "✗ Runner coordinator Dockerfile missing"
+            exit 1
+          fi
+
+  check-scripts-executable:
+    name: Check Scripts are Executable
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check script permissions
+        run: |
+          if [ -d "scripts" ]; then
+            for script in scripts/*.sh; do
+              if [ -f "$script" ]; then
+                if [ -x "$script" ]; then
+                  echo "✓ $script is executable"
+                else
+                  echo "✗ $script is not executable"
+                  chmod +x "$script"
+                  echo "  Fixed: made $script executable"
+                fi
+              fi
+            done
+          fi
+          
+          # Check service scripts
+          find services -type f -name "*.sh" | while read -r script; do
+            if [ -x "$script" ]; then
+              echo "✓ $script is executable"
+            else
+              echo "⚠ Warning: $script is not executable"
+            fi
+          done

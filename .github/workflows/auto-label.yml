@@ -1,0 +1,92 @@
+---
+name: Auto Label PRs
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  label-pr:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Label based on branch type
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const labels = [];
+
+            // Determine labels based on branch name
+            if (branchName.startsWith('feature/')) {
+              labels.push('feature');
+
+              // Check for specific feature areas
+              if (branchName.includes('git-server')) {
+                labels.push('git-server');
+              }
+              if (branchName.includes('runner-coordinator')) {
+                labels.push('runner-coordinator');
+              }
+              if (branchName.includes('docker')) {
+                labels.push('docker');
+              }
+              if (branchName.includes('authentication') || branchName.includes('auth')) {
+                labels.push('security');
+              }
+              if (branchName.includes('api')) {
+                labels.push('api');
+              }
+            } else if (branchName.startsWith('hotfix/')) {
+              labels.push('hotfix');
+              labels.push('priority-high');
+            } else if (branchName.startsWith('release/')) {
+              labels.push('release');
+            } else if (branchName.startsWith('copilot/')) {
+              labels.push('copilot');
+            }
+
+            // Add labels based on target branch
+            const targetBranch = context.payload.pull_request.base.ref;
+            if (targetBranch === 'main') {
+              labels.push('to-main');
+            } else if (targetBranch === 'dev') {
+              labels.push('to-dev');
+            }
+
+            // Add documentation label if PR touches docs
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const hasDocsChanges = files.data.some(file =>
+              file.filename.includes('docs/') ||
+              file.filename.endsWith('.md')
+            );
+
+            if (hasDocsChanges) {
+              labels.push('documentation');
+            }
+
+            // Add workflow label if PR touches GitHub Actions
+            const hasWorkflowChanges = files.data.some(file =>
+              file.filename.includes('.github/workflows/')
+            );
+
+            if (hasWorkflowChanges) {
+              labels.push('github-actions');
+            }
+
+            // Apply labels
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: labels
+              });
+            }

@@ -352,7 +352,6 @@ jobs:
           REQUIRED_DOCS=(
             "README.md"
             "CONTRIBUTING.md"
-            "docs/CONTRIBUTING.md"
             "docs/development/README.md"
             "docs/development/branching-strategy.md"
           )

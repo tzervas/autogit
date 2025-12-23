@@ -67,11 +67,16 @@ proxy_set_header X-Forwarded-Proto $scheme;
 ### SSL Certificate Warning
 Since we use self-signed certificates, your browser and Git client will show a warning.
 
-**For Git**:
+> **Security Warning**: Disabling SSL verification globally is highly discouraged as it exposes you to man-in-the-middle attacks. Only use the following commands for local development and with full awareness of the risks.
+
+**For Git (Per-Repository - Recommended)**:
+```bash
+git config http.sslVerify false
+```
+
+**For Git (Global - Use with Caution)**:
 ```bash
 git config --global http.sslVerify false
-# OR for a specific repo:
-git config http.sslVerify false
 ```
 
 ### Port Conflicts

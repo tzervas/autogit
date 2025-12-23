@@ -85,7 +85,9 @@ async def handle_job_webhook(payload: JobWebhook, db: Session = Depends(get_db))
         gitlab_job_id=payload.checkout_sha, # Using SHA as placeholder for job ID
         project_id=payload.project_id,
         project_name=payload.project_name,
-        status="queued"
+        status="queued",
+        architecture_req="amd64", # Default
+        gpu_req=False # Default
     )
     db.add(new_job)
     db.commit()

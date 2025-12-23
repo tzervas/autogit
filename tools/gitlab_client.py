@@ -1,12 +1,15 @@
 import requests
 import os
+import urllib.parse
 
 class GitLabApiError(Exception):
-    """Raised when the GitLab API returns an error response."""
-    def __init__(self, message, status_code=None, endpoint=None):
-        super().__init__(message)
+    """Raised when a GitLab API request returns an error response."""
+    def __init__(self, status_code, message, method=None, endpoint=None):
         self.status_code = status_code
+        self.message = message
+        self.method = method
         self.endpoint = endpoint
+        super().__init__(f"GitLab API Error ({status_code}): {message} [{method} {endpoint}]")
 
 class GitLabClient:
     """
@@ -44,18 +47,16 @@ class GitLabClient:
                     error_msg = response.json().get("message", response.text)
                 except ValueError:
                     error_msg = response.text
-
-                raise GitLabApiError(
-                    f"GitLab API Error ({response.status_code}): {error_msg}",
-                    status_code=response.status_code,
-                    endpoint=endpoint
-                )
+                raise GitLabApiError(response.status_code, error_msg, method, endpoint)
 
             return response.json() if response.content else None
         except requests.exceptions.RequestException as e:
             if isinstance(e, GitLabApiError):
                 raise e
-            raise GitLabApiError(f"Network error connecting to GitLab: {e}", endpoint=endpoint) from e
+            # Wrap transport-level errors in GitLabApiError for uniformity
+            status_code = getattr(getattr(e, "response", None), "status_code", 0)
+            message = f"Request to GitLab failed: {e}"
+            raise GitLabApiError(status_code, message, method, endpoint) from e
 
     # User Operations
     def get_users(self):
@@ -97,3 +98,39 @@ class GitLabClient:
     def create_group(self, name, path, visibility="private"):
         data = {"name": name, "path": path, "visibility": visibility}
         return self._request("POST", "groups", data=data)
+
+    # Branch Protection Operations
+    def protect_branch(self, project_id, branch_name, push_access_level=40, merge_access_level=40):
+        """
+        Protect a branch.
+        Access levels: 0 (No access), 30 (Developer), 40 (Maintainer), 60 (Admin)
+        """
+        data = {
+            "name": branch_name,
+            "push_access_level": push_access_level,
+            "merge_access_level": merge_access_level
+        }
+        return self._request("POST", f"projects/{project_id}/protected_branches", data=data)
+
+    def unprotect_branch(self, project_id, branch_name):
+        encoded_branch = urllib.parse.quote(branch_name, safe='')
+        return self._request("DELETE", f"projects/{project_id}/protected_branches/{encoded_branch}")
+
+    # Webhook Operations
+    def add_project_webhook(self, project_id, url, push_events=True, merge_requests_events=True):
+        data = {
+            "url": url,
+            "push_events": push_events,
+            "merge_requests_events": merge_requests_events
+        }
+        return self._request("POST", f"projects/{project_id}/hooks", data=data)
+
+    # Repository File Operations
+    def create_file(self, project_id, file_path, branch, content, commit_message):
+        data = {
+            "branch": branch,
+            "content": content,
+            "commit_message": commit_message
+        }
+        encoded_path = urllib.parse.quote(file_path, safe='')
+        return self._request("POST", f"projects/{project_id}/repository/files/{encoded_path}", data=data)

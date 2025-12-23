@@ -11,13 +11,13 @@ AutoGit interacts with the GitLab Git Server via the GitLab REST API v4. This do
 ## Authentication
 
 ### Personal Access Tokens (PAT)
-The primary method for API authentication is using Personal Access Tokens.
+The primary method for API authentication is to use Personal Access Tokens.
 
 - **Header**: `PRIVATE-TOKEN: <your_access_token>`
 - **Scopes Required**: `api`, `read_user`, `read_repository`, `write_repository`
 
 ### Creating a PAT
-1. Login to GitLab.
+1. Log in to GitLab.
 2. Go to **User Settings** → **Access Tokens**.
 3. Click **Add new token**.
 4. Select the required scopes and click **Create personal access token**.

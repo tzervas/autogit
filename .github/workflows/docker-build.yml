@@ -46,7 +46,7 @@ jobs:
             type=sha
 
       - name: Build Git Server (with GHCR layer caching)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/git-server
           file: ./services/git-server/Dockerfile
@@ -85,7 +85,7 @@ jobs:
             type=sha
 
       - name: Build Runner Coordinator (with GHCR layer caching)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/runner-coordinator
           file: ./services/runner-coordinator/Dockerfile

@@ -25,21 +25,25 @@ if [ -z "$BACKUP_FILE" ]; then
     exit 1
 fi
 
+# Determine script directory to anchor paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMPOSE_FILE="$SCRIPT_DIR/../../../docker-compose.yml"
+
 # Check if GitLab is running
-if ! docker compose ps git-server --status running --format json | grep -q '"State":"running"'; then
+if ! docker compose -f "$COMPOSE_FILE" ps git-server --status running --format json | grep -q '"State":"running"'; then
     print_error "GitLab container is not running"
     exit 1
 fi
 
 print_info "Stopping services that connect to the database..."
-docker compose exec -T git-server gitlab-ctl stop puma
-docker compose exec -T git-server gitlab-ctl stop sidekiq
+docker compose -f "$COMPOSE_FILE" exec -T git-server gitlab-ctl stop puma
+docker compose -f "$COMPOSE_FILE" exec -T git-server gitlab-ctl stop sidekiq
 
 print_info "Restoring from backup: $BACKUP_FILE..."
-docker compose exec -T git-server gitlab-backup restore BACKUP="$BACKUP_FILE" force=yes
+docker compose -f "$COMPOSE_FILE" exec -T git-server gitlab-backup restore BACKUP="$BACKUP_FILE" force=yes
 
 print_info "Restarting GitLab services..."
-docker compose exec -T git-server gitlab-ctl reconfigure
-docker compose exec -T git-server gitlab-ctl restart
+docker compose -f "$COMPOSE_FILE" exec -T git-server gitlab-ctl reconfigure
+docker compose -f "$COMPOSE_FILE" exec -T git-server gitlab-ctl restart
 
 print_info "✅ Restore completed successfully."

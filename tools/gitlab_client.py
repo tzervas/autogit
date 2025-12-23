@@ -1,15 +1,23 @@
 import requests
 import os
 
+class GitLabApiError(Exception):
+    """Raised when the GitLab API returns an error response."""
+    def __init__(self, message, status_code=None, endpoint=None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.endpoint = endpoint
+
 class GitLabClient:
     """
     A lightweight Python client for the GitLab REST API v4.
     """
 
-    def __init__(self, base_url=None, token=None):
+    def __init__(self, base_url=None, token=None, timeout=10):
         self.base_url = base_url or os.getenv("GITLAB_URL", "http://localhost:3000")
         self.api_url = f"{self.base_url.rstrip('/')}/api/v4"
         self.token = token or os.getenv("GITLAB_TOKEN")
+        self.timeout = timeout
 
         if not self.token:
             raise ValueError("GitLab API token is required. Set GITLAB_TOKEN env var or pass it to the constructor.")
@@ -21,16 +29,33 @@ class GitLabClient:
 
     def _request(self, method, endpoint, data=None, params=None):
         url = f"{self.api_url}/{endpoint.lstrip('/')}"
-        response = requests.request(method, url, headers=self.headers, json=data, params=params)
+        try:
+            response = requests.request(
+                method,
+                url,
+                headers=self.headers,
+                json=data,
+                params=params,
+                timeout=self.timeout
+            )
 
-        if response.status_code >= 400:
-            try:
-                error_msg = response.json().get("message", response.text)
-            except:
-                error_msg = response.text
-            raise Exception(f"GitLab API Error ({response.status_code}): {error_msg}")
+            if response.status_code >= 400:
+                try:
+                    error_msg = response.json().get("message", response.text)
+                except ValueError:
+                    error_msg = response.text
 
-        return response.json() if response.content else None
+                raise GitLabApiError(
+                    f"GitLab API Error ({response.status_code}): {error_msg}",
+                    status_code=response.status_code,
+                    endpoint=endpoint
+                )
+
+            return response.json() if response.content else None
+        except requests.exceptions.RequestException as e:
+            if isinstance(e, GitLabApiError):
+                raise e
+            raise GitLabApiError(f"Network error connecting to GitLab: {e}", endpoint=endpoint) from e
 
     # User Operations
     def get_users(self):

@@ -1,6 +1,6 @@
 import os
 import sys
-from gitlab_client import GitLabClient
+from gitlab_client import GitLabClient, GitLabApiError
 
 def main():
     # Configuration
@@ -35,8 +35,10 @@ def main():
         for k in keys:
             print(f"- {k['title']} (Fingerprint: {k['fingerprint']})")
 
+    except GitLabApiError as e:
+        print(f"GitLab API Error: {e}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()

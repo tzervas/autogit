@@ -70,9 +70,9 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 - [x] Create Dockerfile for GitLab CE (AMD64 native - MVP)
 - [x] Add multi-arch build files (AMD64, ARM64, RISC-V) for future
 - [x] Configure docker-compose.yml integration
-- [x] Setup volume mounts for data persistence
+- [x] Set up volume mounts for data persistence
 - [x] Configure network settings
-- [x] Setup environment variables with ARCH selection
+- [x] Set up environment variables with ARCH selection
 - [x] Configure resource limits
 - [x] Add health checks
 - [x] Add architecture detection script
@@ -87,6 +87,14 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 - Architecture detection script
 - Documentation: `docs/git-server/docker-setup.md`
 
+**Acceptance Criteria**:
+- [x] GitLab CE container builds successfully on AMD64
+- [x] Container starts and passes health checks
+- [x] Data persists across container restarts
+- [x] Resource limits properly configured
+- [x] Multi-arch support documented (testing AMD64 only for MVP)
+- [x] Documentation complete and tested
+
 ---
 
 ##### 2. Basic Authentication Setup ✅ COMPLETE
@@ -99,11 +107,11 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 **Tasks**:
 - [x] Configure GitLab authentication system
-- [x] Setup initial admin user
+- [x] Set up initial admin user
 - [x] Configure user registration settings
-- [x] Setup session management
+- [x] Set up session management
 - [x] Configure password policies
-- [x] Setup email notifications (optional)
+- [x] Set up email notifications (optional)
 - [x] Document authentication procedures
 
 **Deliverables**:
@@ -125,7 +133,7 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 **Tasks**:
 - [x] Configure SSH server on port 2222 in `gitlab.rb`
-- [x] Setup SSH key management scripts/documentation
+- [x] Set up SSH key management scripts/documentation
 - [x] Configure Git over SSH settings
 - [x] Test SSH cloning and pushing
 - [x] Document SSH setup for users
@@ -155,10 +163,10 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 **Tasks**:
 - [ ] Configure HTTP access on port 3000
-- [ ] Setup HTTPS with SSL certificates
+- [ ] Set up HTTPS with SSL certificates
 - [ ] Configure reverse proxy settings
 - [ ] Test HTTP(S) cloning and pushing
-- [ ] Setup basic authentication over HTTP
+- [ ] Set up basic authentication over HTTP
 - [ ] Document access configuration
 
 **Deliverables**:
@@ -216,9 +224,9 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 **Tasks**:
 - [ ] Implement repository creation
-- [ ] Setup repository templates
+- [ ] Set up repository templates
 - [ ] Configure repository settings
-- [ ] Setup branch protection
+- [ ] Set up branch protection
 - [ ] Configure webhooks
 - [ ] Document repository management
 
@@ -247,7 +255,7 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 **Tasks**:
 - [ ] Configure GitLab Runner registration
-- [ ] Setup webhook triggers for CI/CD
+- [ ] Set up webhook triggers for CI/CD
 - [ ] Configure pipeline integration
 - [ ] Test runner connectivity
 - [ ] Document runner setup

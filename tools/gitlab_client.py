@@ -45,7 +45,7 @@ class GitLabClient:
             if response.status_code >= 400:
                 try:
                     error_msg = response.json().get("message", response.text)
-                except (ValueError, requests.exceptions.JSONDecodeError):
+                except ValueError:
                     error_msg = response.text
                 raise GitLabApiError(response.status_code, error_msg, method, endpoint)
 
@@ -53,7 +53,10 @@ class GitLabClient:
         except requests.exceptions.RequestException as e:
             if isinstance(e, GitLabApiError):
                 raise e
-            raise Exception(f"HTTP Request failed: {e}")
+            # Wrap transport-level errors in GitLabApiError for uniformity
+            status_code = getattr(getattr(e, "response", None), "status_code", 0)
+            message = f"Request to GitLab failed: {e}"
+            raise GitLabApiError(status_code, message, method, endpoint) from e
 
     # User Operations
     def get_users(self):

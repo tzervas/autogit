@@ -1,15 +1,26 @@
 import requests
 import os
+import urllib.parse
+
+class GitLabApiError(Exception):
+    """Raised when a GitLab API request returns an error response."""
+    def __init__(self, status_code, message, method=None, endpoint=None):
+        self.status_code = status_code
+        self.message = message
+        self.method = method
+        self.endpoint = endpoint
+        super().__init__(f"GitLab API Error ({status_code}): {message} [{method} {endpoint}]")
 
 class GitLabClient:
     """
     A lightweight Python client for the GitLab REST API v4.
     """
 
-    def __init__(self, base_url=None, token=None):
+    def __init__(self, base_url=None, token=None, timeout=10):
         self.base_url = base_url or os.getenv("GITLAB_URL", "http://localhost:3000")
         self.api_url = f"{self.base_url.rstrip('/')}/api/v4"
         self.token = token or os.getenv("GITLAB_TOKEN")
+        self.timeout = timeout
 
         if not self.token:
             raise ValueError("GitLab API token is required. Set GITLAB_TOKEN env var or pass it to the constructor.")
@@ -21,16 +32,28 @@ class GitLabClient:
 
     def _request(self, method, endpoint, data=None, params=None):
         url = f"{self.api_url}/{endpoint.lstrip('/')}"
-        response = requests.request(method, url, headers=self.headers, json=data, params=params)
+        try:
+            response = requests.request(
+                method,
+                url,
+                headers=self.headers,
+                json=data,
+                params=params,
+                timeout=self.timeout
+            )
 
-        if response.status_code >= 400:
-            try:
-                error_msg = response.json().get("message", response.text)
-            except:
-                error_msg = response.text
-            raise Exception(f"GitLab API Error ({response.status_code}): {error_msg}")
+            if response.status_code >= 400:
+                try:
+                    error_msg = response.json().get("message", response.text)
+                except (ValueError, requests.exceptions.JSONDecodeError):
+                    error_msg = response.text
+                raise GitLabApiError(response.status_code, error_msg, method, endpoint)
 
-        return response.json() if response.content else None
+            return response.json() if response.content else None
+        except requests.exceptions.RequestException as e:
+            if isinstance(e, GitLabApiError):
+                raise e
+            raise Exception(f"HTTP Request failed: {e}")
 
     # User Operations
     def get_users(self):
@@ -87,7 +110,8 @@ class GitLabClient:
         return self._request("POST", f"projects/{project_id}/protected_branches", data=data)
 
     def unprotect_branch(self, project_id, branch_name):
-        return self._request("DELETE", f"projects/{project_id}/protected_branches/{branch_name}")
+        encoded_branch = urllib.parse.quote(branch_name, safe='')
+        return self._request("DELETE", f"projects/{project_id}/protected_branches/{encoded_branch}")
 
     # Webhook Operations
     def add_project_webhook(self, project_id, url, push_events=True, merge_requests_events=True):
@@ -105,4 +129,5 @@ class GitLabClient:
             "content": content,
             "commit_message": commit_message
         }
-        return self._request("POST", f"projects/{project_id}/repository/files/{file_path.replace('/', '%2F')}", data=data)
+        encoded_path = urllib.parse.quote(file_path, safe='')
+        return self._request("POST", f"projects/{project_id}/repository/files/{encoded_path}", data=data)

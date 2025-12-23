@@ -1,6 +1,6 @@
 import os
 import sys
-from gitlab_client import GitLabClient
+from tools.gitlab_client import GitLabClient
 
 def main():
     # Configuration

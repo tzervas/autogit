@@ -233,7 +233,7 @@ jobs:
 
       - name: Run yamllint
         run: |
-          yamllint -c .yamllint.yml . || true
+          yamllint -c config/.yamllint.yml . || true
 
   lint-markdown:
     name: Lint Markdown Files

@@ -38,22 +38,24 @@ class GitLabClient:
                 params=params,
                 timeout=self.timeout
             )
+
+            if response.status_code >= 400:
+                try:
+                    error_msg = response.json().get("message", response.text)
+                except ValueError:
+                    error_msg = response.text
+
+                raise GitLabApiError(
+                    f"GitLab API Error ({response.status_code}): {error_msg}",
+                    status_code=response.status_code,
+                    endpoint=endpoint
+                )
+
+            return response.json() if response.content else None
         except requests.exceptions.RequestException as e:
-            raise GitLabApiError(f"Network error connecting to GitLab: {e}", endpoint=endpoint)
-
-        if response.status_code >= 400:
-            try:
-                error_msg = response.json().get("message", response.text)
-            except (ValueError, requests.exceptions.JSONDecodeError):
-                error_msg = response.text
-
-            raise GitLabApiError(
-                f"GitLab API Error ({response.status_code}): {error_msg}",
-                status_code=response.status_code,
-                endpoint=endpoint
-            )
-
-        return response.json() if response.content else None
+            if isinstance(e, GitLabApiError):
+                raise e
+            raise GitLabApiError(f"Network error connecting to GitLab: {e}", endpoint=endpoint) from e
 
     # User Operations
     def get_users(self):

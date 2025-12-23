@@ -11,7 +11,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   # ============================================================================
@@ -175,28 +176,45 @@ jobs:
   # Code Quality Checks (Linting)
   # ============================================================================
 
-  lint-shell:
+  lint-shell-scripts:
     name: Lint Shell Scripts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
-      - name: Run ShellCheck on scripts
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        id: pre-commit
+        run: pre-commit run --all-files
+        continue-on-error: true
+
+      - name: Commit and push fixes
+        if: steps.pre-commit.outcome == 'failure'
         run: |
-          if [ -d "scripts" ]; then
-            find scripts -type f -name "*.sh" -exec shellcheck {} +
-          else
-            echo "No scripts directory found"
-          fi
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: automated linting fixes"
+          git push origin HEAD:${{ github.head_ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # Also check service scripts
-          if [ -d "services" ]; then
-            find services -type f -name "*.sh" -exec shellcheck {} +
-          fi
+      - name: Fail if fixes were needed
+        if: steps.pre-commit.outcome == 'failure'
+        run: |
+          echo "Pre-commit found issues and attempted to fix them. Please pull the latest changes."
+          exit 1
 
   lint-yaml:
     name: Lint YAML Files

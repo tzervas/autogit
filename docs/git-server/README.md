@@ -14,26 +14,25 @@ The Git Server component provides version control, CI/CD, and repository managem
 
 The following guides are planned for the Git Server component. They will be created as the implementation progresses.
 
-### Getting Started (Planned)
-- Installation Guide - How to install and configure the Git Server
-- Configuration - Detailed configuration options
+### Getting Started
+- [Installation Guide](docker-setup.md) - How to install and configure the Git Server
+- [Configuration](authentication.md) - Detailed configuration options
 
-### User Guides (Planned)
-- Repository Management - Creating and managing repositories
-- SSH Access - Setting up SSH keys and access
-- HTTP Access - Using HTTP/HTTPS for Git operations
-- CI/CD Integration - Setting up CI/CD pipelines
+### User Guides
+- [User Guide](user-guide.md) - General usage for developers
+- [Repository Management](repository-management.md) - Creating and managing repositories
+- [SSH Access](ssh-access.md) - Setting up SSH keys and access
+- [HTTP Access](http-access.md) - Using HTTP/HTTPS for Git operations
 
-### API Documentation (Planned)
-- API Reference - Complete REST API documentation
-- API Examples - Common API usage patterns
-- Webhooks - Event notifications and webhooks
+### API Documentation
+- [API Integration](api-integration.md) - Complete REST API documentation
+- [API Examples](../../tools/example_api_usage.py) - Common API usage patterns
 
-### Administration (Planned)
-- Admin Guide - Administrative tasks and configuration
-- User Management - Managing users and permissions
-- Backup and Recovery - Backup strategies and disaster recovery
-- Security - Security best practices and hardening
+### Administration
+- [Admin Guide](admin-guide.md) - Administrative tasks and configuration
+- [User Management](authentication.md) - Managing users and permissions
+- [Backup and Recovery](backup-recovery.md) - Backup strategies and disaster recovery
+- [Security](security-config.md) - Security best practices and hardening
 - Monitoring - Monitoring and observability
 
 ### Troubleshooting (Planned)

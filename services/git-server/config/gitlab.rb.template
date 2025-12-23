@@ -6,6 +6,16 @@
 ## Ref: https://docs.gitlab.com/omnibus/settings/configuration.html#configuring-the-external-url-for-gitlab
 external_url ENV['GITLAB_EXTERNAL_URL'] || 'http://localhost:3000'
 
+## NGINX Settings
+nginx['listen_port'] = 80
+nginx['listen_https'] = false
+
+## HTTPS Settings (Uncomment and configure for SSL)
+# external_url 'https://gitlab.autogit.local'
+# nginx['redirect_http_to_https'] = true
+# nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.autogit.local.crt"
+# nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.autogit.local.key"
+
 ## GitLab Email Server Settings (optional)
 ## Uncomment and configure if you want email notifications
 # gitlab_rails['smtp_enable'] = true

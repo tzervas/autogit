@@ -98,43 +98,25 @@ main
 
 ### Workflow Steps
 
-1. **Start New Feature**
+1. **Task Identification**: Identify the next task from `TASK_TRACKER.md`.
+2. **Feature Branch Creation**: Create a parent feature branch from `dev`.
    ```bash
    git checkout dev
    git pull origin dev
-   git checkout -b feature/gpu-scheduling
-   git push -u origin feature/gpu-scheduling
+   git checkout -b feature/<task-name>
    ```
-
-2. **Create Sub-Feature**
+3. **Sub-Feature Branching**: For each subtask, create a branch from the parent feature branch.
    ```bash
-   git checkout feature/gpu-scheduling
-   git checkout -b feature/gpu-scheduling/detection-service
-   git push -u origin feature/gpu-scheduling/detection-service
+   git checkout feature/<task-name>
+   git checkout -b feature/<task-name>/<subtask-name>
    ```
+4. **Development and Local Integration**:
+   - Complete work in the sub-feature branch.
+   - Merge sub-feature branch back into the parent feature branch.
+   - Delete the sub-feature branch locally and remotely.
+5. **Final Integration**: Once all subtasks are merged into the parent feature branch and validated, create a PR from the parent feature branch to `dev`.
 
-3. **Create Work Branch**
-   ```bash
-   git checkout feature/gpu-scheduling/detection-service
-   git checkout -b feature/gpu-scheduling/detection-service/nvidia-support
-   git push -u origin feature/gpu-scheduling/detection-service/nvidia-support
-   ```
-
-4. **Complete Work and Merge Up**
-   ```bash
-   # After completing work on nvidia-support
-   # Create PR: nvidia-support -> detection-service
-   # After approval and merge, move to parent
-   git checkout feature/gpu-scheduling/detection-service
-   git pull origin feature/gpu-scheduling/detection-service
-
-   # After all sub-work is done, create PR: detection-service -> gpu-scheduling
-   # After approval and merge
-   git checkout feature/gpu-scheduling
-   git pull origin feature/gpu-scheduling
-
-   # After all sub-features done, create PR: gpu-scheduling -> dev
-   ```
+> **Note**: This hierarchical approach ensures that `dev` remains clean and that complex features are fully integrated and tested as a unit before being merged into the main development line.
 
 ### Dev to Main Release
 

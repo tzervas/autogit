@@ -24,7 +24,7 @@ print_error() {
 
 # Check if GitLab is running
 check_gitlab_running() {
-    if ! docker compose ps --format json git-server | grep -q '"State":"running"'; then
+    if ! docker compose ps git-server --status running --format json | grep -q '"State":"running"'; then
         print_error "GitLab container is not running"
         exit 1
     fi
@@ -43,14 +43,16 @@ backup_config() {
     print_info "Backing up GitLab configuration..."
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     BACKUP_DIR="./backups/config_$TIMESTAMP"
-    mkdir -p "$BACKUP_DIR"
+    # Create parent directory if it doesn't exist
+    mkdir -p "./backups"
+    # Create backup directory with secure permissions
+    mkdir -m 700 "$BACKUP_DIR"
 
     # Copy config from volume/container
     # Note: /etc/gitlab contains sensitive secrets (gitlab-secrets.json)
     docker compose cp git-server:/etc/gitlab "$BACKUP_DIR"
 
-    # Set restrictive permissions on the backup directory
-    chmod 700 "$BACKUP_DIR"
+    # Ensure restrictive permissions on sensitive secret file
     chmod 600 "$BACKUP_DIR/gitlab/gitlab-secrets.json" 2>/dev/null || true
 
     print_info "✅ Configuration backed up to $BACKUP_DIR"

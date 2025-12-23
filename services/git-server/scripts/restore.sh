@@ -26,7 +26,7 @@ if [ -z "$BACKUP_FILE" ]; then
 fi
 
 # Check if GitLab is running
-if ! docker compose ps git-server | grep -q "Up"; then
+if ! docker compose ps --format json git-server | grep -q '"State":"running"'; then
     print_error "GitLab container is not running"
     exit 1
 fi

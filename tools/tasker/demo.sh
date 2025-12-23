@@ -78,7 +78,7 @@ if [ -f "TASK_SUMMARY_milestone-2-subtask-1.md" ]; then
     echo ""
     echo "(file truncated for brevity)"
     echo ""
-    
+
     # Clean up
     rm -f TASK_SUMMARY_milestone-2-subtask-1.md
     echo "Cleaned up temporary file."

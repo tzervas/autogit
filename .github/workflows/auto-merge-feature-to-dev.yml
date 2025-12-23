@@ -105,8 +105,8 @@ jobs:
 
             // Filter to only completed checks (ignore skipped/cancelled)
             const completedChecks = checkRuns.check_runs.filter(run =>
-              run.status === 'completed' && 
-              run.conclusion !== 'skipped' && 
+              run.status === 'completed' &&
+              run.conclusion !== 'skipped' &&
               run.conclusion !== 'cancelled'
             );
 

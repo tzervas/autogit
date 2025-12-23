@@ -52,14 +52,14 @@ def provision_runner(
     gpu_type: Optional[str] = None
 ) -> str:
     """Provision a new runner instance.
-    
+
     Args:
         architecture: Target architecture (amd64, arm64, riscv)
         gpu_type: Optional GPU type (nvidia, amd, intel)
-        
+
     Returns:
         Runner instance ID
-        
+
     Raises:
         ProvisionError: If provisioning fails
     """
@@ -73,28 +73,28 @@ Use Google-style docstrings:
 ```python
 def complex_function(param1: str, param2: int) -> bool:
     """Short description of function.
-    
+
     Longer description with more details about what this
     function does and why it exists.
-    
+
     Args:
         param1: Description of param1
         param2: Description of param2
-        
+
     Returns:
         Description of return value
-        
+
     Raises:
         ValueError: When param2 is negative
         TypeError: When param1 is not a string
-        
+
     Example:
         >>> complex_function("test", 42)
         True
-        
+
     Note:
         Additional notes about edge cases or performance.
-        
+
     See Also:
         related_function: For related functionality
     """
@@ -111,13 +111,13 @@ Each class/function should have one reason to change:
 # Good - Single responsibility
 class RunnerProvisioner:
     """Handles runner provisioning only."""
-    
+
     def provision(self, config: RunnerConfig) -> Runner:
         ...
 
 class RunnerMonitor:
     """Handles runner monitoring only."""
-    
+
     def check_health(self, runner: Runner) -> bool:
         ...
 ```
@@ -130,10 +130,10 @@ Extend behavior without modifying existing code:
 # Use Protocol for extensibility
 class StorageBackend(Protocol):
     """Protocol for storage backends."""
-    
+
     def store(self, key: str, value: bytes) -> None:
         ...
-    
+
     def retrieve(self, key: str) -> bytes:
         ...
 
@@ -141,7 +141,7 @@ class StorageBackend(Protocol):
 class S3Storage:
     def store(self, key: str, value: bytes) -> None:
         ...
-        
+
 class LocalStorage:
     def store(self, key: str, value: bytes) -> None:
         ...
@@ -156,7 +156,7 @@ Depend on abstractions, not concretions:
 class RunnerManager:
     def __init__(self, storage: StorageBackend):
         self.storage = storage
-    
+
     def save_runner(self, runner: Runner) -> None:
         data = runner.serialize()
         self.storage.store(runner.id, data)
@@ -172,17 +172,17 @@ from unittest.mock import Mock
 
 class TestRunnerProvisioner:
     """Tests for RunnerProvisioner."""
-    
+
     @pytest.fixture
     def provisioner(self):
         """Create provisioner instance."""
         return RunnerProvisioner()
-    
+
     def test_provision_amd64_runner(self, provisioner):
         """Test provisioning amd64 runner."""
         runner = provisioner.provision("amd64")
         assert runner.architecture == "amd64"
-    
+
     def test_provision_with_invalid_arch_raises(self, provisioner):
         """Test that invalid architecture raises error."""
         with pytest.raises(ValueError):
@@ -241,11 +241,11 @@ from pydantic import BaseModel, Field, validator
 
 class RunnerConfig(BaseModel):
     """Configuration for runner."""
-    
+
     architecture: str = Field(..., description="Target architecture")
     max_runners: int = Field(10, ge=1, le=100)
     idle_timeout: int = Field(600, ge=60)
-    
+
     @validator('architecture')
     def validate_architecture(cls, v):
         allowed = ['amd64', 'arm64', 'riscv']

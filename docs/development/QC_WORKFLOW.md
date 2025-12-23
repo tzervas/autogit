@@ -1,8 +1,8 @@
 # Quality Control (QC) Workflow
 
-**Last Updated**: 2025-12-21  
-**Version**: 1.0  
-**Status**: Active  
+**Last Updated**: 2025-12-21
+**Version**: 1.0
+**Status**: Active
 **Owner**: Tyler Zervas (@tzervas)
 
 ---
@@ -469,7 +469,7 @@ Use this for each PR/task:
 
 ---
 
-**Maintained By**: Evaluator Agent  
-**Review Cycle**: After each milestone  
-**Next Review**: After Git Server implementation  
+**Maintained By**: Evaluator Agent
+**Review Cycle**: After each milestone
+**Next Review**: After Git Server implementation
 **Owner**: Tyler Zervas (@tzervas)

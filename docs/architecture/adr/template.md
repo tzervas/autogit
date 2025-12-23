@@ -43,7 +43,7 @@ What becomes easier or more difficult to do because of this change?
 - Improvements
 - Capabilities enabled
 
-### Negative Consequences  
+### Negative Consequences
 
 - List drawbacks
 - Trade-offs made

@@ -196,14 +196,14 @@ runner:
   default_architecture: amd64
   max_runners: 50
   idle_timeout: 600
-  
+
 gpu:
   detection_interval: 60
   vendors:
     - nvidia
     - amd
     - intel
-    
+
 monitoring:
   enabled: true
   interval: 30

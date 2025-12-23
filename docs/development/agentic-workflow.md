@@ -242,11 +242,11 @@ Iterate until quality standards met.
 1. **Code Quality**
    - Missing type hints in function `provision_runner`
    - Violation of SRP in class `RunnerManager`
-   
+
 2. **Testing**
    - Coverage is 65%, need 80%+
    - Missing edge case tests for error handling
-   
+
 3. **Documentation**
    - API docs not updated
    - Missing example in docs/runners/new-feature.md

@@ -39,7 +39,7 @@ Successfully implemented a comprehensive feature branch structure and workflow s
   - Merge hierarchy: work → sub-feature → feature → dev
   - One subtask per PR strategy
   - Examples and best practices
-  
+
 - **HOW_TO_START_NEXT_FEATURE.md** (7,676 characters)
   - Step-by-step guide for subtask workflow
   - Example walkthrough

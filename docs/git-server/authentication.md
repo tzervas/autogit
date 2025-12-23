@@ -1,8 +1,8 @@
 # GitLab Authentication and User Management
 
-**Component**: Git Server (GitLab CE) - Authentication  
-**Version**: 16.11.0-ce.0  
-**Status**: Production Ready  
+**Component**: Git Server (GitLab CE) - Authentication
+**Version**: 16.11.0-ce.0
+**Status**: Production Ready
 **Last Updated**: 2025-12-22
 
 ## Overview

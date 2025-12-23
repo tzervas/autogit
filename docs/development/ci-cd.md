@@ -174,11 +174,11 @@ release:
   needs: [lint, test, security, build, integration, e2e]
   steps:
     - uses: actions/checkout@v4
-    
+
     - name: Extract version
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-    
+
     - name: Build and push images
       run: |
         docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -188,7 +188,7 @@ release:
           --tag autogit/runner-coordinator:latest \
           --push \
           services/runner-coordinator/
-    
+
     - name: Create GitHub Release
       uses: actions/create-release@v1
       env:
@@ -197,7 +197,7 @@ release:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ steps.version.outputs.VERSION }}
         body_path: CHANGELOG.md
-    
+
     - name: Deploy Helm chart
       run: |
         helm package charts/autogit/
@@ -279,7 +279,7 @@ performance:
 ### Required Secrets
 
 - `DOCKER_USERNAME` - Docker Hub username
-- `DOCKER_PASSWORD` - Docker Hub password  
+- `DOCKER_PASSWORD` - Docker Hub password
 - `CODECOV_TOKEN` - Codecov token
 - `GITHUB_TOKEN` - GitHub token (automatic)
 
@@ -394,12 +394,12 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-  
+
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:
       - id: flake8
-  
+
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.3.0
     hooks:

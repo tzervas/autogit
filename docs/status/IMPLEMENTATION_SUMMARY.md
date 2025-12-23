@@ -50,7 +50,7 @@ Each template includes:
 ### 4. Branch Management Scripts
 Created 4 helper scripts in `/scripts/`:
 
-- **create-feature-branch.sh**: 
+- **create-feature-branch.sh**:
   - Automates feature branch structure creation
   - Creates feature + all sub-feature branches in one command
   - Validates branch names

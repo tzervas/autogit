@@ -360,10 +360,10 @@ Expected performance improvements with GHCR caching:
    ```dockerfile
    # 1. Base image (rarely changes)
    FROM gitlab/gitlab-ce:16.11.0-ce.0
-   
+
    # 2. Dependencies (changes occasionally)
    RUN apt-get update && apt-get install...
-   
+
    # 3. Application code (changes frequently)
    COPY . /app
    ```

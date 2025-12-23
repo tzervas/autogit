@@ -53,9 +53,9 @@ print_info "Waiting for GitLab to be fully initialized..."
 print_info "This may take 3-5 minutes on first startup..."
 
 # Wait for GitLab to be ready
-MAX_WAIT=300  # 5 minutes
+MAX_WAIT=300 # 5 minutes
 WAITED=0
-while ! docker compose exec -T git-server gitlab-rake gitlab:check SANITIZE=true > /dev/null 2>&1; do
+while ! docker compose exec -T git-server gitlab-rake gitlab:check SANITIZE=true >/dev/null 2>&1; do
     if [ $WAITED -ge $MAX_WAIT ]; then
         print_error "GitLab did not become ready within $MAX_WAIT seconds"
         exit 1
@@ -70,11 +70,10 @@ print_info "GitLab is ready!"
 
 # Reset root password
 print_info "Setting up admin user: $ADMIN_USERNAME"
-if docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" <<EOF
+if docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" <<EOF; then
 ${ADMIN_PASSWORD}
 ${ADMIN_PASSWORD}
 EOF
-then
     print_info "✅ Admin user password has been set successfully!"
     echo ""
     print_info "Login Details:"

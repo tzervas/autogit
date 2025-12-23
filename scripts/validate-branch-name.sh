@@ -32,49 +32,49 @@ BRANCH_NAME=$1
 # Validate branch name patterns
 validate_branch() {
     local branch=$1
-    
+
     # Protected branches
-    if [[ "$branch" == "main" || "$branch" == "dev" ]]; then
+    if [[ $branch == "main" || $branch == "dev" ]]; then
         print_success "Protected branch: $branch"
         return 0
     fi
-    
+
     # Feature branches
-    if [[ "$branch" =~ ^feature/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/[a-z0-9-]+$ ]]; then
         print_success "Valid feature branch: $branch"
         return 0
     fi
-    
+
     # Sub-feature branches
-    if [[ "$branch" =~ ^feature/[a-z0-9-]+/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/[a-z0-9-]+/[a-z0-9-]+$ ]]; then
         print_success "Valid sub-feature branch: $branch"
         return 0
     fi
-    
+
     # Work branches
-    if [[ "$branch" =~ ^feature/[a-z0-9-]+/[a-z0-9-]+/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^feature/[a-z0-9-]+/[a-z0-9-]+/[a-z0-9-]+$ ]]; then
         print_success "Valid work branch: $branch"
         return 0
     fi
-    
+
     # Hotfix branches
-    if [[ "$branch" =~ ^hotfix/[a-z0-9-]+$ ]]; then
+    if [[ $branch =~ ^hotfix/[a-z0-9-]+$ ]]; then
         print_success "Valid hotfix branch: $branch"
         return 0
     fi
-    
+
     # Release branches
-    if [[ "$branch" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    if [[ $branch =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         print_success "Valid release branch: $branch"
         return 0
     fi
-    
+
     # Copilot branches (special case for GitHub Copilot)
-    if [[ "$branch" =~ ^copilot/.+$ ]]; then
+    if [[ $branch =~ ^copilot/.+$ ]]; then
         print_info "Copilot branch: $branch"
         return 0
     fi
-    
+
     # If we get here, branch name is invalid
     print_error "Invalid branch name: $branch"
     echo ""

@@ -222,23 +222,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           pip install black flake8 mypy
-      
+
       - name: Run Black
         run: black --check .
-      
+
       - name: Run Flake8
         run: flake8 .
-      
+
       - name: Run MyPy
         run: mypy src/
 
@@ -247,22 +247,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install UV
         run: pip install uv
-      
+
       - name: Install dependencies
         run: uv sync
-      
+
       - name: Run tests with coverage
         run: |
           uv run pytest --cov --cov-report=xml --cov-report=term
-      
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -275,10 +275,10 @@ jobs:
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Build multi-platform image
         uses: docker/build-push-action@v5
         with:
@@ -294,13 +294,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check markdown links
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: 'yes'
           config-file: '.github/markdown-link-check-config.json'
-      
+
       - name: Verify doc index
         run: |
           # Custom script to verify docs/INDEX.md is up to date

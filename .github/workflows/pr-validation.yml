@@ -17,7 +17,7 @@ jobs:
   # ============================================================================
   # PR Metadata Validation
   # ============================================================================
-  
+
   validate-branch-naming:
     name: Validate Branch Naming Convention
     runs-on: ubuntu-latest
@@ -192,7 +192,7 @@ jobs:
           else
             echo "No scripts directory found"
           fi
-          
+
           # Also check service scripts
           if [ -d "services" ]; then
             find services -type f -name "*.sh" -exec shellcheck {} +
@@ -431,7 +431,7 @@ jobs:
               fi
             done
           fi
-          
+
           # Check service scripts
           find services -type f -name "*.sh" | while read -r script; do
             if [ -x "$script" ]; then

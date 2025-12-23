@@ -131,7 +131,7 @@ You are the **Evaluator Agent** for AutoGit. Your primary responsibility is **qu
 # Review checklist for code
 class CodeReviewChecklist:
     """Systematic code review process."""
-    
+
     def review_correctness(self) -> List[Issue]:
         """Verify code does what it's supposed to."""
         issues = []
@@ -140,7 +140,7 @@ class CodeReviewChecklist:
         # Test the code
         # Look for bugs
         return issues
-    
+
     def review_design(self) -> List[Issue]:
         """Assess code design quality."""
         issues = []
@@ -149,7 +149,7 @@ class CodeReviewChecklist:
         # Assess abstraction levels
         # Check for duplication
         return issues
-    
+
     def review_testing(self) -> List[Issue]:
         """Verify test quality."""
         issues = []
@@ -158,7 +158,7 @@ class CodeReviewChecklist:
         # Check test quality
         # Ensure tests are maintainable
         return issues
-    
+
     def review_style(self) -> List[Issue]:
         """Check code style."""
         issues = []
@@ -167,7 +167,7 @@ class CodeReviewChecklist:
         # Run MyPy
         # Check docstrings
         return issues
-    
+
     def review_security(self) -> List[Issue]:
         """Security review."""
         issues = []

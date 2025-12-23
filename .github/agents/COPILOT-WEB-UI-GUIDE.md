@@ -1,6 +1,6 @@
 # Copilot Web UI Agent Workflow Implementation Guide
 
-**Last Updated**: 2025-12-21  
+**Last Updated**: 2025-12-21
 **Status**: Active
 
 ## Overview
@@ -79,16 +79,16 @@ Copilot automatically selects relevant agents based on:
    ```markdown
    ## Task 1: Design GPU Detection Interface
    Assigned: Software Engineer
-   
+
    ## Task 2: Implement AMD Detection
    Assigned: Software Engineer
-   
+
    ## Task 3: Add Docker Configuration
    Assigned: DevOps Engineer
-   
+
    ## Task 4: Security Review
    Assigned: Security Engineer
-   
+
    ## Task 5: Update Documentation
    Assigned: Documentation Engineer
    ```
@@ -271,7 +271,7 @@ Root Agent:
 
 **Problem**: Agent ignores specialized configuration
 
-**Solution**: 
+**Solution**:
 1. Verify `.github/agents/agent.md` exists and is valid markdown
 2. Check agent file references shared-context.md correctly
 3. Explicitly mention agent: `@software-engineer: ...`

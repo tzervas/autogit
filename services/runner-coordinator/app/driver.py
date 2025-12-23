@@ -26,7 +26,8 @@ class DockerDriver:
         network: str = "autogit-network",
         environment: Optional[Dict[str, str]] = None,
         platform: Optional[str] = None,
-        gpu_vendor: Optional[str] = None
+        gpu_vendor: Optional[str] = None,
+        userns_mode: str = "host" # Default to host, but can be overridden for isolation
     ) -> Dict[str, Any]:
         """
         Spawn a new runner container.
@@ -54,6 +55,10 @@ class DockerDriver:
                 platform=platform,
                 device_requests=device_requests,
                 devices=devices,
+                userns_mode=userns_mode,
+                cap_drop=["ALL"], # Drop all capabilities by default
+                cap_add=["CHOWN", "SETGID", "SETUID"], # Add only necessary ones
+                security_opt=["no-new-privileges:true"],
                 restart_policy={"Name": "unless-stopped"},
                 volumes={
                     "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"}

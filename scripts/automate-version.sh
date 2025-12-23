@@ -8,25 +8,28 @@ set -e
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Function to get the current version from git tags
 get_current_version() {
-    local version=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    local version
+    version=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
     echo "$version"
 }
 
 # Function to increment semantic version
 increment_version() {
-    local version=$1
-    local type=$2 # major, minor, patch
+    local version="$1"
+    local type="$2" # major, minor, patch
     
-    local major=$(echo $version | cut -d. -f1 | tr -d 'v')
-    local minor=$(echo $version | cut -d. -f2)
-    local patch=$(echo $version | cut -d. -f3 | cut -d- -f1)
+    local major
+    major=$(echo "$version" | cut -d. -f1 | tr -d 'v')
+    local minor
+    minor=$(echo "$version" | cut -d. -f2)
+    local patch
+    patch=$(echo "$version" | cut -d. -f3 | cut -d- -f1)
     
-    case $type in
+    case "$type" in
         major)
             major=$((major + 1))
             minor=0
@@ -57,12 +60,12 @@ if [[ "$CURRENT_BRANCH" == "main" ]]; then
     # Logic for determining major/minor/patch could be based on commit messages (e.g., feat:, fix:, BREAKING CHANGE:)
     # For now, default to patch unless specified
     TYPE=${1:-patch}
-    NEW_VERSION=$(increment_version $CURRENT_VERSION $TYPE)
+    NEW_VERSION=$(increment_version "$CURRENT_VERSION" "$TYPE")
     
 elif [[ "$CURRENT_BRANCH" == "dev" ]]; then
     # On dev, we do pre-releases
     echo -e "${YELLOW}Detected dev branch. Preparing for a pre-release...${NC}"
-    PATCH_VERSION=$(increment_version $CURRENT_VERSION patch)
+    PATCH_VERSION=$(increment_version "$CURRENT_VERSION" patch)
     TIMESTAMP=$(date +%Y%m%d%H%M%S)
     NEW_VERSION="${PATCH_VERSION}-dev.${TIMESTAMP}"
     
@@ -70,8 +73,8 @@ else
     # On feature/sub-feature branches, we do dev tags
     echo -e "${YELLOW}Detected feature/work branch. Preparing for a dev tag...${NC}"
     # Sanitize branch name for tag
-    SAFE_BRANCH=$(echo $CURRENT_BRANCH | sed 's/[^a-zA-Z0-9]/-/g')
-    PATCH_VERSION=$(increment_version $CURRENT_VERSION patch)
+    SAFE_BRANCH="${CURRENT_BRANCH//[^a-zA-Z0-9]/-}"
+    PATCH_VERSION=$(increment_version "$CURRENT_VERSION" patch)
     TIMESTAMP=$(date +%Y%m%d%H%M%S)
     NEW_VERSION="${PATCH_VERSION}-${SAFE_BRANCH}.${TIMESTAMP}"
 fi

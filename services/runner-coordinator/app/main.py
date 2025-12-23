@@ -1,9 +1,40 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 import datetime
+import asyncio
+from sqlalchemy.orm import Session
+
+from .driver import DockerDriver
+from .job_manager import JobManager
+from .models import Base, Job
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+DATABASE_URL = "sqlite:///./runner_coordinator.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AutoGit Runner Coordinator", version="0.1.0")
+driver = DockerDriver()
+
+@app.on_event("startup")
+async def startup_event():
+    # Start the job queue processor in the background
+    db = SessionLocal()
+    job_manager = JobManager(db, driver)
+    asyncio.create_task(job_manager.process_queue())
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Models
 class JobWebhook(BaseModel):
@@ -42,15 +73,23 @@ async def list_runners():
     return []
 
 @app.post("/webhook/job")
-async def handle_job_webhook(payload: JobWebhook, background_tasks: BackgroundTasks):
+async def handle_job_webhook(payload: JobWebhook, db: Session = Depends(get_db)):
     """
     Handle incoming job webhooks from GitLab.
-    This will eventually trigger the runner provisioning logic.
     """
     if payload.object_kind != "build":
         raise HTTPException(status_code=400, detail="Only build events are supported")
 
-    # TODO: Add to job queue and trigger provisioning
+    # Create job in database
+    new_job = Job(
+        gitlab_job_id=payload.checkout_sha, # Using SHA as placeholder for job ID
+        project_id=payload.project_id,
+        project_name=payload.project_name,
+        status="queued"
+    )
+    db.add(new_job)
+    db.commit()
+
     return {"message": "Job received and queued", "job_id": payload.checkout_sha}
 
 if __name__ == "__main__":

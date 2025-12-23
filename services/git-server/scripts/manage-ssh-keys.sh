@@ -24,7 +24,7 @@ print_error() {
 
 # Check if GitLab is running
 check_gitlab_running() {
-    if ! docker compose ps git-server --format json | grep -q '"State":"running"'; then
+    if ! docker compose ps git-server --status running --format json | grep -q '"State":"running"'; then
         print_error "GitLab container is not running"
         exit 1
     fi
@@ -67,6 +67,8 @@ add_key() {
 
     print_info "Adding SSH key '$title' for user: $username"
 
+    # Pass key content via environment variable.
+    # Note: We use a heredoc for the Ruby script.
     if docker compose exec -T \
         -e USERNAME="$username" \
         -e TITLE="$title" \
@@ -74,7 +76,8 @@ add_key() {
         git-server gitlab-rails runner <<'EOF'; then
 user = User.find_by(username: ENV['USERNAME'])
 if user
-  key = user.keys.new(title: ENV['TITLE'], key: ENV['KEY_CONTENT'])
+  key_content = ENV['KEY_CONTENT'].strip
+  key = user.keys.new(title: ENV['TITLE'], key: key_content)
   if key.save
     puts "SSH key added successfully!"
   else

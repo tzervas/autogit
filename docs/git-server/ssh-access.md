@@ -19,7 +19,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ## 2. Add SSH Key to AutoGit
 
 ### Option 1: Via Web UI (Recommended)
-1. Login to AutoGit: http://localhost:3000
+1. Log in to AutoGit: http://localhost:3000
 2. Click on your avatar in the top-right corner and select **Settings**.
 3. In the left sidebar, select **SSH Keys**.
 4. Click **Add new key**.

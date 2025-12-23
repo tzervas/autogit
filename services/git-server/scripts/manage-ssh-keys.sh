@@ -24,7 +24,7 @@ print_error() {
 
 # Check if GitLab is running
 check_gitlab_running() {
-    if ! docker compose ps git-server | grep -q "Up"; then
+    if ! docker compose ps git-server --status running --format json | grep -q '"State":"running"'; then
         print_error "GitLab container is not running"
         exit 1
     fi
@@ -40,8 +40,8 @@ list_keys() {
     fi
 
     print_info "Listing SSH keys for user: $username"
-    docker compose exec -T git-server gitlab-rails runner <<EOF
-user = User.find_by(username: '${username}')
+    docker compose exec -T -e USERNAME="$username" git-server gitlab-rails runner <<'EOF'
+user = User.find_by(username: ENV['USERNAME'])
 if user
   user.keys.each do |key|
     puts "ID: #{key.id}, Title: #{key.title}, Fingerprint: #{key.fingerprint}"
@@ -67,10 +67,17 @@ add_key() {
 
     print_info "Adding SSH key '$title' for user: $username"
 
-    if docker compose exec -T git-server gitlab-rails runner <<EOF; then
-user = User.find_by(username: '${username}')
+    # Pass key content via environment variable.
+    # Note: We use a heredoc for the Ruby script.
+    if docker compose exec -T \
+        -e USERNAME="$username" \
+        -e TITLE="$title" \
+        -e KEY_CONTENT="$key_content" \
+        git-server gitlab-rails runner <<'EOF'; then
+user = User.find_by(username: ENV['USERNAME'])
 if user
-  key = user.keys.new(title: '${title}', key: '${key_content}')
+  key_content = ENV['KEY_CONTENT'].strip
+  key = user.keys.new(title: ENV['TITLE'], key: key_content)
   if key.save
     puts "SSH key added successfully!"
   else
@@ -99,16 +106,24 @@ delete_key() {
         exit 1
     fi
 
+    if [[ ! $key_id =~ ^[0-9]+$ ]]; then
+        print_error "Error: Key ID must be a number"
+        exit 1
+    fi
+
     print_warn "Deleting SSH key ID $key_id for user: $username"
-    docker compose exec -T git-server gitlab-rails runner <<EOF
-user = User.find_by(username: '${username}')
+    docker compose exec -T \
+        -e USERNAME="$username" \
+        -e KEY_ID="$key_id" \
+        git-server gitlab-rails runner <<'EOF'
+user = User.find_by(username: ENV['USERNAME'])
 if user
-  key = user.keys.find_by(id: ${key_id})
+  key = user.keys.find_by(id: ENV['KEY_ID'].to_i)
   if key
     key.destroy
     puts "SSH key deleted successfully!"
   else
-    puts "Error: Key ID ${key_id} not found for user ${username}"
+    puts "Error: Key ID #{ENV['KEY_ID']} not found for user #{ENV['USERNAME']}"
     exit 1
   end
 else

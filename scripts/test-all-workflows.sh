@@ -37,7 +37,7 @@ echo "  2. Watch runners spawn automatically (4 cores, 6GB each)"
 echo "  3. Monitor job execution"
 echo "  4. Verify cleanup after cooldown"
 echo ""
-read -p "Press Enter to start..."
+read -r -p "Press Enter to start..."
 echo ""
 
 # Test 1: Trigger pipeline
@@ -75,7 +75,7 @@ for i in {1..60}; do
 
     # Get runner count
     RUNNER_COUNT=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
-    [ $RUNNER_COUNT -gt $MAX_RUNNERS_SEEN ] && MAX_RUNNERS_SEEN=$RUNNER_COUNT
+    [ "$RUNNER_COUNT" -gt "$MAX_RUNNERS_SEEN" ] && MAX_RUNNERS_SEEN=$RUNNER_COUNT
 
     # Print status change
     if [ "$STATUS" != "$LAST_STATUS" ]; then
@@ -96,7 +96,7 @@ for i in {1..60}; do
     fi
 
     # Show runner activity
-    if [ $RUNNER_COUNT -gt 0 ]; then
+    if [ "$RUNNER_COUNT" -gt 0 ]; then
         echo -ne "\r  ${CYAN}Runners active: ${RUNNER_COUNT}${NC} | Elapsed: $(($(date +%s) - START_TIME))s"
     fi
 
@@ -138,7 +138,7 @@ for i in {1..30}; do
     TIME=$(date +"%H:%M:%S")
     echo -ne "\r  [$TIME] Runners: ${RUNNER_COUNT} | Containers: ${CONTAINERS} | Check: $i/30"
 
-    [ $RUNNER_COUNT -eq 0 ] && [ $CONTAINERS -le 1 ] && {
+    [ "$RUNNER_COUNT" -eq 0 ] && [ "$CONTAINERS" -le 1 ] && {
         echo ""
         echo -e "${GREEN}✓${NC} Cleanup complete!"
         break
@@ -161,7 +161,7 @@ echo -e "${BOLD}Results:${NC}"
 echo -e "  ${GREEN}✓${NC} Pipeline triggered and executed"
 echo -e "  ${GREEN}✓${NC} Dynamic runners spawned (max: ${MAX_RUNNERS_SEEN})"
 echo -e "  ${GREEN}✓${NC} Jobs executed: ${SUCCESS_COUNT}/${TOTAL_COUNT} succeeded"
-if [ $RUNNER_COUNT -eq 0 ]; then
+if [ "$RUNNER_COUNT" -eq 0 ]; then
     echo -e "  ${GREEN}✓${NC} Runners cleaned up successfully"
 else
     echo -e "  ${YELLOW}⏳${NC} Runners in cooldown (${RUNNER_COUNT} active)"

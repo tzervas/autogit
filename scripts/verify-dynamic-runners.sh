@@ -209,20 +209,16 @@ if [ -n "${GITLAB_TOKEN}" ]; then
                 # Add the example CI file
                 info "Adding .gitlab-ci.yml..."
 
-                CI_CONTENT=$(cat .gitlab-ci.example.yml | base64 -w 0)
-
-                curl -sf --request POST \
+                if curl -sf --request POST \
                     --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
                     --header "Content-Type: application/json" \
                     --data "{
                         \"branch\": \"main\",
-                        \"content\": \"${CI_CONTENT}\",
+                        \"content\": \"${ENCODED_CONTENT}\",
                         \"commit_message\": \"Add CI/CD configuration\",
                         \"encoding\": \"base64\"
                     }" \
-                    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1
-
-                if [ $? -eq 0 ]; then
+                    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
                     success "CI configuration added"
                 else
                     warning "Could not add CI configuration automatically"

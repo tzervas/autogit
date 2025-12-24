@@ -1,9 +1,9 @@
 # Release PR Summary - v0.2.0
 
-**PR Branch**: `copilot/review-dev-branch-merge`  
-**Target Branch**: `main`  
-**Release Version**: v0.2.0  
-**Date**: December 24, 2025  
+**PR Branch**: `copilot/review-dev-branch-merge`
+**Target Branch**: `main`
+**Release Version**: v0.2.0
+**Date**: December 24, 2025
 **Type**: Minor Release (New Features)
 
 ---

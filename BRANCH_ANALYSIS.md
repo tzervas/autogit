@@ -208,7 +208,7 @@ All 10 feature branches point to the same commit as main (4eb26d6) and contain *
    for branch in feature/homelab-deployment ...; do
        git tag archive/$branch origin/$branch
    done
-   
+
    # Then delete if desired
    # git push origin --delete <branch-name>
    ```

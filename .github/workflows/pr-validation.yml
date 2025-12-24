@@ -664,7 +664,7 @@ jobs:
   wait-for-self-hosted-ci:
     name: Wait for Self-Hosted CI Results
     runs-on: self-hosted
-    needs: [validate-branch-naming, validate-pr-target, check-pr-description, lint-shell-scripts, validate-docker]
+    needs: [validate-branch-naming, validate-pr-target, check-pr-description, lint-and-autofix, validate-docker, validate-syntax]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

@@ -5,6 +5,8 @@ All notable changes to AutoGit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+> **Note on Versioning**: Prior to v0.2.0, git tags (e.g., v0.1.16) were used for releases while `pyproject.toml` remained at 0.1.0. Starting with v0.2.0, we now maintain version consistency between git tags and `pyproject.toml`.
+
 ## [Unreleased]
 
 ## [0.2.0] - 2024-12-24

@@ -195,11 +195,14 @@ jobs:
       - name: Install pre-commit via uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          ~/.cargo/bin/uv tool install pre-commit
+          source ~/.local/bin/env
+          uv tool install pre-commit
 
       - name: Run pre-commit
         id: pre-commit
-        run: ~/.local/bin/pre-commit run --all-files
+        run: |
+          source ~/.local/bin/env
+          pre-commit run --all-files
         continue-on-error: true
 
       - name: Commit and push fixes
@@ -229,11 +232,13 @@ jobs:
       - name: Install yamllint via uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          ~/.cargo/bin/uv tool install yamllint
+          source ~/.local/bin/env
+          uv tool install yamllint
 
       - name: Run yamllint
         run: |
-          ~/.local/bin/yamllint -c config/.yamllint.yml . || true
+          source ~/.local/bin/env
+          uvx yamllint -c config/.yamllint.yml . || true
 
   lint-markdown:
     name: Lint Markdown Files
@@ -403,12 +408,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Validate docker-compose.yml
         run: |
-          docker compose config > /dev/null
+          # Use docker compose config to validate the file
+          docker compose config > /dev/null || {
+            echo "✗ docker-compose.yml is invalid"
+            exit 1
+          }
+          echo "✓ docker-compose.yml is valid"
 
       - name: Check Dockerfiles exist
         run: |

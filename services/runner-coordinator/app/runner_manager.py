@@ -40,7 +40,7 @@ class RunnerManager:
         self.gitlab_token = gitlab_token
         self.cooldown_minutes = cooldown_minutes
         self.max_idle_runners = max_idle_runners
-        self.runner_image = "gitlab/gitlab-runner:alpine"
+        self.runner_image = os.getenv("RUNNER_IMAGE", "gitlab/gitlab-runner:alpine")
 
         # Get runner registration token from env or parameter
         self.runner_registration_token = runner_registration_token or os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")

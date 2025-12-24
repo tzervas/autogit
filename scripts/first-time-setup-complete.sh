@@ -119,6 +119,15 @@ else
     fi
 fi
 
+# Validate that password has been changed from default
+if [ "$GITLAB_ROOT_PASSWORD" = "CHANGE_ME_SECURE_PASSWORD" ]; then # pragma: allowlist secret
+    error "SECURITY WARNING: Default password detected!"
+    error "The password 'CHANGE_ME_SECURE_PASSWORD' must not be used in production."
+    error "This script should have generated a secure password automatically."
+    error "Please check your .env file and ensure it's properly configured."
+    exit 1
+fi
+
 # Step 3: Create API token
 echo ""
 header "Step 3: Creating GitLab API Token"

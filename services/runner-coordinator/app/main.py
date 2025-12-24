@@ -21,7 +21,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = "sqlite:///./runner_coordinator.db"
+# Configuration from environment
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./runner_coordinator.db")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -89,7 +90,9 @@ async def lifespan(app: FastAPI):
     try:
         await manager_task
     except asyncio.CancelledError:
-        pass
+        # Expected exception when cancelling the lifecycle manager task
+        # The task is cleanly cancelled and resources are cleaned up
+        logger.info("Runner lifecycle manager stopped gracefully")
     db.close()
 
 app = FastAPI(title="AutoGit Runner Coordinator", version="0.2.0", lifespan=lifespan)
@@ -188,14 +191,20 @@ async def register_runner(request: RunnerRegistrationRequest):
     runner_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
     runner_name = f"autogit-runner-{runner_id}"
 
+    # Get configuration from environment
+    runner_image = os.getenv("RUNNER_IMAGE", "gitlab/gitlab-runner:alpine")
+    runner_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
+    runner_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
+    runner_network = os.getenv("RUNNER_NETWORK", "autogit-network")
+
     try:
         # Spawn the runner container
         result = driver.spawn_runner(
             name=runner_name,
-            image="gitlab/gitlab-runner:alpine",
-            cpu_limit=4.0,
-            mem_limit="4g",
-            network="autogit_autogit-network",
+            image=runner_image,
+            cpu_limit=runner_cpu_limit,
+            mem_limit=runner_mem_limit,
+            network=runner_network,
             platform="linux/amd64"
         )
 

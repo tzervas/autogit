@@ -40,14 +40,14 @@ class RunnerManager:
         self.gitlab_token = gitlab_token
         self.cooldown_minutes = cooldown_minutes
         self.max_idle_runners = max_idle_runners
-        self.runner_image = "gitlab/gitlab-runner:alpine"
+        self.runner_image = os.getenv("RUNNER_IMAGE", "gitlab/gitlab-runner:alpine")
 
         # Get runner registration token from env or parameter
         self.runner_registration_token = runner_registration_token or os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")
 
         # Enhanced resource limits - quad core, 4-6GB RAM for faster boot
         self.default_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
-        self.default_mem_limit = os.getenv("RUNNER_MEM_LIMIT", "6g")
+        self.default_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
 
         logger.info(f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner")
         logger.info(f"Cooldown: {self.cooldown_minutes} minutes, Max idle: {self.max_idle_runners}")

@@ -1,0 +1,71 @@
+---
+name: GitHub Actions Runner Registration
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - register
+          - unregister
+          - status
+      runner_name:
+        description: 'Runner name (for register/unregister)'
+        required: false
+        type: string
+        default: 'homelab-runner'
+
+permissions:
+  contents: read
+
+jobs:
+  manage-runner:
+    name: Manage GitHub Actions Runner
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup SSH for Homelab Access
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOMELAB_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 192.168.1.170 >> ~/.ssh/known_hosts
+
+      - name: Register GitHub Actions Runner
+        if: inputs.action == 'register'
+        run: |
+          RUNNER_NAME="${{ inputs.runner_name }}"
+          echo "Registering GitHub Actions runner: $RUNNER_NAME"
+
+          # This would register a GitHub Actions runner that can trigger jobs on GitLab
+          # The runner would be configured to:
+          # 1. Listen for GitHub Actions jobs
+          # 2. Forward those jobs to our GitLab CI
+          # 3. Report results back to GitHub
+
+          ssh homelab "echo 'GitHub Actions runner registration placeholder'"
+
+      - name: Unregister GitHub Actions Runner
+        if: inputs.action == 'unregister'
+        run: |
+          RUNNER_NAME="${{ inputs.runner_name }}"
+          echo "Unregistering GitHub Actions runner: $RUNNER_NAME"
+
+          ssh homelab "echo 'GitHub Actions runner unregistration placeholder'"
+
+      - name: Check Runner Status
+        if: inputs.action == 'status'
+        run: |
+          echo "Checking GitHub Actions runner status..."
+
+          # Check if our homelab runners are available
+          ssh homelab "export DOCKER_HOST=unix:///run/user/1000/docker.sock && docker ps --filter name=autogit-runner --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+
+          echo ""
+          echo "GitLab Runner Status:"
+          ssh homelab "export DOCKER_HOST=unix:///run/user/1000/docker.sock && docker exec autogit-git-server gitlab-runner status 2>/dev/null || echo 'GitLab runner not accessible'"

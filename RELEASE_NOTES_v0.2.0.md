@@ -2,7 +2,10 @@
 
 **Release Date**: December 24, 2024  
 **Release Type**: Minor Version (New Features)  
-**Previous Version**: v0.1.16
+**Previous Git Tag**: v0.1.16  
+**Previous pyproject.toml Version**: 0.1.0  
+
+> **Note**: Prior to this release, git tags (e.g., v0.1.16) were used for releases while `pyproject.toml` remained at 0.1.0. Starting with v0.2.0, we now maintain version consistency between git tags and the version in `pyproject.toml`.
 
 ---
 

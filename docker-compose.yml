@@ -3,12 +3,16 @@ services:
   git-server:
     build:
       context: ./services/git-server
+      cache_from:
+        - autogit-git-server:latest
+    image: autogit-git-server:latest
     container_name: autogit-git-server
     hostname: gitlab.autogit.local
     ports:
-      - "${GITLAB_HTTP_PORT:-3000}:80"      # HTTP
+      - "${GITLAB_HTTP_PORT:-3000}:3000"    # HTTP
       - "${GITLAB_HTTPS_PORT:-3443}:443"    # HTTPS
       - "${GITLAB_SSH_PORT:-2222}:22"       # SSH
+      - "${GITLAB_REGISTRY_PORT:-5050}:5050" # Container Registry
     volumes:
       - ${GITLAB_CONFIG_VOLUME:-git-config}:/etc/gitlab
       - ${GITLAB_LOGS_VOLUME:-git-logs}:/var/log/gitlab
@@ -16,10 +20,18 @@ services:
     environment:
       - GITLAB_OMNIBUS_CONFIG=${GITLAB_OMNIBUS_CONFIG:-external_url "http://localhost:3000"}
       - GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}
-    shm_size: '256m'
+    shm_size: '1g'
+    deploy:
+      resources:
+        limits:
+          cpus: '16'
+          memory: 32G
+        reservations:
+          cpus: '8'
+          memory: 16G
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/-/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/-/health"]
       interval: 30s
       timeout: 10s
       start_period: 180s
@@ -28,16 +40,49 @@ services:
       - autogit-network
 
   # Runner coordinator - manages GPU and compute runners
+  # For production: set COORDINATOR_IMAGE to registry URL
+  # For development: uses local build
   runner-coordinator:
     build:
       context: ./services/runner-coordinator
+      cache_from:
+        - autogit-runner-coordinator:latest
+    image: ${COORDINATOR_IMAGE:-autogit-runner-coordinator:latest}
     container_name: autogit-runner-coordinator
     ports:
       - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${RUNNER_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+      - ./runner_coordinator.db:/app/runner_coordinator.db
+    # In rootless mode, UID 0 inside maps to the host user (UID 1000).
+    # This is necessary to access the host's rootless Docker socket.
+    user: "0:0"
     environment:
       - SERVICE_NAME=runner-coordinator
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - GITLAB_URL=${GITLAB_URL:-http://autogit-git-server:3000}
+      - GITLAB_TOKEN=${GITLAB_TOKEN:-}
+      - GITLAB_RUNNER_REGISTRATION_TOKEN=${GITLAB_RUNNER_REGISTRATION_TOKEN:-}
+      - RUNNER_COOLDOWN_MINUTES=${RUNNER_COOLDOWN_MINUTES:-5}
+      - MAX_IDLE_RUNNERS=${MAX_IDLE_RUNNERS:-0}
+      - RUNNER_NETWORK=${RUNNER_NETWORK:-autogit-network}
+      # For rootless Docker: path to the docker socket ON THE HOST
+      # This is where runners mount the socket from
+      - RUNNER_DOCKER_SOCKET=${RUNNER_DOCKER_SOCKET:-/run/user/1000/docker.sock}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '8'
+          memory: 8G
+        reservations:
+          cpus: '4'
+          memory: 4G
+    restart: unless-stopped
     depends_on:
       - git-server
     networks:
@@ -46,14 +91,27 @@ services:
 networks:
   autogit-network:
     driver: bridge
+    name: autogit-network
 
 volumes:
   git-config:
     driver: local
     name: autogit-git-config
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/config
   git-logs:
     driver: local
     name: autogit-git-logs
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/logs
   git-data:
     driver: local
     name: autogit-git-data
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/data

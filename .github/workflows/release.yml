@@ -34,7 +34,7 @@ on:
 jobs:
   validate-release:
     name: Validate Release Requirements
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
     steps:
@@ -71,7 +71,7 @@ jobs:
 
   create-release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: validate-release
     outputs:
       version: ${{ steps.get_version.outputs.version }}
@@ -144,7 +144,7 @@ jobs:
 
   build-and-publish-images:
     name: Build and Publish Docker Images
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: create-release
     permissions:
       contents: read

@@ -22,7 +22,7 @@ permissions:
 jobs:
   create-fix-pr:
     name: Create Automatic Fix PR
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: |
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.run_attempt >= 3 &&

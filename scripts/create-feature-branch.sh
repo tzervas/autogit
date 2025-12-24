@@ -81,7 +81,7 @@ if [ ${#SUBTASKS[@]} -gt 0 ]; then
     print_info "Creating sub-feature branches..."
 
     for subtask in "${SUBTASKS[@]}"; do
-        SUBTASK_BRANCH="feature/$FEATURE_NAME/$subtask"
+        SUBTASK_BRANCH="feature/$FEATURE_NAME-$subtask"
         print_info "Creating sub-feature branch: $SUBTASK_BRANCH"
         git checkout "$FEATURE_BRANCH"
         git checkout -b "$SUBTASK_BRANCH"

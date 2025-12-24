@@ -24,7 +24,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] User guides
 - [ ] Tutorial content
 
-## Version 1.1 - Multi-Architecture (Target: Q2 2025)
+## Version 1.1 - Multi-Architecture (Target: Q2 2025) 🚧 BACKLOG
 
 ### Features
 - [ ] ARM64 native support (for ARM64 hosts/runners)

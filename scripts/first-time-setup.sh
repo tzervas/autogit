@@ -1,0 +1,263 @@
+#!/bin/bash
+# AutoGit First-Time Setup - Provides login info and configures dynamic runners
+
+set -e
+
+HOMELAB_IP="${HOMELAB_IP:-192.168.1.170}"
+GITLAB_URL="${GITLAB_URL:-http://${HOMELAB_IP}:3000}"
+COORDINATOR_URL="${COORDINATOR_URL:-http://${HOMELAB_IP}:8080}"
+GITLAB_ROOT_PASSWORD="${GITLAB_ROOT_PASSWORD:-CHANGE_ME_SECURE_PASSWORD}"
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo ""
+echo "╔══════════════════════════════════════════════════════════════════════╗"
+echo "║                                                                      ║"
+echo "║                   🚀 AutoGit First-Time Setup 🚀                    ║"
+echo "║                                                                      ║"
+echo "║           Self-Hosted Git Server with Dynamic CI/CD Runners         ║"
+echo "║                                                                      ║"
+echo "╚══════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Wait for services to be ready
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}Step 1: Checking Services${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo "Waiting for GitLab to be ready (this may take a few minutes on first start)..."
+RETRIES=0
+MAX_RETRIES=60
+until curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; do
+    RETRIES=$((RETRIES + 1))
+    if [ $RETRIES -ge $MAX_RETRIES ]; then
+        echo "❌ GitLab did not start in time"
+        echo ""
+        echo "Troubleshooting:"
+        echo "  • Check logs: ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker logs autogit-git-server'"
+        echo "  • Check status: bash scripts/check-homelab-status.sh"
+        exit 1
+    fi
+    echo -n "."
+    sleep 5
+done
+echo ""
+echo "✓ GitLab is ready!"
+echo ""
+
+echo "Checking Runner Coordinator..."
+if curl -sf "${COORDINATOR_URL}/health" >/dev/null 2>&1; then
+    echo "✓ Runner Coordinator is ready!"
+else
+    echo "❌ Runner Coordinator is not responding"
+    exit 1
+fi
+
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}Step 2: GitLab WebUI Login Information${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}                     🌐 GitLab Web Interface                      ${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo -e "  ${BOLD}URL:${NC}      ${GITLAB_URL}"
+echo -e "  ${BOLD}Username:${NC} ${GREEN}root${NC}"
+echo -e "  ${BOLD}Password:${NC} ${GREEN}${GITLAB_ROOT_PASSWORD}${NC}"
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo "💡 Save these credentials securely!"
+echo ""
+
+# Save login info to a file
+cat >.autogit_login_info <<EOF
+AutoGit GitLab Login Information
+Generated: $(date)
+
+GitLab Web Interface:
+  URL:      ${GITLAB_URL}
+  Username: root
+  Password: ${GITLAB_ROOT_PASSWORD}
+
+Quick Links:
+  - Projects:          ${GITLAB_URL}/dashboard/projects
+  - Admin Area:        ${GITLAB_URL}/admin
+  - CI/CD Runners:     ${GITLAB_URL}/admin/runners
+  - Access Tokens:     ${GITLAB_URL}/-/user_settings/personal_access_tokens
+
+Runner Coordinator:
+  URL:      ${COORDINATOR_URL}
+  Health:   ${COORDINATOR_URL}/health
+  Runners:  ${COORDINATOR_URL}/runners
+  Status:   ${COORDINATOR_URL}/status
+EOF
+
+chmod 600 .autogit_login_info
+echo "✓ Login information saved to: ${PWD}/.autogit_login_info"
+echo ""
+
+# Configure dynamic runners
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}Step 3: Configuring Dynamic Runners${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo "Getting runner registration token from GitLab..."
+
+# Get registration token via Rails console
+REGISTRATION_TOKEN=$(ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner "puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token"' 2>/dev/null | tail -1)
+
+if [ -n "$REGISTRATION_TOKEN" ] && [ "$REGISTRATION_TOKEN" != "null" ]; then
+    echo "✓ Got runner registration token"
+
+    # Save to environment file
+    cat >.env.runner <<EOF
+# AutoGit Runner Coordinator Configuration
+# Generated: $(date)
+
+GITLAB_URL=${GITLAB_URL}
+GITLAB_RUNNER_REGISTRATION_TOKEN=${REGISTRATION_TOKEN}
+RUNNER_COOLDOWN_MINUTES=5
+MAX_IDLE_RUNNERS=0
+EOF
+    chmod 600 .env.runner
+    echo "✓ Configuration saved to: ${PWD}/.env.runner"
+    echo ""
+
+    echo "💡 To apply this configuration, restart the coordinator:"
+    echo "   ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker restart autogit-runner-coordinator'"
+    echo ""
+else
+    echo "⚠ Could not automatically retrieve registration token"
+    echo ""
+    echo "Manual steps:"
+    echo "  1. Login to GitLab at ${GITLAB_URL}"
+    echo "  2. Go to Admin Area → CI/CD → Runners"
+    echo "  3. Copy the registration token"
+    echo "  4. Set it: export GITLAB_RUNNER_REGISTRATION_TOKEN='your_token'"
+    echo ""
+fi
+
+# Create personal access token for automation
+echo "Creating personal access token for automation..."
+
+if bash scripts/setup-gitlab-automation.sh >/tmp/gitlab-automation.log 2>&1; then
+    echo "✓ Automation configured successfully"
+
+    # Load the token
+    if [ -f ".env.gitlab" ]; then
+        source .env.gitlab
+        echo "✓ GitLab API token configured"
+    fi
+else
+    echo "⚠ Automation setup encountered issues (see /tmp/gitlab-automation.log)"
+fi
+
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}Step 4: Understanding Dynamic Runners${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo "📋 How Dynamic Runners Work:"
+echo ""
+echo "  1. ${BOLD}Zero Footprint${NC}"
+echo "     • No runners exist when idle"
+echo "     • Only the coordinator service runs"
+echo ""
+echo "  2. ${BOLD}Automatic Spawning${NC}"
+echo "     • Coordinator monitors GitLab for pending jobs"
+echo "     • Spawns runners on-demand within seconds"
+echo "     • Registers them automatically with GitLab"
+echo ""
+echo "  3. ${BOLD}Automatic Cleanup${NC}"
+echo "     • Runners idle after job completion"
+echo "     • Cleaned up after cooldown period (default: 5 minutes)"
+echo "     • Containers are fully removed (zero footprint restored)"
+echo ""
+echo "  4. ${BOLD}Fully Managed${NC}"
+echo "     • No manual intervention required"
+echo "     • Health monitoring"
+echo "     • Automatic recovery from failures"
+echo ""
+
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}Step 5: Quick Start Guide${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+echo "🚀 ${BOLD}Test Your Dynamic Runners:${NC}"
+echo ""
+echo "  1. Create or open a project in GitLab:"
+echo "     ${GITLAB_URL}"
+echo ""
+echo "  2. Add a simple .gitlab-ci.yml file:"
+echo "     ---"
+echo "     test:"
+echo "       script:"
+echo '         - echo "Hello from dynamic runner!"'
+echo "       tags:"
+echo "         - docker"
+echo "     ---"
+echo ""
+echo "  3. Push a commit or manually trigger pipeline"
+echo ""
+echo "  4. Watch runners spawn automatically:"
+echo "     watch -n 2 'curl -s ${COORDINATOR_URL}/runners | jq'"
+echo ""
+echo "  5. Or monitor containers:"
+echo "     watch -n 2 'ssh homelab \"DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter name=autogit-runner\"'"
+echo ""
+
+echo ""
+echo "📊 ${BOLD}Monitoring Commands:${NC}"
+echo ""
+echo "  # Check system status"
+echo "  curl ${COORDINATOR_URL}/status | jq"
+echo ""
+echo "  # List active runners"
+echo "  curl ${COORDINATOR_URL}/runners | jq"
+echo ""
+echo "  # View coordinator logs"
+echo "  ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker logs -f autogit-runner-coordinator'"
+echo ""
+echo "  # Check overall homelab status"
+echo "  bash scripts/check-homelab-status.sh"
+echo ""
+
+if [ -f "scripts/gitlab-helpers.sh" ]; then
+    echo ""
+    echo "🛠️  ${BOLD}Helper Functions Available:${NC}"
+    echo ""
+    echo "  source scripts/gitlab-helpers.sh"
+    echo "  gitlab-help"
+    echo ""
+fi
+
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}                          ✅ Setup Complete!                       ${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Your AutoGit instance is ready with:"
+echo "  ✓ GitLab CE self-hosted git server"
+echo "  ✓ Dynamic runner coordinator"
+echo "  ✓ Zero-footprint runner management"
+echo "  ✓ Automatic lifecycle management"
+echo ""
+echo "Login now: ${GITLAB_URL}"
+echo ""
+echo "📚 Documentation: docs/runners/dynamic-runner-testing.md"
+echo ""

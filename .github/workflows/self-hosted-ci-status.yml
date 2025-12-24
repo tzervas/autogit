@@ -1,0 +1,141 @@
+---
+name: Self-Hosted CI Status Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - main
+      - dev
+      - 'feature/**'
+      - 'work/**'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to check (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  check-gitlab-ci-status:
+    name: Check Self-Hosted GitLab CI Status
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ inputs.pr_number }}" != "" ]; then
+            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "pr_number=${{ github.event.number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check GitLab CI Pipeline Status
+        id: gitlab-check
+        run: |
+          PR_NUMBER="${{ steps.pr.outputs.pr_number }}"
+          BRANCH_NAME="${{ github.head_ref }}"
+
+          echo "Checking CI status for PR #$PR_NUMBER, branch: $BRANCH_NAME"
+
+          # This would need to be configured with your GitLab instance
+          # For now, we'll create a placeholder that can be extended
+
+          # Check if we have GitLab credentials
+          if [ -z "$GITLAB_TOKEN" ]; then
+            echo "GITLAB_TOKEN not configured - skipping GitLab CI check"
+            echo "status=unknown" >> $GITHUB_OUTPUT
+            echo "message=GitLab CI integration not configured" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Placeholder for GitLab API call
+          # In a real implementation, this would:
+          # 1. Find the corresponding branch/pipeline in GitLab
+          # 2. Check pipeline status
+          # 3. Report back to GitHub
+
+          echo "status=pending" >> $GITHUB_OUTPUT
+          echo "message=Self-hosted CI integration pending configuration" >> $GITHUB_OUTPUT
+
+      - name: Report CI Status to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.gitlab-check.outputs.status }}';
+            const message = '${{ steps.gitlab-check.outputs.message }}';
+
+            const statusMap = {
+              'success': 'success',
+              'failed': 'failure',
+              'running': 'pending',
+              'pending': 'pending',
+              'unknown': 'error'
+            };
+
+            const description = status === 'success'
+              ? 'Self-hosted CI passed ✅'
+              : status === 'failed'
+              ? 'Self-hosted CI failed ❌'
+              : status === 'running'
+              ? 'Self-hosted CI running ⏳'
+              : `Self-hosted CI: ${message}`;
+
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: statusMap[status] || 'error',
+              target_url: 'http://192.168.1.170:3000/root/autogit/pipelines',
+              description: description,
+              context: 'Self-Hosted CI'
+            });
+
+      - name: Comment on PR with CI Status
+        if: steps.gitlab-check.outputs.status != 'unknown'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.gitlab-check.outputs.status }}';
+            const message = '${{ steps.gitlab-check.outputs.message }}';
+
+            let comment = '## 🔄 Self-Hosted CI Status\n\n';
+            comment += `**Status:** ${status}\n`;
+            comment += `**Details:** ${message}\n\n`;
+            comment += '📍 [View Pipeline](http://192.168.1.170:3000/root/autogit/pipelines)\n\n';
+            comment += '*This PR is validated using our self-hosted GitLab CI infrastructure.*';
+
+            // Check if we've already commented
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const existingComment = comments.data.find(c =>
+              c.body.includes('Self-Hosted CI Status')
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }

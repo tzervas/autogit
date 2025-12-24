@@ -1,0 +1,47 @@
+# Simple AutoGit CI/CD Test Configuration
+
+stages:
+  - test
+  - build
+
+# Quick test job
+test:hello:
+  stage: test
+  script:
+    - echo "Hello from AutoGit dynamic runner!"
+    - echo "Runner ID ${CI_RUNNER_ID}"
+    - echo "Job ID ${CI_JOB_ID}"
+    - echo "Pipeline ID ${CI_PIPELINE_ID}"
+    - sleep 5
+    - echo "Test complete!"
+  tags:
+    - docker
+
+# Parallel jobs to test multiple runners
+test:job1:
+  stage: test
+  script:
+    - echo "Parallel job 1 starting"
+    - sleep 15
+    - echo "Job 1 complete"
+  tags:
+    - docker
+
+test:job2:
+  stage: test
+  script:
+    - echo "Parallel job 2 starting"
+    - sleep 15
+    - echo "Job 2 complete"
+  tags:
+    - docker
+
+# Build stage job
+build:test:
+  stage: build
+  script:
+    - echo "Build stage executing"
+    - sleep 10
+    - echo "Build complete"
+  tags:
+    - docker

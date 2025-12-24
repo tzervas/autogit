@@ -19,7 +19,7 @@ permissions:
 jobs:
   sync-to-features:
     name: Sync Dev Changes to Feature Branches
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

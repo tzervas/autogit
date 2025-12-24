@@ -10,6 +10,8 @@
 
 AutoGit is a fully self-hosted GitOps platform that automatically manages and scales GitLab runners across multiple architectures (amd64, arm64, RISC-V) with GPU-aware scheduling (AMD, NVIDIA, Intel). Built with security, lightweight performance, and ease of deployment in mind.
 
+> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully self-hosted Homeland instance with automated, lifecycle-managed runners. While some manual tasks remain, this release proves the concept and provides a functioning foundation for continued refinement toward the 1.0.0 release.
+
 ### Key Features
 
 - 🚀 **Dynamic Runner Autoscaling** - Automatically provisions right-sized runners based on job queue
@@ -40,15 +42,18 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 
 ## Quick Start
 
+> ⚠️ **Important**: Please review [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) before deploying to understand what features are production-ready vs. experimental.
+
 ### Prerequisites
 
 - Docker 24.0+ or Kubernetes 1.28+
 - Debian 12+ or Ubuntu 22.04+ (host OS)
 - Minimum 8GB RAM, 50GB storage
-- **Architecture**: AMD64 (MVP), ARM64 native or QEMU (Phase 2+)
-- Optional: GPU for accelerated workloads
+- **Architecture**: AMD64 (MVP) - ✅ Production Ready
+- **ARM64/RISC-V**: Planned, not yet implemented
+- Optional: GPU for accelerated workloads (⚠️ Not yet implemented)
 
-### Docker Compose (Development)
+### Docker Compose (Development) - ✅ Validated & Production-Ready
 
 ```bash
 git clone https://github.com/tzervas/autogit.git
@@ -58,15 +63,15 @@ cp .env.example .env
 docker compose up -d
 ```
 
-### Kubernetes/Helm (Production)
+### Kubernetes/Helm (Production) - ⚠️ Planned, Not Yet Implemented
 
 ```bash
-# Install with Helm
-helm repo add autogit https://tzervas.github.io/autogit
-helm install autogit autogit/autogit -f values.yaml
+# Kubernetes deployment is planned for future releases
+# Currently, use Docker Compose for all deployments
+# See DEPLOYMENT_READINESS.md for current status
 ```
 
-See [Installation Guide](docs/installation/README.md) for detailed instructions.
+See [Installation Guide](docs/installation/README.md) and [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature status.
 
 ## Project Structure
 

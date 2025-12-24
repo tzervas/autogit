@@ -39,7 +39,7 @@ fi
 # Check if admin password is set
 if [ -z "$ADMIN_PASSWORD" ]; then
     print_error "GITLAB_ROOT_PASSWORD environment variable is not set!"
-    print_info "Please set it in your .env file or export it: export GITLAB_ROOT_PASSWORD='your-secure-password'"
+    print_info "Please set it in your .env file or export it: export GITLAB_ROOT_PASSWORD='your-secure-password'" # pragma: allowlist secret
     exit 1
 fi
 

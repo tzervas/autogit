@@ -29,7 +29,9 @@ variables:
   # - GHCR_USER: GitHub username (masked)
   # - GHCR_TOKEN: GitHub PAT with packages:write scope (masked, protected)
   GHCR_REGISTRY: ghcr.io
-  GHCR_REPO: tzervas/autogit
+  # GHCR images are published as: ghcr.io/tzervas/autogit-{service}:{tag}
+  GHCR_OWNER: tzervas
+  GHCR_PREFIX: autogit
 
   # ==========================================================================
   # Project Metadata
@@ -288,9 +290,12 @@ publish:git-server-ghcr:
         exit 1
       fi
       echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
+      # Set the full image name (ghcr.io/owner/prefix-service)
+      export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
+      echo "📦 Target image = ${GHCR_IMAGE}"
   script:
     - echo "📦 Publishing Git Server to GHCR..."
-    - echo "📋 Image naming - ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     # Create Docker config with GHCR credentials (secrets are masked in logs)
     - |
@@ -298,10 +303,10 @@ publish:git-server-ghcr:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/git-server"
       --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${LATEST_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}"
       --build-arg "VERSION=${VERSION}"
       --build-arg "VARIANT=${BUILD_VARIANT}"
       --build-arg "ARCH=${BUILD_ARCH}"
@@ -334,16 +339,19 @@ publish:runner-coordinator-ghcr:
   before_script:
     # Validate GHCR credentials are available
     - |
-      echo "� Validating GHCR authentication..."
+      echo "🔐 Validating GHCR authentication..."
       if [ -z "${GHCR_USER}" ] || [ -z "${GHCR_TOKEN}" ]; then
         echo "❌ ERROR: GHCR credentials not configured"
         echo "ℹ️ Please set GHCR_USER and GHCR_TOKEN in GitLab CI/CD Variables"
         exit 1
       fi
       echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
+      # Set the full image name (ghcr.io/owner/prefix-service)
+      export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
+      echo "📦 Target image = ${GHCR_IMAGE}"
   script:
-    - echo "�📦 Publishing Runner Coordinator to GHCR..."
-    - echo "📋 Image naming - ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📦 Publishing Runner Coordinator to GHCR..."
+    - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     # Create Docker config with GHCR credentials
     - |
@@ -351,10 +359,10 @@ publish:runner-coordinator-ghcr:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/runner-coordinator"
       --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${LATEST_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}"
       --build-arg "VERSION=${VERSION}"
       --build-arg "VARIANT=${BUILD_VARIANT}"
       --build-arg "ARCH=${BUILD_ARCH}"

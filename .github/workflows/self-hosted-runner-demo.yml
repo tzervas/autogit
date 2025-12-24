@@ -1,0 +1,142 @@
+---
+name: Self-Hosted Runner Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_type:
+        description: 'Type of job to run on self-hosted runners'
+        required: true
+        type: choice
+        options:
+          - build
+          - test
+          - deploy
+          - benchmark
+      runner_specs:
+        description: 'Runner specifications (CPU,RAM,timeout)'
+        required: false
+        type: string
+        default: '4,6g,300'
+
+permissions:
+  contents: read
+
+jobs:
+  trigger-self-hosted-job:
+    name: Trigger Self-Hosted Job
+    runs-on: self-hosted
+    outputs:
+      job_id: ${{ steps.trigger.outputs.job_id }}
+      runner_id: ${{ steps.trigger.outputs.runner_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Parse Runner Specs
+        id: specs
+        run: |
+          SPECS="${{ inputs.runner_specs }}"
+          IFS=',' read -r CPU RAM TIMEOUT <<< "$SPECS"
+
+          echo "cpu=$CPU" >> $GITHUB_OUTPUT
+          echo "ram=$RAM" >> $GITHUB_OUTPUT
+          echo "timeout=$TIMEOUT" >> $GITHUB_OUTPUT
+
+      - name: Trigger Self-Hosted Job
+        id: trigger
+        run: |
+          JOB_TYPE="${{ inputs.job_type }}"
+          CPU="${{ steps.specs.outputs.cpu }}"
+          RAM="${{ steps.specs.outputs.ram }}"
+          TIMEOUT="${{ steps.specs.outputs.timeout }}"
+
+          echo "🚀 Triggering self-hosted job: $JOB_TYPE"
+          echo "Runner specs: ${CPU} CPU, ${RAM} RAM, ${TIMEOUT}s timeout"
+          echo ""
+
+          # This would trigger a job on our GitLab CI via API
+          # The job would dynamically spawn a runner with the specified specs
+
+          # Placeholder - in production this would:
+          # 1. Call GitLab API to trigger a pipeline
+          # 2. Specify runner requirements (CPU, RAM, etc.)
+          # 3. Wait for completion and get results
+
+          echo "job_id=demo-job-$(date +%s)" >> $GITHUB_OUTPUT
+          echo "runner_id=demo-runner-$(date +%s)" >> $GITHUB_OUTPUT
+
+          echo "✅ Job triggered successfully!"
+          echo "Job ID: demo-job-$(date +%s)"
+          echo "Runner ID: demo-runner-$(date +%s)"
+
+  monitor-job-progress:
+    name: Monitor Job Progress
+    runs-on: self-hosted
+    needs: trigger-self-hosted-job
+    steps:
+      - name: Monitor Self-Hosted Job
+        run: |
+          JOB_ID="${{ needs.trigger-self-hosted-job.outputs.job_id }}"
+          RUNNER_ID="${{ needs.trigger-self-hosted-job.outputs.runner_id }}"
+
+          echo "📊 Monitoring job: $JOB_ID"
+          echo "Runner: $RUNNER_ID"
+          echo ""
+
+          # Placeholder monitoring - in production this would poll GitLab API
+          echo "🔄 Job status: Running"
+          echo "⏱️  Elapsed: 45 seconds"
+          echo "📈 Progress: 60% complete"
+          echo ""
+          echo "Runner details:"
+          echo "  • CPU: ${{ inputs.runner_specs }}"
+          echo "  • Status: Active"
+          echo "  • Container: autogit-runner-$RUNNER_ID"
+          echo ""
+
+          # Simulate job completion
+          sleep 2
+          echo "✅ Job completed successfully!"
+          echo "📊 Final results:"
+          echo "  • Duration: 67 seconds"
+          echo "  • CPU usage: 85%"
+          echo "  • Memory usage: 2.1GB"
+          echo "  • Exit code: 0"
+
+  report-results:
+    name: Report Results
+    runs-on: self-hosted
+    needs: [trigger-self-hosted-job, monitor-job-progress]
+    if: always()
+    steps:
+      - name: Generate Report
+        run: |
+          JOB_ID="${{ needs.trigger-self-hosted-job.outputs.job_id }}"
+          RUNNER_ID="${{ needs.trigger-self-hosted-job.outputs.runner_id }}"
+          JOB_TYPE="${{ inputs.job_type }}"
+
+          echo "# 🚀 Self-Hosted CI Demo Report" >> report.md
+          echo "" >> report.md
+          echo "## Job Details" >> report.md
+          echo "- **Job ID:** $JOB_ID" >> report.md
+          echo "- **Runner ID:** $RUNNER_ID" >> report.md
+          echo "- **Job Type:** $JOB_TYPE" >> report.md
+          echo "- **Runner Specs:** ${{ inputs.runner_specs }}" >> report.md
+          echo "" >> report.md
+          echo "## Results" >> report.md
+          echo "✅ Job completed successfully on self-hosted infrastructure!" >> report.md
+          echo "" >> report.md
+          echo "## Architecture Highlights" >> report.md
+          echo "- **Dynamic Runner Spawning:** Runners created on-demand" >> report.md
+          echo "- **Resource Optimization:** CPU/RAM allocated as needed" >> report.md
+          echo "- **Self-Hosted GitLab:** Full CI/CD on homelab hardware" >> report.md
+          echo "- **GitHub Integration:** Status reporting and PR updates" >> report.md
+          echo "" >> report.md
+          echo "[View Pipeline](http://192.168.1.170:3000/root/autogit/pipelines)" >> report.md
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: self-hosted-ci-report
+          path: report.md

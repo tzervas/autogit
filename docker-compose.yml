@@ -82,9 +82,21 @@ volumes:
   git-config:
     driver: local
     name: autogit-git-config
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/config
   git-logs:
     driver: local
     name: autogit-git-logs
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/logs
   git-data:
     driver: local
     name: autogit-git-data
+    driver_opts:
+      type: none
+      o: bind
+      device: ${GITLAB_DATA_PATH:-/var/lib/autogit}/data

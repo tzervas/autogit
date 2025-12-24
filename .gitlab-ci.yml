@@ -15,12 +15,26 @@ variables:
   # GitHub Container Registry
   GHCR_REGISTRY: ghcr.io
   GHCR_REPO: tzervas/autogit
-  # Image versioning
+  # Project info
+  PROJECT_VENDOR: AutoGit
+  PROJECT_LICENSE: MIT
+  PROJECT_URL: https://github.com/tzervas/autogit
+  # Architecture (default, can be overridden per job)
+  BUILD_ARCH: amd64
+  # Image versioning - dynamic based on branch/tag
   IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
   LATEST_TAG: latest
+  # Version from pyproject.toml (set in before_script or manually)
+  VERSION: "0.2.0"
+  # Variant based on branch
+  BUILD_VARIANT: >-
+    ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+${CI_COMMIT_BRANCH/\//-}}
   # Services to build
   GIT_SERVER_IMAGE: git-server
   COORDINATOR_IMAGE: runner-coordinator
+  # Full image names with naming convention: {component}:{version}-{arch}-{variant}
+  GIT_SERVER_FULL_TAG: "${GIT_SERVER_IMAGE}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+  COORDINATOR_FULL_TAG: "${COORDINATOR_IMAGE}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
 
 # =============================================================================
 # STAGE 1: VALIDATION - Quick checks to fail fast
@@ -88,8 +102,12 @@ build:git-server:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
+  variables:
+    SERVICE_NAME: git-server
+    BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "🏗️ Building Git Server image..."
+    - echo "📋 Image naming: ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
@@ -98,8 +116,17 @@ build:git-server:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/git-server"
       --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}/${GIT_SERVER_IMAGE}:${IMAGE_TAG}"
-      --destination "${CI_REGISTRY_IMAGE}/${GIT_SERVER_IMAGE}:${LATEST_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}"
+      --build-arg "VERSION=${VERSION}"
+      --build-arg "VARIANT=${BUILD_VARIANT}"
+      --build-arg "ARCH=${BUILD_ARCH}"
+      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.source=${CI_PROJECT_URL}"
       --cache=true
       --cache-ttl=168h
   rules:
@@ -113,8 +140,12 @@ build:runner-coordinator:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
+  variables:
+    SERVICE_NAME: runner-coordinator
+    BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "🏗️ Building Runner Coordinator image..."
+    - echo "📋 Image naming: ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
@@ -123,8 +154,17 @@ build:runner-coordinator:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/runner-coordinator"
       --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}/${COORDINATOR_IMAGE}:${IMAGE_TAG}"
-      --destination "${CI_REGISTRY_IMAGE}/${COORDINATOR_IMAGE}:${LATEST_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}"
+      --build-arg "VERSION=${VERSION}"
+      --build-arg "VARIANT=${BUILD_VARIANT}"
+      --build-arg "ARCH=${BUILD_ARCH}"
+      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.source=${CI_PROJECT_URL}"
       --cache=true
       --cache-ttl=168h
   rules:
@@ -143,8 +183,12 @@ publish:git-server-ghcr:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
+  variables:
+    SERVICE_NAME: git-server
+    BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "📦 Publishing Git Server to GHCR..."
+    - echo "📋 Image naming: ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
@@ -153,9 +197,18 @@ publish:git-server-ghcr:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/git-server"
       --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${LATEST_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${LATEST_TAG}"
+      --build-arg "VERSION=${VERSION}"
+      --build-arg "VARIANT=${BUILD_VARIANT}"
+      --build-arg "ARCH=${BUILD_ARCH}"
+      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.source=${PROJECT_URL}"
       --cache=true
       --cache-ttl=168h
   rules:
@@ -170,8 +223,12 @@ publish:runner-coordinator-ghcr:
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
+  variables:
+    SERVICE_NAME: runner-coordinator
+    BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "📦 Publishing Runner Coordinator to GHCR..."
+    - echo "📋 Image naming: ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
@@ -180,9 +237,18 @@ publish:runner-coordinator-ghcr:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/runner-coordinator"
       --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${LATEST_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${LATEST_TAG}"
+      --build-arg "VERSION=${VERSION}"
+      --build-arg "VARIANT=${BUILD_VARIANT}"
+      --build-arg "ARCH=${BUILD_ARCH}"
+      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
+      --label "org.opencontainers.image.source=${PROJECT_URL}"
       --cache=true
       --cache-ttl=168h
   rules:

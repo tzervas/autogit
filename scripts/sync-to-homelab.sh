@@ -19,7 +19,7 @@ TARGET_PATH=${3:-${HOMELAB_TARGET_PATH:-"/home/$USER/autogit"}}
 
 # Use a specific key name for AutoGit to avoid conflicts
 DEFAULT_KEY_PATH="$HOME/.ssh/id_ed25519_autogit"
-KEY_PATH=$(eval echo ${HOMELAB_SSH_KEY_PATH:-$DEFAULT_KEY_PATH})
+KEY_PATH=$(eval echo "${HOMELAB_SSH_KEY_PATH:-$DEFAULT_KEY_PATH}")
 PUB_KEY="${KEY_PATH}.pub"
 
 if [ -z "$USER" ] || [ -z "$HOST" ]; then

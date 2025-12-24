@@ -134,6 +134,12 @@ jobs:
             exit 0
           fi
 
+          # Work branches → dev (large work items)
+          if [[ "$SOURCE" =~ ^work/ ]] && [[ "$TARGET" == "dev" ]]; then
+            echo "✓ Valid: work → dev (large work item)"
+            exit 0
+          fi
+
           # If we get here, invalid hierarchy
           echo "✗ Invalid PR target"
           echo ""

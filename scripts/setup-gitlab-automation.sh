@@ -151,6 +151,13 @@ fi
 # Encode CI file content
 CI_CONTENT=$(cat .gitlab-ci.example.yml | base64 -w 0)
 
+# Prepare CI config data for API
+CI_CONFIG_DATA="{
+    \"branch\": \"main\",
+    \"content\": \"${CI_CONTENT}\",
+    \"commit_message\": \"Add CI/CD configuration\"
+}"
+
 # Check if .gitlab-ci.yml already exists
 CI_CHECK=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
     "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml?ref=main" 2>/dev/null || echo "{}")
@@ -158,18 +165,11 @@ CI_CHECK=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
 if echo "$CI_CHECK" | jq -e '.content' >/dev/null 2>&1; then
     info "Updating existing .gitlab-ci.yml..."
 
-    curl -sf --request PUT \
+    if curl -sf --request PUT \
         --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
         --header "Content-Type: application/json" \
-        --data "{
-            \"branch\": \"main\",
-            \"content\": \"${CI_CONTENT}\",
-            \"commit_message\": \"Update CI/CD configuration\",
-            \"encoding\": \"base64\"
-        }" \
-        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
+        --data "${CI_CONFIG_DATA}" \
+        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
         success "CI configuration updated"
     else
         warning "Failed to update CI configuration"
@@ -177,18 +177,11 @@ if echo "$CI_CHECK" | jq -e '.content' >/dev/null 2>&1; then
 else
     info "Creating .gitlab-ci.yml..."
 
-    curl -sf --request POST \
+    if curl -sf --request POST \
         --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
         --header "Content-Type: application/json" \
-        --data "{
-            \"branch\": \"main\",
-            \"content\": \"${CI_CONTENT}\",
-            \"commit_message\": \"Add CI/CD configuration\",
-            \"encoding\": \"base64\"
-        }" \
-        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
+        --data "${CI_CONFIG_DATA}" \
+        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
         success "CI configuration added"
     else
         warning "Failed to add CI configuration"

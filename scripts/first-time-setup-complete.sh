@@ -62,7 +62,7 @@ echo "  • Set up the autogit project with CI/CD"
 echo "  • Configure dynamic runner management"
 echo "  • Securely store and display all credentials"
 echo ""
-read -p "Press Enter to continue..."
+read -r -p "Press Enter to continue..."
 echo ""
 
 # Step 1: Check services
@@ -104,7 +104,7 @@ else
     # Try to get from running container
     GITLAB_ROOT_PASSWORD=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server printenv GITLAB_ROOT_PASSWORD" 2>/dev/null || echo "")
 
-    if [ -z "$GITLAB_ROOT_PASSWORD" ] || [ "$GITLAB_ROOT_PASSWORD" = "CHANGE_ME_SECURE_PASSWORD" ]; then
+    if [ -z "$GITLAB_ROOT_PASSWORD" ] || [ "$GITLAB_ROOT_PASSWORD" = "CHANGE_ME_SECURE_PASSWORD" ]; then # pragma: allowlist secret
         # Generate new secure password
         info "Generating secure random password..."
         GITLAB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)

@@ -103,30 +103,30 @@ show_logs() {
 # Main Loop
 while true; do
     show_status
-    read -n 1 opt
+    read -r -n 1 opt
     echo ""
     case $opt in
     s)
         sync_files
-        read -n 1 -p "Press any key to continue..."
+        read -r -n 1 -p "Press any key to continue..."
         ;;
     d)
         sync_files
         deploy
-        read -n 1 -p "Press any key to continue..."
+        read -r -n 1 -p "Press any key to continue..."
         ;;
     u)
         sync_files
         fast_update
-        read -n 1 -p "Press any key to continue..."
+        read -r -n 1 -p "Press any key to continue..."
         ;;
     r)
         restart_services
-        read -n 1 -p "Press any key to continue..."
+        read -r -n 1 -p "Press any key to continue..."
         ;;
     t)
         tear_down
-        read -n 1 -p "Press any key to continue..."
+        read -r -n 1 -p "Press any key to continue..."
         ;;
     l) show_logs ;;
     q) exit 0 ;;

@@ -22,7 +22,7 @@ echo "Press Ctrl+C to stop."
 # Function to cleanup background processes
 cleanup() {
     echo "Stopping monitor..."
-    kill $(jobs -p) 2>/dev/null || true
+    kill "$(jobs -p)" 2>/dev/null || true
     exit
 }
 

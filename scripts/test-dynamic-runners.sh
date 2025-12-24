@@ -60,7 +60,7 @@ INITIAL_RUNNERS=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
 echo "  Active runners: ${INITIAL_RUNNERS}"
 
 info "Current containers:"
-ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --format '{{.Names}}'" 2>/dev/null | while read name; do
+ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --format '{{.Names}}'" 2>/dev/null | while read -r name; do
     if [ -n "$name" ]; then
         echo "  • ${name}"
     fi
@@ -118,11 +118,11 @@ while true; do
     # Get runner count
     RUNNER_COUNT=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
 
-    if [ $RUNNER_COUNT -gt $MAX_RUNNERS ]; then
+    if [ "$RUNNER_COUNT" -gt "$MAX_RUNNERS" ]; then
         MAX_RUNNERS=$RUNNER_COUNT
     fi
 
-    if [ $RUNNER_COUNT -gt 0 ] && [ "$RUNNER_SPAWNED" = "false" ]; then
+    if [ "$RUNNER_COUNT" -gt 0 ] && [ "$RUNNER_SPAWNED" = "false" ]; then
         RUNNER_SPAWNED=true
         success "Runner spawned! (${RUNNER_COUNT} active)"
     fi
@@ -157,7 +157,7 @@ while true; do
     fi
 
     # Print runner count if changed
-    if [ $RUNNER_COUNT -gt 0 ]; then
+    if [ "$RUNNER_COUNT" -gt 0 ]; then
         echo -ne "\r  Active runners: ${RUNNER_COUNT} | Elapsed: ${ELAPSED}s"
     fi
 
@@ -187,7 +187,7 @@ echo "  • Max concurrent runners: ${MAX_RUNNERS}"
 echo "  • Total duration: ${ELAPSED}s"
 echo ""
 
-if [ $JOB_COUNT -gt 0 ]; then
+if [ "$JOB_COUNT" -gt 0 ]; then
     info "Job Details:"
     echo "$JOBS" | jq -r '.[] | "  • \(.name): \(.status) (\(.stage))"'
     echo ""
@@ -211,7 +211,7 @@ if [ "$RUNNER_SPAWNED" = "true" ]; then
         TIMESTAMP=$(date +"%H:%M:%S")
         echo -ne "\r[${TIMESTAMP}] Active runners: ${RUNNER_COUNT} | Containers: ${CONTAINER_COUNT} | Waiting: ${i}x2s"
 
-        if [ $RUNNER_COUNT -eq 0 ] && [ $CONTAINER_COUNT -eq 0 ]; then
+        if [ "$RUNNER_COUNT" -eq 0 ] && [ "$CONTAINER_COUNT" -eq 0 ]; then
             echo ""
             success "All runners cleaned up!"
             break
@@ -243,7 +243,7 @@ else
     warning "⚠ Job execution: No successful jobs"
 fi
 
-if [ $FINAL_RUNNERS -eq 0 ]; then
+if [ "$FINAL_RUNNERS" -eq 0 ]; then
     success "✓ Runner cleanup: WORKING"
 else
     warning "⚠ Runner cleanup: ${FINAL_RUNNERS} runner(s) still active (cooldown period)"

@@ -9,9 +9,12 @@ class DockerDriver:
     Driver for managing runner containers via the Docker API.
     """
 
-    def __init__(self, base_url: str = "unix://var/run/docker.sock"):
+    def __init__(self, base_url: Optional[str] = None):
         try:
-            self.client = docker.DockerClient(base_url=base_url)
+            if base_url:
+                self.client = docker.DockerClient(base_url=base_url)
+            else:
+                self.client = docker.from_env()
             self.client.ping()
         except Exception as e:
             logger.error(f"Failed to connect to Docker daemon: {e}")

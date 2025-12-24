@@ -12,6 +12,7 @@ build/
 venv/
 env/
 ENV/
+.venv/
 
 # IDE
 .vscode/
@@ -21,6 +22,7 @@ ENV/
 
 # Docker
 .env
+.env.homelab
 
 # Logs
 *.log
@@ -35,3 +37,5 @@ data/
 
 # Task summaries (generated files)
 TASK_SUMMARY_*.md
+infrastructure/homelab/.terraform/
+infrastructure/homelab/*.tfstate*

@@ -373,10 +373,10 @@ Implement GitLab CE integration as the core Git server for AutoGit platform.
 
 ---
 
-### Milestone 4: Multi-Architecture Support 🚧 IN PROGRESS
+### Milestone 4: Multi-Architecture Support 🚧 BACKLOG
 **Target**: Q2 2025
-**Status**: Active Development
-**Priority**: Medium
+**Status**: Backlogged (Prioritizing AMD64 Deployment)
+**Priority**: Low
 
 **Epic Tasks**:
 - [x] Add AMD64 native support

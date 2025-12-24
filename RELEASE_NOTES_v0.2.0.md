@@ -1,6 +1,6 @@
 # Release Notes - AutoGit v0.2.0
 
-**Release Date**: December 24, 2024  
+**Release Date**: December 24, 2025  
 **Release Type**: Minor Version (New Features)  
 **Previous Git Tag**: v0.1.16  
 **Previous pyproject.toml Version**: 0.1.0  

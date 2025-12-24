@@ -7,6 +7,147 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-12-24
+
+### ⚠️ Deployment Status & Validation
+
+**Production-Ready Components**:
+- ✅ Core Docker Compose orchestration (validated and working)
+- ✅ Git Server service with GitLab CE (tested and operational)
+- ✅ Basic runner coordinator service (functional in Docker)
+- ✅ Documentation structure and development guides (complete)
+- ✅ CI/CD workflows for GitHub Actions (validated)
+
+**Experimental/Early Phase Components** (⚠️ Not Fully Validated):
+- 🔶 **Homelab Terraform Deployment** - **EARLY PHASE**
+  - Status: Initial implementation, not fully tested in production
+  - Known Issues:
+    - Requires manual SSH key setup and configuration
+    - Deployment validation scripts need more testing
+    - Rootless Docker configuration may need adjustment per environment
+    - Timeout values may need tuning for different network speeds
+    - Limited error recovery and rollback mechanisms
+  - Recommendation: Use for testing only, manual verification required
+  - See `infrastructure/homelab/README.md` for setup prerequisites
+
+- 🔶 **Dynamic Runner Management** - **IN DEVELOPMENT**
+  - Status: Documentation and scripts created, integration testing incomplete
+  - Known Issues:
+    - Autonomous runner scaling not fully validated
+    - GPU detection and allocation needs testing on actual hardware
+    - Multi-architecture support (ARM64, RISC-V) is planned but not implemented
+  - Recommendation: Manual runner registration recommended for production use
+
+- 🔶 **GitLab CI/CD Integration** - **INITIAL SETUP**
+  - Status: Configuration templates provided, end-to-end testing pending
+  - Known Issues:
+    - GitLab automation scripts need validation against live GitLab instance
+    - Runner registration may require manual token configuration
+    - SSO/authentication integration not yet implemented
+  - Recommendation: Review and customize configurations for your environment
+
+- 🔶 **Self-Hosted GitHub Runners** - **PROOF OF CONCEPT**
+  - Status: Workflows created, testing on actual self-hosted infrastructure incomplete
+  - Known Issues:
+    - Runner lifecycle management needs validation
+    - Security hardening pending review
+    - Scale testing not performed
+  - Recommendation: Test in isolated environment before production use
+
+### Added
+- **Homelab Deployment Infrastructure** (⚠️ EXPERIMENTAL - See status above)
+  - Enhanced Terraform configuration with SSH key authentication (no passwords)
+  - Rootless Docker support for improved security
+  - Dynamic deploy path configuration based on SSH user
+  - Comprehensive deployment scripts and monitoring tools
+  - Automated deployment with `scripts/deploy-homelab.sh`
+  - Health monitoring with `scripts/check-homelab-status.sh`
+  - Log retrieval with `scripts/fetch-homelab-logs.sh`
+  - **Note**: Requires manual setup and validation - see deployment status above
+
+- **Self-Hosted CI/CD Workflows**: GitHub Actions workflows for self-hosted runners
+  - `github-actions-runner.yml` - GitHub Actions runner workflow
+  - `self-hosted-ci-status.yml` - Self-hosted CI status reporting
+  - `self-hosted-runner-demo.yml` - Self-hosted runner demo workflow
+  - CI result capture automation with `scripts/capture-ci-results.sh`
+
+- **Dynamic Runner Management**: Autonomous runner automation and testing
+  - `docs/runners/AUTONOMOUS_RUNNERS.md` - Comprehensive autonomous runner documentation
+  - `docs/runners/dynamic-runner-testing.md` - Dynamic runner testing guide
+  - `scripts/test-dynamic-runners.sh` - Dynamic runner testing automation
+  - `scripts/verify-dynamic-runners.sh` - Dynamic runner verification (340 lines)
+  - Runner registration automation with `scripts/register-runners.sh`
+
+- **GitLab Integration**: GitLab CI/CD configuration and automation
+  - `.gitlab-ci.yml` - Main GitLab CI configuration
+  - `.gitlab-ci-simple.yml` - Simplified GitLab CI configuration
+  - `.gitlab-ci.example.yml` - Example GitLab CI configuration
+  - GitLab automation setup with `scripts/setup-gitlab-automation.sh` (373 lines)
+  - GitLab helper functions with `scripts/gitlab-helpers.sh`
+  - GitLab password generation with `scripts/generate-gitlab-password.sh`
+
+- **Security & Credentials Management**:
+  - `docs/security/CREDENTIALS_MANAGEMENT.md` - Comprehensive credentials management guide (270 lines)
+  - `.secrets.baseline` - Secrets baseline for detect-secrets tool
+  - GitHub runner setup with `scripts/setup-github-runner.sh`
+
+- **Deployment Documentation**:
+  - `docs/status/DEPLOYMENT_STATUS.md` - Deployment status tracking (284 lines)
+  - `docs/status/HOMELAB_DEPLOYMENT_COMPLETE.md` - Homelab deployment summary (243 lines)
+  - `SETUP_COMPLETE.md` - Setup completion documentation (330 lines)
+
+- **Infrastructure Scripts**:
+  - `scripts/first-time-setup.sh` - Initial setup automation (262 lines)
+  - `scripts/first-time-setup-complete.sh` - Setup completion script (252 lines)
+  - `scripts/homelab-manager.sh` - Homelab management CLI (138 lines)
+  - `scripts/monitor-deployment.sh` - Deployment monitoring (79 lines)
+  - `scripts/deploy-and-monitor.sh` - Combined deployment and monitoring
+  - `scripts/sync-to-homelab.sh` - Homelab sync utility (70 lines)
+  - `scripts/setup-storage.sh` - Storage configuration (55 lines)
+  - `scripts/test-all-workflows.sh` - Comprehensive workflow testing (184 lines)
+
+### Changed
+- **Terraform Configuration**: Enhanced `infrastructure/homelab/main.tf`
+  - Migrated from password to SSH key authentication
+  - Added support for rootless Docker (unix:///run/user/1000/docker.sock)
+  - Dynamic deploy path based on SSH user variable
+  - Improved error handling and logging
+  - Added comprehensive output variables (deployment status, paths, docker host)
+  - Increased timeout to 15 minutes for image pulls
+
+- **Environment Configuration**:
+  - Enhanced `.env.example` with homelab-specific variables and detailed documentation
+  - Added `.env.homelab.example` - Homelab-specific environment template
+
+- **CI/CD Workflows**: Updated GitHub Actions workflows for better integration
+  - Updated `pr-validation.yml` for enhanced PR validation
+  - Updated workflow README with new workflows documentation
+
+- **Docker Compose**: Enhanced `docker-compose.yml` for homelab deployment compatibility
+
+- **Documentation Updates**:
+  - Updated `docs/status/ROADMAP.md` with homelab deployment milestones
+  - Updated `docs/status/TASK_TRACKER.md` with deployment progress tracking
+
+- **Scripts**: Enhanced `scripts/create-feature-branch.sh` with improvements
+
+- **Version Control**:
+  - Updated `.gitignore` with homelab artifacts and deployment logs
+  - Updated `.pre-commit-config.yaml` with additional checks
+
+### Security
+- Migrated from password-based to SSH key-based authentication for Terraform
+- Added rootless Docker support for improved container security
+- Implemented comprehensive credentials management documentation
+- Added secrets baseline for automated secret detection
+
+### Infrastructure
+- Complete homelab deployment automation stack
+- Support for self-hosted GitHub Actions runners
+- GitLab CE integration with automated setup
+- Dynamic runner provisioning and management
+- Comprehensive monitoring and health checking
+
 ### Added - 2025-12-21
 - **Task Tracker System**: Comprehensive project task tracking in `TASK_TRACKER.md`
   - Milestone tracking with detailed subtasks
@@ -120,5 +261,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added architecture overview and ADR system
 - Added component documentation for installation, configuration, runners, GPU, security, operations, and API
 
-[Unreleased]: https://github.com/tzervas/autogit/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/tzervas/autogit/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/tzervas/autogit/compare/v0.1.16...v0.2.0
 [0.1.0]: https://github.com/tzervas/autogit/releases/tag/v0.1.0

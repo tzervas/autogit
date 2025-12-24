@@ -9,6 +9,9 @@ stages:
 # GLOBAL VARIABLES
 # =============================================================================
 variables:
+  # Git configuration - prevent shallow clone issues with parallel jobs
+  GIT_DEPTH: 0
+  GIT_STRATEGY: fetch
   # GitLab Registry configuration
   REGISTRY: ${CI_REGISTRY}
   REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}
@@ -99,6 +102,11 @@ test:job2:
 build:git-server:
   stage: build
   tags: [docker]
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
@@ -138,6 +146,11 @@ build:git-server:
 build:runner-coordinator:
   stage: build
   tags: [docker]
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]

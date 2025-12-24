@@ -114,13 +114,16 @@ test:job2:
     - echo "✅ Performance test passed!"
 
 # =============================================================================
-# STAGE 3: BUILD - Docker image builds
+# STAGE 3: BUILD - Docker image builds (GitLab Registry)
 # =============================================================================
 # Uses Kaniko for rootless Docker builds (no Docker-in-Docker needed)
+# NOTE: GitLab Registry builds are optional - GHCR is the primary registry
+# If GitLab Container Registry isn't configured, builds will gracefully skip
 
 build:git-server:
   stage: build
   tags: [docker]
+  allow_failure: true  # Optional - GHCR is primary
   retry:
     max: 2
     when:
@@ -189,6 +192,7 @@ build:git-server:
 build:runner-coordinator:
   stage: build
   tags: [docker]
+  allow_failure: true  # Optional - GHCR is primary
   retry:
     max: 2
     when:
@@ -311,8 +315,7 @@ publish:git-server-ghcr:
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
     - if: $CI_COMMIT_TAG
-  needs:
-    - build:git-server
+  # No needs - GHCR publish is independent of GitLab Registry builds
 
 publish:runner-coordinator-ghcr:
   stage: publish
@@ -365,8 +368,7 @@ publish:runner-coordinator-ghcr:
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
     - if: $CI_COMMIT_TAG
-  needs:
-    - build:runner-coordinator
+  # No needs - GHCR publish is independent of GitLab Registry builds
 
 # =============================================================================
 # STAGE 5: INTEGRATION - End-to-end tests

@@ -194,8 +194,8 @@ async def register_runner(request: RunnerRegistrationRequest):
     # Get configuration from environment
     runner_image = os.getenv("RUNNER_IMAGE", "gitlab/gitlab-runner:alpine")
     runner_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
-    runner_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "4g")
-    runner_network = os.getenv("RUNNER_NETWORK", "autogit_autogit-network")
+    runner_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
+    runner_network = os.getenv("RUNNER_NETWORK", "autogit-network")
 
     try:
         # Spawn the runner container

@@ -47,7 +47,7 @@ class RunnerManager:
 
         # Enhanced resource limits - quad core, 4-6GB RAM for faster boot
         self.default_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
-        self.default_mem_limit = os.getenv("RUNNER_MEM_LIMIT", "6g")
+        self.default_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
 
         logger.info(f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner")
         logger.info(f"Cooldown: {self.cooldown_minutes} minutes, Max idle: {self.max_idle_runners}")

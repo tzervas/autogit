@@ -8,9 +8,9 @@ echo " AutoGit CI Pipeline Results Capture"
 echo "========================================================================="
 
 # Configuration
-PROJECT_ID=1
-GITLAB_URL="http://192.168.1.170:3000"
-GITLAB_TOKEN="glpat-MvdMGSIK6A5Ilud5cNilbm86MQp1OjEH.01.0w1p3alr8"
+PROJECT_ID="${PROJECT_ID:-1}"
+GITLAB_URL="${GITLAB_URL:-http://192.168.1.170:3000}"
+GITLAB_TOKEN="${GITLAB_TOKEN:?Error: GITLAB_TOKEN environment variable must be set}"
 OUTPUT_DIR="docs/ci-results"
 
 # Create output directory

@@ -172,7 +172,7 @@ Root Password: Set via GITLAB_ROOT_PASSWORD
 ```bash
 homelab-gitlab:
   URL: http://192.168.1.170:3000/root/autogit.git
-  Auth: Personal Access Token (glpat-MvdMGSIK6A5Ilud5cNilbm86MQp1OjEH...)
+  Auth: Personal Access Token (set via GITLAB_TOKEN env var)
 ```
 
 ## 🔍 Diagnostic Commands

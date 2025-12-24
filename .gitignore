@@ -23,6 +23,14 @@ ENV/
 # Docker
 .env
 .env.homelab
+.env.gitlab
+
+# Secrets and credentials (NEVER COMMIT!)
+.autogit_secrets
+.autogit_login_info
+*.token
+*_password
+*_secrets
 
 # Logs
 *.log

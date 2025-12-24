@@ -50,12 +50,18 @@ services:
       - "8080:8080"
     volumes:
       - /run/user/1000/docker.sock:/var/run/docker.sock
+      - ./runner_coordinator.db:/app/runner_coordinator.db
     # In rootless mode, UID 0 inside maps to the host user (UID 1000).
     # This is necessary to access the host's rootless Docker socket.
     user: "0:0"
     environment:
       - SERVICE_NAME=runner-coordinator
       - DOCKER_HOST=unix:///var/run/docker.sock
+      - GITLAB_URL=${GITLAB_URL:-http://autogit-git-server:3000}
+      - GITLAB_TOKEN=${GITLAB_TOKEN:-}
+      - GITLAB_RUNNER_REGISTRATION_TOKEN=${GITLAB_RUNNER_REGISTRATION_TOKEN:-}
+      - RUNNER_COOLDOWN_MINUTES=${RUNNER_COOLDOWN_MINUTES:-5}
+      - MAX_IDLE_RUNNERS=${MAX_IDLE_RUNNERS:-0}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

@@ -82,6 +82,7 @@ services:
         reservations:
           cpus: '4'
           memory: 4G
+    restart: unless-stopped
     depends_on:
       - git-server
     networks:

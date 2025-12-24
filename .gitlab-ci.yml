@@ -9,12 +9,18 @@ stages:
 # GLOBAL VARIABLES
 # =============================================================================
 variables:
-  # Registry configuration - uses GitLab's built-in CI variables
+  # GitLab Registry configuration
   REGISTRY: ${CI_REGISTRY}
   REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}
+  # GitHub Container Registry
+  GHCR_REGISTRY: ghcr.io
+  GHCR_REPO: tzervas/autogit
   # Image versioning
   IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
   LATEST_TAG: latest
+  # Services to build
+  GIT_SERVER_IMAGE: git-server
+  COORDINATOR_IMAGE: runner-coordinator
 
 # =============================================================================
 # STAGE 1: VALIDATION - Quick checks to fail fast
@@ -74,47 +80,116 @@ test:job2:
 # =============================================================================
 # STAGE 3: BUILD - Docker image builds
 # =============================================================================
-# NOTE: Docker-in-Docker (dind) doesn't work with rootless Docker.
-# Image builds should be done on the host or using Kaniko/Buildah.
-# For now, this stage is configured to build on the host's Docker socket.
+# Uses Kaniko for rootless Docker builds (no Docker-in-Docker needed)
+
+build:git-server:
+  stage: build
+  tags: [docker]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
+  script:
+    - echo "🏗️ Building Git Server image..."
+    - mkdir -p /kaniko/.docker
+    - |
+      echo "{\"auths\":{
+        \"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${CI_REGISTRY_USER}\" \"${CI_REGISTRY_PASSWORD}\" | base64 | tr -d '\n')\"}
+      }}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/services/git-server"
+      --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/${GIT_SERVER_IMAGE}:${IMAGE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${GIT_SERVER_IMAGE}:${LATEST_TAG}"
+      --cache=true
+      --cache-ttl=168h
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 build:runner-coordinator:
   stage: build
   tags: [docker]
-  image: docker:latest
-  variables:
-    # Use host Docker socket instead of dind (requires privileged runner)
-    DOCKER_HOST: unix:///var/run/docker.sock
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
   script:
     - echo "🏗️ Building Runner Coordinator image..."
-    - docker info || echo "Docker not available - skipping build"
-    - cd services/runner-coordinator
-    - docker build -t runner-coordinator:${IMAGE_TAG:-latest} . || echo "Build skipped - Docker not available"
-    - echo "✅ Build stage complete"
-  allow_failure: true  # Allow failure until we have proper build infrastructure
-
-# =============================================================================
-# STAGE 4: PUBLISH - Push images to Container Registry
-# =============================================================================
-# NOTE: Registry push requires Docker build capability.
-# Currently skipped for rootless Docker environments.
-# TODO: Implement Kaniko or Buildah for rootless builds.
-
-publish:runner-coordinator:
-  stage: publish
-  tags: [docker]
-  image: docker:latest
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-  script:
-    - echo "� Checking Docker availability for registry push..."
-    - docker info || { echo "Docker not available - skipping publish"; exit 0; }
-    - echo "Registry push would happen here"
-    - echo "✅ Publish stage complete"
-  allow_failure: true
+    - mkdir -p /kaniko/.docker
+    - |
+      echo "{\"auths\":{
+        \"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${CI_REGISTRY_USER}\" \"${CI_REGISTRY_PASSWORD}\" | base64 | tr -d '\n')\"}
+      }}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/services/runner-coordinator"
+      --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/${COORDINATOR_IMAGE}:${IMAGE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${COORDINATOR_IMAGE}:${LATEST_TAG}"
+      --cache=true
+      --cache-ttl=168h
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
     - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+# =============================================================================
+# STAGE 4: PUBLISH - Push images to GitHub Container Registry
+# =============================================================================
+# Publishes to GHCR for GitHub Actions and external consumption
+
+publish:git-server-ghcr:
+  stage: publish
+  tags: [docker]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
+  script:
+    - echo "📦 Publishing Git Server to GHCR..."
+    - mkdir -p /kaniko/.docker
+    - |
+      echo "{\"auths\":{
+        \"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}
+      }}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/services/git-server"
+      --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${GIT_SERVER_IMAGE}:${LATEST_TAG}"
+      --cache=true
+      --cache-ttl=168h
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_TAG
+  needs:
+    - build:git-server
+
+publish:runner-coordinator-ghcr:
+  stage: publish
+  tags: [docker]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
+  script:
+    - echo "📦 Publishing Runner Coordinator to GHCR..."
+    - mkdir -p /kaniko/.docker
+    - |
+      echo "{\"auths\":{
+        \"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}
+      }}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/services/runner-coordinator"
+      --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${IMAGE_TAG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${CI_COMMIT_REF_SLUG}"
+      --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${COORDINATOR_IMAGE}:${LATEST_TAG}"
+      --cache=true
+      --cache-ttl=168h
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_TAG
+  needs:
+    - build:runner-coordinator
 
 # =============================================================================
 # STAGE 5: INTEGRATION - End-to-end tests

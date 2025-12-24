@@ -11,7 +11,8 @@ stages:
 variables:
   # Git configuration - prevent shallow clone issues with parallel jobs
   GIT_DEPTH: 0
-  GIT_STRATEGY: fetch
+  GIT_STRATEGY: clone
+  GIT_CLEAN_FLAGS: none
   # GitLab Registry configuration
   REGISTRY: ${CI_REGISTRY}
   REGISTRY_IMAGE: ${CI_REGISTRY_IMAGE}

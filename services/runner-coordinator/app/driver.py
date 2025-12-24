@@ -118,3 +118,55 @@ class DockerDriver:
         """
         # TODO: Implement label-based cleanup
         pass
+
+    def register_gitlab_runner(
+        self,
+        container_id: str,
+        gitlab_url: str,
+        registration_token: str,
+        description: str,
+        tags: str,
+        executor: str = "docker",
+        docker_image: str = "python:3.11-slim"
+    ) -> Dict[str, Any]:
+        """
+        Register a GitLab runner inside an already running container.
+        """
+        try:
+            container = self.client.containers.get(container_id)
+
+            # Build the registration command
+            register_cmd = [
+                "gitlab-runner",
+                "register",
+                "--non-interactive",
+                "--url", gitlab_url,
+                "--registration-token", registration_token,
+                "--executor", executor,
+                "--description", description,
+                "--tag-list", tags,
+                "--docker-image", docker_image,
+                "--docker-privileged=false",
+                "--docker-volumes", "/var/run/docker.sock:/var/run/docker.sock"
+            ]
+
+            # Execute the registration command
+            exit_code, output = container.exec_run(
+                cmd=register_cmd,
+                detach=False
+            )
+
+            if exit_code != 0:
+                logger.error(f"Runner registration failed: {output.decode('utf-8')}")
+                raise RuntimeError(f"Registration failed with exit code {exit_code}")
+
+            logger.info(f"Runner registered successfully: {description}")
+            return {
+                "status": "registered",
+                "container_id": container.short_id,
+                "output": output.decode('utf-8')
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to register runner in container {container_id}: {e}")
+            raise

@@ -107,13 +107,14 @@ build:git-server:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "🏗️ Building Git Server image..."
-    - echo "📋 Image naming: ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
         \"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${CI_REGISTRY_USER}\" \"${CI_REGISTRY_PASSWORD}\" | base64 | tr -d '\n')\"}
       }}" > /kaniko/.docker/config.json
-    - /kaniko/executor
+    - >-
+      /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/git-server"
       --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
@@ -145,13 +146,14 @@ build:runner-coordinator:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "🏗️ Building Runner Coordinator image..."
-    - echo "📋 Image naming: ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
         \"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${CI_REGISTRY_USER}\" \"${CI_REGISTRY_PASSWORD}\" | base64 | tr -d '\n')\"}
       }}" > /kaniko/.docker/config.json
-    - /kaniko/executor
+    - >-
+      /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/runner-coordinator"
       --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
@@ -188,13 +190,14 @@ publish:git-server-ghcr:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "📦 Publishing Git Server to GHCR..."
-    - echo "📋 Image naming: ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📋 Image naming - ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{
         \"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}
       }}" > /kaniko/.docker/config.json
-    - /kaniko/executor
+    - >-
+      /kaniko/executor
       --context "${CI_PROJECT_DIR}/services/git-server"
       --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
       --destination "${GHCR_REGISTRY}/${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
@@ -228,7 +231,7 @@ publish:runner-coordinator-ghcr:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   script:
     - echo "📦 Publishing Runner Coordinator to GHCR..."
-    - echo "📋 Image naming: ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+    - echo "📋 Image naming = ${GHCR_REPO}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
     - mkdir -p /kaniko/.docker
     - |
       echo "{\"auths\":{

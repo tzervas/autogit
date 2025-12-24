@@ -8,10 +8,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/.."
 
 # Load configuration
-if [ -f ".env.gitlab" ]; then
-    source .env.gitlab
+if [ -f ".env" ]; then
+    source .env
 else
-    echo "Error: .env.gitlab not found. Run: bash scripts/setup-gitlab-automation.sh"
+    echo "Error: .env not found. Run: bash scripts/setup-gitlab-automation.sh"
     exit 1
 fi
 

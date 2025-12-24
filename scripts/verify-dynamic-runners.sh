@@ -62,9 +62,9 @@ if [ -z "${GITLAB_TOKEN}" ]; then
         GITLAB_TOKEN=$(cat "$TOKEN_FILE")
         info "Loaded GitLab token from ${TOKEN_FILE}"
         export GITLAB_TOKEN
-    elif [ -f ".env.gitlab" ]; then
-        source .env.gitlab
-        info "Loaded configuration from .env.gitlab"
+    elif [ -f ".env" ]; then
+        source .env
+        info "Loaded configuration from .env"
     fi
 fi
 
@@ -78,8 +78,8 @@ if [ -z "${GITLAB_TOKEN}" ]; then
         if [ -f "$TOKEN_FILE" ]; then
             GITLAB_TOKEN=$(cat "$TOKEN_FILE")
             export GITLAB_TOKEN
-        elif [ -f ".env.gitlab" ]; then
-            source .env.gitlab
+        elif [ -f ".env" ]; then
+            source .env
         fi
 
         if [ -z "${GITLAB_TOKEN}" ]; then
@@ -105,8 +105,8 @@ if [ -z "${GITLAB_TOKEN}" ]; then
             bash scripts/setup-gitlab-automation.sh
 
             # Reload configuration
-            if [ -f ".env.gitlab" ]; then
-                source .env.gitlab
+            if [ -f ".env" ]; then
+                source .env
             fi
         else
             warning "Continuing with limited functionality..."

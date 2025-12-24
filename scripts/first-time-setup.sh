@@ -121,7 +121,8 @@ if [ -n "$REGISTRATION_TOKEN" ] && [ "$REGISTRATION_TOKEN" != "null" ]; then
     echo "✓ Got runner registration token"
 
     # Save to environment file
-    cat >.env.runner <<EOF
+    cat >>.env <<EOF
+
 # AutoGit Runner Coordinator Configuration
 # Generated: $(date)
 
@@ -130,8 +131,8 @@ GITLAB_RUNNER_REGISTRATION_TOKEN=${REGISTRATION_TOKEN}
 RUNNER_COOLDOWN_MINUTES=5
 MAX_IDLE_RUNNERS=0
 EOF
-    chmod 600 .env.runner
-    echo "✓ Configuration saved to: ${PWD}/.env.runner"
+    chmod 600 .env
+    echo "✓ Configuration saved to: ${PWD}/.env"
     echo ""
 
     echo "💡 To apply this configuration, restart the coordinator:"
@@ -155,8 +156,8 @@ if bash scripts/setup-gitlab-automation.sh >/tmp/gitlab-automation.log 2>&1; the
     echo "✓ Automation configured successfully"
 
     # Load the token
-    if [ -f ".env.gitlab" ]; then
-        source .env.gitlab
+    if [ -f ".env" ]; then
+        source .env
         echo "✓ GitLab API token configured"
     fi
 else

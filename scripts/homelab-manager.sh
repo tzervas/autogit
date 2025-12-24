@@ -5,9 +5,9 @@
 set -e
 
 # Load environment variables
-if [ -f ".env.homelab" ]; then
+if [ -f ".env" ]; then
     set -a
-    source .env.homelab
+    source .env
     set +a
 fi
 

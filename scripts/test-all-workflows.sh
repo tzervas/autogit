@@ -7,11 +7,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 # Load config
-[ -f ".env.gitlab" ] || {
+[ -f ".env" ] || {
     echo "Run first-time-setup first!"
     exit 1
 }
-source .env.gitlab
+source .env
 source scripts/gitlab-helpers.sh
 
 # Colors

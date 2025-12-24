@@ -131,8 +131,8 @@ The runner coordinator accepts these environment variables:
 
 After setup, these files contain your configuration:
 
-- **`.env.gitlab`** - GitLab API credentials
-- **`.env.runner`** - Runner registration token
+- **`.env`** - GitLab API credentials
+- **`.env`** - Runner registration token
 - **`.autogit_login_info`** - WebUI login credentials
 - **`~/.autogit_gitlab_token`** - Personal access token (keep secure!)
 
@@ -181,7 +181,7 @@ curl http://192.168.1.170:8080/status | jq
 curl http://192.168.1.170:8080/runners | jq
 
 # GitLab pipelines
-source .env.gitlab
+source .env
 curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "http://192.168.1.170:3000/api/v4/projects/1/pipelines" | jq
 ```
@@ -279,7 +279,7 @@ ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps -a --filter
 4. Copy the registration token
 5. Update environment:
 ```bash
-echo "GITLAB_RUNNER_REGISTRATION_TOKEN=your_token_here" >> .env.runner
+echo "GITLAB_RUNNER_REGISTRATION_TOKEN=your_token_here" >> .env
 ```
 
 ### Database Issues
@@ -333,8 +333,8 @@ Coordinator detects GPU requirement and spawns runner with GPU access.
 
 ### Tokens
 
-- **Personal Access Token** (`.env.gitlab`) - API access, keep secure
-- **Runner Registration Token** (`.env.runner`) - Register new runners, rotate periodically
+- **Personal Access Token** (`.env`) - API access, keep secure
+- **Runner Registration Token** (`.env`) - Register new runners, rotate periodically
 - **Files** - All credential files have `chmod 600` (owner read/write only)
 
 ### Runner Isolation

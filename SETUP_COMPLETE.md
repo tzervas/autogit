@@ -26,7 +26,7 @@ You now have a **fully automated, self-hosted Git server with dynamic CI/CD runn
 
 All credentials are securely stored in:
 - **`~/.autogit_secrets`** - Main secrets file (mode 600)
-- **`.env.gitlab`** - Environment configuration (mode 600)
+- **`.env`** - Environment configuration (mode 600)
 
 ### GitLab Web Access
 ```
@@ -192,7 +192,7 @@ We'll add automatic token retrieval in the next update.
 ## 🛠 Configuration
 
 ### Environment Variables
-Edit `.env.gitlab`:
+Edit `.env`:
 ```bash
 RUNNER_CPU_LIMIT=4.0          # CPU cores per runner
 RUNNER_MEM_LIMIT=6g           # RAM per runner
@@ -230,7 +230,7 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker restart autogi
 ssh homelab "docker logs autogit-runner-coordinator --tail 50"
 
 # Verify GitLab token is set
-source .env.gitlab && echo $GITLAB_TOKEN
+source .env && echo $GITLAB_TOKEN
 
 # Check coordinator can reach GitLab
 curl -sf --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
@@ -250,7 +250,7 @@ curl -X POST "${COORDINATOR_URL}/test/spawn-runner"
 ### Runners Don't Cleanup
 ```bash
 # Check cooldown settings
-source .env.gitlab && echo $RUNNER_COOLDOWN_SECONDS
+source .env && echo $RUNNER_COOLDOWN_SECONDS
 
 # Manually cleanup
 ssh homelab "docker ps --filter 'name=autogit-runner' -q | xargs docker stop"
@@ -299,7 +299,7 @@ watch -n 2 'ssh homelab "docker ps --filter name=autogit"'
 ```
 
 ### 4. Scale Up
-Adjust resources in `.env.gitlab`:
+Adjust resources in `.env`:
 - Increase CPU/RAM per runner
 - Adjust cooldown period
 - Configure max concurrent runners

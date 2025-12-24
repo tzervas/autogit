@@ -208,7 +208,7 @@ fi
 # Step 7: Export environment configuration
 info "Creating environment configuration..."
 
-cat >.env.gitlab <<EOF
+cat >>.env <<EOF
 # AutoGit GitLab Configuration
 # Generated on $(date)
 
@@ -218,8 +218,8 @@ GITLAB_PROJECT_ID=${PROJECT_ID}
 COORDINATOR_URL=${COORDINATOR_URL}
 EOF
 
-chmod 600 .env.gitlab
-success "Configuration saved to .env.gitlab"
+chmod 600 .env
+success "Configuration saved to .env"
 
 # Step 8: Create helper aliases
 info "Creating helper scripts..."
@@ -229,9 +229,9 @@ cat >scripts/gitlab-helpers.sh <<'EOFHELPER'
 # GitLab Helper Functions
 
 # Source the environment
-if [ -f ".env.gitlab" ]; then
+if [ -f ".env" ]; then
     set -a
-    source .env.gitlab
+    source .env
     set +a
 fi
 
@@ -346,7 +346,7 @@ info "Configuration:"
 echo "  • GitLab URL:     ${GITLAB_URL}"
 echo "  • Project:        ${PROJECT_NAME} (ID: ${PROJECT_ID})"
 echo "  • Token saved:    ${TOKEN_FILE}"
-echo "  • Environment:    .env.gitlab"
+echo "  • Environment:    .env"
 echo ""
 
 info "Quick start:"

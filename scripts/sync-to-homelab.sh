@@ -4,11 +4,11 @@
 
 set -e
 
-# Load environment variables if .env.homelab exists
-if [ -f ".env.homelab" ]; then
+# Load environment variables if .env exists
+if [ -f ".env" ]; then
     # Use a more robust way to load env vars
     set -a
-    source .env.homelab
+    source .env
     set +a
 fi
 
@@ -24,7 +24,7 @@ PUB_KEY="${KEY_PATH}.pub"
 
 if [ -z "$USER" ] || [ -z "$HOST" ]; then
     echo "Usage: $0 <user> <host> [path]"
-    echo "Or set HOMELAB_SSH_USER and HOMELAB_SSH_HOST in .env.homelab"
+    echo "Or set HOMELAB_SSH_USER and HOMELAB_SSH_HOST in .env"
     exit 1
 fi
 

@@ -191,7 +191,8 @@ echo ""
 header "Step 7: Saving Configuration"
 echo ""
 
-cat >.env.gitlab <<EOF
+cat >>.env <<EOF
+
 GITLAB_URL=${GITLAB_URL}
 GITLAB_TOKEN=${GITLAB_TOKEN}
 GITLAB_PROJECT_ID=${PROJECT_ID}
@@ -199,7 +200,7 @@ COORDINATOR_URL=${COORDINATOR_URL}
 RUNNER_CPU_LIMIT=4.0
 RUNNER_MEM_LIMIT=6g
 EOF
-chmod 600 .env.gitlab
+chmod 600 .env
 
 cat >"$SECRETS_FILE" <<EOF
 GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}

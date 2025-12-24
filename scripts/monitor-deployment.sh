@@ -4,10 +4,10 @@
 
 set -e
 
-# Load environment variables if .env.homelab exists
-if [ -f ".env.homelab" ]; then
+# Load environment variables if .env exists
+if [ -f ".env" ]; then
     set -a
-    source .env.homelab
+    source .env
     set +a
 fi
 

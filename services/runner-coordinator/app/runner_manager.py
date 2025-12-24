@@ -32,6 +32,7 @@ class RunnerManager:
         gitlab_token: str,
         cooldown_minutes: int = 5,
         max_idle_runners: int = 0,
+        runner_registration_token: str = None,
     ):
         self.db = db
         self.driver = driver
@@ -41,12 +42,19 @@ class RunnerManager:
         self.max_idle_runners = max_idle_runners
         self.runner_image = "gitlab/gitlab-runner:alpine"
 
+        # Get runner registration token from env or parameter
+        self.runner_registration_token = runner_registration_token or os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")
+
         # Enhanced resource limits - quad core, 4-6GB RAM for faster boot
         self.default_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
         self.default_mem_limit = os.getenv("RUNNER_MEM_LIMIT", "6g")
 
         logger.info(f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner")
         logger.info(f"Cooldown: {self.cooldown_minutes} minutes, Max idle: {self.max_idle_runners}")
+        if self.runner_registration_token:
+            logger.info("✓ Runner registration token configured")
+        else:
+            logger.warning("⚠ No runner registration token - cannot register runners!")
 
     async def start_lifecycle_manager(self):
         """
@@ -204,6 +212,10 @@ class RunnerManager:
                 self.db.commit()
                 return
 
+            # Use internal network URL for cloning (runners connect via Docker network)
+            # This resolves the "localhost" issue where GitLab reports localhost URLs
+            clone_url = self.gitlab_url  # Already uses internal hostname (autogit-git-server)
+
             # Execute registration command in container
             self.driver.register_gitlab_runner(
                 container_id=runner.container_id,
@@ -212,7 +224,8 @@ class RunnerManager:
                 description=runner.name,
                 tags=",".join(tags),
                 executor="docker",
-                docker_image="python:3.11-slim"
+                docker_image="python:3.11-slim",
+                clone_url=clone_url
             )
 
             # Start the runner
@@ -368,25 +381,14 @@ class RunnerManager:
 
     def _get_registration_token(self) -> Optional[str]:
         """
-        Get the runner registration token from GitLab
+        Get the runner registration token
         """
-        try:
-            # Try to get instance-wide registration token (requires admin)
-            response = requests.get(
-                f"{self.gitlab_url}/api/v4/admin/runners",
-                headers={"PRIVATE-TOKEN": self.gitlab_token},
-                timeout=10
-            )
+        # Use the configured token if available
+        if self.runner_registration_token:
+            return self.runner_registration_token
 
-            if response.status_code == 200:
-                # For getting the registration token, we need to access the admin area
-                # This is typically done via the Rails console
-                return os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")
-
-        except Exception as e:
-            logger.error(f"Failed to get registration token: {e}")
-
-        return None
+        # Otherwise try to get from environment
+        return os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")
 
     def _unregister_runner_from_gitlab(self, runner: Runner):
         """

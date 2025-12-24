@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
+from contextlib import asynccontextmanager
 import datetime
 import asyncio
 import os
@@ -27,40 +28,71 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="AutoGit Runner Coordinator", version="0.2.0")
 driver = DockerDriver()
 
 # Configuration from environment
 GITLAB_URL = os.getenv("GITLAB_URL", "http://autogit-git-server:3000")
 GITLAB_TOKEN = os.getenv("GITLAB_TOKEN", "")
+GITLAB_RUNNER_REGISTRATION_TOKEN = os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN", "")
 COOLDOWN_MINUTES = int(os.getenv("RUNNER_COOLDOWN_MINUTES", "5"))
 MAX_IDLE_RUNNERS = int(os.getenv("MAX_IDLE_RUNNERS", "0"))
 
-@app.on_event("startup")
-async def startup_event():
+# Global runner manager instance
+runner_manager_instance = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Start the autonomous runner lifecycle manager
+    Lifespan context manager - starts background tasks on startup
     """
-    logger.info("Starting AutoGit Runner Coordinator...")
+    global runner_manager_instance
+
+    logger.info("=" * 60)
+    logger.info("Starting AutoGit Runner Coordinator")
+    logger.info("=" * 60)
     logger.info(f"GitLab URL: {GITLAB_URL}")
     logger.info(f"Cooldown: {COOLDOWN_MINUTES} minutes")
     logger.info(f"Max idle runners: {MAX_IDLE_RUNNERS}")
 
     if not GITLAB_TOKEN:
-        logger.warning("GITLAB_TOKEN not set - runner manager will have limited functionality")
+        logger.warning("⚠ GITLAB_TOKEN not set - runner manager will have limited functionality")
+    else:
+        logger.info(f"✓ GITLAB_TOKEN configured ({GITLAB_TOKEN[:20]}...)")
+
+    if not GITLAB_RUNNER_REGISTRATION_TOKEN:
+        logger.warning("⚠ GITLAB_RUNNER_REGISTRATION_TOKEN not set")
+    else:
+        logger.info(f"✓ GITLAB_RUNNER_REGISTRATION_TOKEN configured ({GITLAB_RUNNER_REGISTRATION_TOKEN[:20]}...)")
 
     # Start the lifecycle manager in the background
     db = SessionLocal()
-    runner_manager = RunnerManager(
+    runner_manager_instance = RunnerManager(
         db=db,
         driver=driver,
         gitlab_url=GITLAB_URL,
         gitlab_token=GITLAB_TOKEN,
         cooldown_minutes=COOLDOWN_MINUTES,
-        max_idle_runners=MAX_IDLE_RUNNERS
+        max_idle_runners=MAX_IDLE_RUNNERS,
+        runner_registration_token=GITLAB_RUNNER_REGISTRATION_TOKEN
     )
 
-    asyncio.create_task(runner_manager.start_lifecycle_manager())
+    # Start the lifecycle manager task
+    manager_task = asyncio.create_task(runner_manager_instance.start_lifecycle_manager())
+    logger.info("✓ Runner lifecycle manager started")
+    logger.info("=" * 60)
+
+    yield  # Application runs here
+
+    # Shutdown
+    logger.info("Shutting down runner manager...")
+    manager_task.cancel()
+    try:
+        await manager_task
+    except asyncio.CancelledError:
+        pass
+    db.close()
+
+app = FastAPI(title="AutoGit Runner Coordinator", version="0.2.0", lifespan=lifespan)
 
 # Dependency
 def get_db():

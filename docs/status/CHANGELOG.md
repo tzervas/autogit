@@ -32,13 +32,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Recommendation: Use for testing only, manual verification required
   - See `infrastructure/homelab/README.md` for setup prerequisites
 
-- 🔶 **Dynamic Runner Management** - **IN DEVELOPMENT**
-  - Status: Documentation and scripts created, integration testing incomplete
-  - Known Issues:
-    - Autonomous runner scaling not fully validated
-    - GPU detection and allocation needs testing on actual hardware
+- 🟡 **Dynamic Runner Management** - **CORE FUNCTIONALITY VALIDATED**
+  - Status: Core automated lifecycle validated in local GitLab and GitHub self-hosted runners
+  - ✅ Validated Features:
+    - Automated runner lifecycle (zero-runner start, job detection, spin-up, execution, 5-min idle spin-down)
+    - Job queue monitoring and detection
+    - Runner allocation and job execution
+    - Tested with local self-hosted GitLab instance
+    - Tested as GitHub self-hosted runners
+  - ⚠️ Needs Further Testing:
+    - Scale testing under high load
+    - Long-term stability validation
+    - GPU detection and allocation (not yet implemented)
     - Multi-architecture support (ARM64, RISC-V) is planned but not implemented
-  - Recommendation: Manual runner registration recommended for production use
+  - Recommendation: Core functionality working, suitable for testing with monitoring; scale testing needed for production
 
 - 🔶 **GitLab CI/CD Integration** - **INITIAL SETUP**
   - Status: Configuration templates provided, end-to-end testing pending
@@ -73,12 +80,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `self-hosted-runner-demo.yml` - Self-hosted runner demo workflow
   - CI result capture automation with `scripts/capture-ci-results.sh`
 
-- **Dynamic Runner Management**: Autonomous runner automation and testing
+- **Dynamic Runner Management**: Autonomous runner automation and testing (✅ Core validated)
   - `docs/runners/AUTONOMOUS_RUNNERS.md` - Comprehensive autonomous runner documentation
   - `docs/runners/dynamic-runner-testing.md` - Dynamic runner testing guide
   - `scripts/test-dynamic-runners.sh` - Dynamic runner testing automation
   - `scripts/verify-dynamic-runners.sh` - Dynamic runner verification (340 lines)
   - Runner registration automation with `scripts/register-runners.sh`
+  - **Validated**: Automated lifecycle (zero-runner → job detection → spin-up → execution → 5-min idle spin-down)
+  - **Validated**: Job queue management and runner allocation
+  - **Tested**: Local self-hosted GitLab instance and GitHub self-hosted runners
 
 - **GitLab Integration**: GitLab CI/CD configuration and automation
   - `.gitlab-ci.yml` - Main GitLab CI configuration

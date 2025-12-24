@@ -59,21 +59,35 @@ New capabilities for deploying AutoGit to homelab environments:
 - `scripts/homelab-manager.sh` - Management CLI
 - Multiple supporting scripts for monitoring and validation
 
-### Dynamic Runner Management ⚠️
-**Status**: Documentation Only
+### Dynamic Runner Management 🟡
+**Status**: Core Functionality Validated
 
-Documentation and scripts for autonomous runner scaling:
+Autonomous runner lifecycle automation with validated core features:
 - Comprehensive guides in `docs/runners/`
 - Testing frameworks and validation scripts
 - Architecture for GPU-aware scheduling
 - Multi-architecture support planning
 
-**Known Limitations**:
-- Integration testing incomplete
-- Autoscaling not implemented
-- GPU support not coded
+**✅ Validated Features** (Tested in local environment):
+- Automated runner lifecycle management
+  - Zero-runner startup (no runners when idle)
+  - Automatic job detection and queue monitoring
+  - Dynamic runner spin-up on job detection
+  - Job allocation and execution
+  - Automatic spin-down after 5 minutes of inactivity
+- Successfully tested with local self-hosted GitLab instance
+- Successfully tested as GitHub self-hosted runners
+- Job queue management operational
+- Runner coordination service functional
+
+**⚠️ Known Limitations** (Needs Further Testing):
+- Scale testing under high concurrent load not performed
+- Long-term stability validation needed
+- GPU support documented but not implemented
 - ARM64/RISC-V not implemented
-- Manual runner setup required for production
+- Production hardening and monitoring needed
+
+**Recommendation**: Core functionality working and suitable for testing environments with monitoring. Scale testing and production hardening needed before heavy production use.
 
 ### GitLab CI/CD Automation ⚠️
 **Status**: Configuration Templates

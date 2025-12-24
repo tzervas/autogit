@@ -192,17 +192,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install pre-commit
-        run: pip install pre-commit
+      - name: Install pre-commit via uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          ~/.cargo/bin/uv tool install pre-commit
 
       - name: Run pre-commit
         id: pre-commit
-        run: pre-commit run --all-files
+        run: ~/.local/bin/pre-commit run --all-files
         continue-on-error: true
 
       - name: Commit and push fixes
@@ -229,17 +226,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install yamllint
-        run: pip install yamllint
+      - name: Install yamllint via uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          ~/.cargo/bin/uv tool install yamllint
 
       - name: Run yamllint
         run: |
-          yamllint -c config/.yamllint.yml . || true
+          ~/.local/bin/yamllint -c config/.yamllint.yml . || true
 
   lint-markdown:
     name: Lint Markdown Files

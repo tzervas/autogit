@@ -1,8 +1,16 @@
 import docker
 from typing import Dict, Any, Optional
 import logging
+import os
 
 logger = logging.getLogger(__name__)
+
+# Default network name (can be overridden by env var)
+DEFAULT_NETWORK = os.environ.get("RUNNER_NETWORK", "autogit-network")
+
+# Docker socket path - for rootless Docker this will be different
+# The coordinator sees DOCKER_HOST, but runners need the actual host socket path
+DOCKER_SOCKET_PATH = os.environ.get("RUNNER_DOCKER_SOCKET", "/var/run/docker.sock")
 
 class DockerDriver:
     """
@@ -16,9 +24,40 @@ class DockerDriver:
             else:
                 self.client = docker.from_env()
             self.client.ping()
+            # Auto-detect the autogit network on init
+            self._detected_network = self._detect_autogit_network()
         except Exception as e:
             logger.error(f"Failed to connect to Docker daemon: {e}")
             raise RuntimeError(f"Docker connection failed: {e}")
+
+    def _detect_autogit_network(self) -> Optional[str]:
+        """
+        Auto-detect the autogit network by looking for networks containing 'autogit'.
+        Handles both 'autogit-network' and 'autogit_autogit-network' (docker-compose prefix).
+        """
+        try:
+            networks = self.client.networks.list()
+            # Priority order: exact match, then prefixed match
+            for net in networks:
+                if net.name == DEFAULT_NETWORK:
+                    logger.info(f"Found exact network match: {net.name}")
+                    return net.name
+
+            # Look for docker-compose prefixed version
+            for net in networks:
+                if 'autogit' in net.name.lower() and net.name != 'bridge':
+                    logger.info(f"Found autogit network (prefixed): {net.name}")
+                    return net.name
+
+            logger.warning(f"No autogit network found, will use default: {DEFAULT_NETWORK}")
+            return None
+        except Exception as e:
+            logger.warning(f"Failed to detect network: {e}")
+            return None
+
+    def get_network_name(self) -> str:
+        """Get the network name to use for runners."""
+        return self._detected_network or DEFAULT_NETWORK
 
     def spawn_runner(
         self,
@@ -26,7 +65,7 @@ class DockerDriver:
         image: str = "gitlab/gitlab-runner:latest",
         cpu_limit: float = 1.0,
         mem_limit: str = "1g",
-        network: str = "autogit-network",
+        network: str = None,
         environment: Optional[Dict[str, str]] = None,
         platform: Optional[str] = None,
         gpu_vendor: Optional[str] = None,
@@ -35,6 +74,10 @@ class DockerDriver:
         """
         Spawn a new runner container.
         """
+        # Use provided network, auto-detected network, or fall back to default
+        network = network or self.get_network_name()
+        logger.debug(f"Using network: {network}")
+
         device_requests = []
         devices = []
 
@@ -46,6 +89,10 @@ class DockerDriver:
             devices = ["/dev/dri:/dev/dri"]
 
         try:
+            # For rootless Docker, the socket path inside runner needs to match
+            # what gitlab-runner expects (/var/run/docker.sock) but bound from host socket
+            logger.debug(f"Mounting docker socket from {DOCKER_SOCKET_PATH}")
+
             container = self.client.containers.run(
                 image=image,
                 name=name,
@@ -64,7 +111,9 @@ class DockerDriver:
                 security_opt=["no-new-privileges:true"],
                 restart_policy={"Name": "unless-stopped"},
                 volumes={
-                    "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"}
+                    # Mount host's docker socket into runner container
+                    # Use configured path (rootless: /run/user/1000/docker.sock)
+                    DOCKER_SOCKET_PATH: {"bind": "/var/run/docker.sock", "mode": "rw"}
                 }
             )
 
@@ -127,10 +176,15 @@ class DockerDriver:
         description: str,
         tags: str,
         executor: str = "docker",
-        docker_image: str = "python:3.11-slim"
+        docker_image: str = "python:3.11-slim",
+        clone_url: str = None
     ) -> Dict[str, Any]:
         """
         Register a GitLab runner inside an already running container.
+
+        Args:
+            clone_url: Optional URL to use for cloning instead of the GitLab URL.
+                       Useful when runners need to use internal network hostnames.
         """
         try:
             container = self.client.containers.get(container_id)
@@ -147,8 +201,13 @@ class DockerDriver:
                 "--tag-list", tags,
                 "--docker-image", docker_image,
                 "--docker-privileged=false",
-                "--docker-volumes", "/var/run/docker.sock:/var/run/docker.sock"
+                "--docker-volumes", "/var/run/docker.sock:/var/run/docker.sock",
+                "--docker-network-mode", self.get_network_name()
             ]
+
+            # Add clone URL if specified (for internal network access)
+            if clone_url:
+                register_cmd.extend(["--clone-url", clone_url])
 
             # Execute the registration command
             exit_code, output = container.exec_run(

@@ -12,6 +12,7 @@ services:
       - "${GITLAB_HTTP_PORT:-3000}:3000"    # HTTP
       - "${GITLAB_HTTPS_PORT:-3443}:443"    # HTTPS
       - "${GITLAB_SSH_PORT:-2222}:22"       # SSH
+      - "${GITLAB_REGISTRY_PORT:-5050}:5050" # Container Registry
     volumes:
       - ${GITLAB_CONFIG_VOLUME:-git-config}:/etc/gitlab
       - ${GITLAB_LOGS_VOLUME:-git-logs}:/var/log/gitlab
@@ -39,17 +40,19 @@ services:
       - autogit-network
 
   # Runner coordinator - manages GPU and compute runners
+  # For production: set COORDINATOR_IMAGE to registry URL
+  # For development: uses local build
   runner-coordinator:
     build:
       context: ./services/runner-coordinator
       cache_from:
         - autogit-runner-coordinator:latest
-    image: autogit-runner-coordinator:latest
+    image: ${COORDINATOR_IMAGE:-autogit-runner-coordinator:latest}
     container_name: autogit-runner-coordinator
     ports:
       - "8080:8080"
     volumes:
-      - /run/user/1000/docker.sock:/var/run/docker.sock
+      - ${RUNNER_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
       - ./runner_coordinator.db:/app/runner_coordinator.db
     # In rootless mode, UID 0 inside maps to the host user (UID 1000).
     # This is necessary to access the host's rootless Docker socket.
@@ -62,6 +65,10 @@ services:
       - GITLAB_RUNNER_REGISTRATION_TOKEN=${GITLAB_RUNNER_REGISTRATION_TOKEN:-}
       - RUNNER_COOLDOWN_MINUTES=${RUNNER_COOLDOWN_MINUTES:-5}
       - MAX_IDLE_RUNNERS=${MAX_IDLE_RUNNERS:-0}
+      - RUNNER_NETWORK=${RUNNER_NETWORK:-autogit-network}
+      # For rootless Docker: path to the docker socket ON THE HOST
+      # This is where runners mount the socket from
+      - RUNNER_DOCKER_SOCKET=${RUNNER_DOCKER_SOCKET:-/run/user/1000/docker.sock}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -83,6 +90,7 @@ services:
 networks:
   autogit-network:
     driver: bridge
+    name: autogit-network
 
 volumes:
   git-config:

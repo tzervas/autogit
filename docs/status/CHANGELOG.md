@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Automated Workflow System**: Complete automation for code quality and releases
+  - Pre-commit auto-fix workflow for PRs (`.github/workflows/pre-commit-auto-fix.yml`)
+  - Automated changelog generation from merged PRs (`.github/workflows/auto-changelog.yml`)
+  - Enhanced pre-commit configuration with 10+ hook types
+  - Setup scripts for pre-commit hooks and git signing
+  - Commit message template for conventional commits
+  - Comprehensive documentation (35KB across 5 guides)
+
+### Fixed
+- **Workflow Trigger Issues**: Release workflow now properly handles all tag patterns
+  - Intelligent source branch detection from git history
+  - Supports production (`vX.Y.Z`), dev (`vX.Y.Z-dev.TIMESTAMP`), and feature branch tags
+  - Fixed permission issues preventing cross-workflow triggers
+
+### Changed
+- **Documentation Updates**:
+  - Fixed "Homeland" → "homelab" terminology throughout
+  - Clarified SSO status: planned but not implemented (Okta/Keycloak evaluation deferred)
+  - Updated architecture docs to reflect MVP status accurately
+  - Added branch protection configuration guide
+  - Added security summary for automated workflows
+
+### Documentation
+- `docs/AUTOMATED_WORKFLOWS.md` - Complete system guide (7KB)
+- `IMPLEMENTATION_SUMMARY.md` - Technical implementation details (7KB)
+- `QUICKSTART_AUTOMATED_WORKFLOW.md` - User-friendly quick start (6KB)
+- `SECURITY_SUMMARY.md` - Security considerations (6KB)
+- `BRANCH_PROTECTION_GUIDE.md` - Required repository settings (10KB)
+- `AUTOMATED_WORKFLOW_DOCS_INDEX.md` - Documentation index (8KB)
+
+### Infrastructure
+- All GitHub Actions commits now auto-signed by GitHub
+- Pre-commit hooks enforce code quality before commits
+- Conventional commit message validation
+- Secret detection and security scanning
+
 ## [0.2.0] - 2025-12-24
 
 ### ⚠️ Deployment Status & Validation

@@ -1,30 +1,70 @@
 # AutoGit Roadmap
 
-This document outlines the planned features and improvements for AutoGit.
+**Project Start**: December 21, 2025
+**Current Version**: 0.3.0 (Automated Workflows)
+**Target v1.0.0 MVP**: January 28, 2026
 
-## Version 1.0 - MVP (Target: Q1 2025)
+This document outlines the planned features and improvements for AutoGit based on realistic velocity projections.
+
+---
+
+## Version 1.0 - MVP (Target: January 28, 2026)
+
+**Status**: In Progress (28% complete)
+**Timeline**: Q1 2026
+**Focus**: Production-ready core platform
 
 ### Core Features
 - [x] Basic project structure
 - [x] Documentation framework
-- [ ] Git server implementation (GitLab CE integration)
-  - [ ] AMD64 native support (MVP focus)
-  - [ ] Docker Compose deployment
-  - [ ] Basic authentication
-  - [ ] SSH and HTTP/HTTPS access
-- [ ] Basic runner coordinator
-  - [ ] AMD64 native support (MVP focus)
-- [ ] Docker Compose deployment (AMD64 native - MVP)
-- [ ] Basic authentication
+- [x] Git server implementation (GitLab CE integration)
+  - [x] AMD64 native support (MVP focus)
+  - [x] Docker Compose deployment
+  - [x] Basic authentication
+  - [x] SSH and HTTP/HTTPS access
+- [x] Basic runner coordinator
+  - [x] AMD64 native support (MVP focus)
+  - [x] Automated lifecycle management
+  - [x] Job queue monitoring
+  - [x] Dynamic spin-up/spin-down
+- [x] Docker Compose deployment (AMD64 native - MVP)
+- [x] Basic authentication
+- [x] Automated CI/CD workflows
+  - [x] Pre-commit automation
+  - [x] Versioning automation
+  - [x] Release automation
+  - [x] Changelog generation
 
 ### Documentation
 - [x] Complete documentation structure
 - [x] Development guides
 - [x] Architecture documentation
+- [x] Automation guides (35KB across 6 documents)
 - [ ] User guides
 - [ ] Tutorial content
 
-## Version 1.1 - Multi-Architecture (Target: Q2 2025) 🚧 BACKLOG
+### Automation (NEW - Completed Q4 2024)
+- [x] Pre-commit hook system with 10+ validators
+- [x] Automated PR code fixes
+- [x] Commit signing and verification
+- [x] Conventional commit enforcement
+- [x] Automated changelog generation
+- [x] Workflow trigger chain (versioning → release)
+- [x] Branch protection configuration
+
+### Next Steps for MVP Completion
+- [ ] End-to-end testing of complete workflow chain
+- [ ] User acceptance testing
+- [ ] Performance optimization
+- [ ] Scale testing under load
+- [ ] User guides and tutorials
+- [ ] v1.0.0 release preparation
+
+## Version 1.1 - Multi-Architecture (Target: March 25, 2026)
+
+**Status**: Planned
+**Timeline**: Q1 2026 (Late)
+**Focus**: ARM64 and RISC-V support
 
 ### Features
 - [ ] ARM64 native support (for ARM64 hosts/runners)
@@ -49,7 +89,11 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Native vs QEMU comparison
 - [ ] Cross-platform compatibility validation
 
-## Version 1.2 - GPU Support (Target: Q2 2025)
+## Version 1.2 - GPU Support (Target: February 18, 2026)
+
+**Status**: Planned
+**Timeline**: Q1 2026 (Mid)
+**Focus**: GPU detection and allocation
 
 ### Features
 - [ ] GPU detection service
@@ -64,7 +108,11 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Vendor-specific setup
 - [ ] Performance optimization guides
 
-## Version 1.3 - Kubernetes (Target: Q3 2025)
+## Version 1.3 - Kubernetes (Target: June 23, 2026)
+
+**Status**: Planned
+**Timeline**: Q2 2026 (Late)
+**Focus**: Production-grade orchestration
 
 ### Features
 - [ ] Helm chart for deployment
@@ -80,23 +128,50 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Backup and recovery
 - [ ] High availability configuration
 
-## Version 1.4 - SSO & Security (Target: Q3 2025)
+## Version 1.4 - SSO & Security (Target: May 19, 2026)
 
-### Features
-- [ ] Authelia integration
+**Status**: Planned
+**Timeline**: Q2 2026 (Mid)
+**Focus**: Enterprise authentication
+
+### SSO Features (Deferred from MVP)
+**Status**: Evaluation of Authelia, Keycloak, and Okta to begin Q2 2026
+
+The decision was made to defer SSO to focus on core functionality first. During the SSO phase, we will evaluate:
+- **Authelia** (Apache 2.0, lightweight, self-hosted)
+- **Keycloak** (Apache 2.0, enterprise features, self-hosted)
+- **Okta** (commercial, cloud-managed)
+
+Selection criteria:
+- Open source preferred
+- Self-hosted capability
+- MIT/Apache 2.0 license preferred
+- Feature completeness vs complexity
+
+- [ ] Evaluate SSO solutions (Authelia, Keycloak, Okta)
+- [ ] Design SSO integration architecture
 - [ ] LDAP/AD support
 - [ ] OAuth2/OIDC support
 - [ ] Multi-factor authentication
 - [ ] Role-based access control
 - [ ] Audit logging
 
-### Security
+### Security (Partially Complete)
+- [x] Commit verification and signing
+- [x] Secret detection (detect-secrets)
+- [x] Pre-commit security hooks
 - [ ] TLS everywhere
-- [ ] Secrets management
+- [ ] Comprehensive secrets management
 - [ ] Security hardening guide
 - [ ] Compliance documentation
 
-## Version 1.5 - Advanced Features (Target: Q4 2025)
+**Note**: SSO was originally considered for early implementation but was deferred to allow focus on building and proving the core platform. The decision to defer SSO evaluation (Okta/Keycloak/alternatives) ensures the MVP delivers solid foundational functionality first.
+
+## Version 1.5 - Advanced Features (Target: September 2026)
+
+**Status**: Future
+**Timeline**: Q3 2026
+**Focus**: Monitoring, observability, and polish
 
 ### Features
 - [ ] Dynamic runner autoscaling

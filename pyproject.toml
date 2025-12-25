@@ -1,7 +1,7 @@
 [project]
 name = "autogit"
-version = "0.2.0"
-description = "Add your description here"
+version = "0.3.0"
+description = "Self-Hosted GitOps Platform with Dynamic Multi-Architecture Runner Management and Automated Workflows"
 requires-python = ">=3.13"
 dependencies = [
     "aiosqlite>=0.22.0",

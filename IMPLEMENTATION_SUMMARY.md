@@ -164,10 +164,29 @@ None. This is purely additive.
 ## Next Steps
 
 After merge:
-1. Test auto-fix workflow on next PR
-2. Monitor workflow chain (versioning → release)
-3. Contributors will be prompted to run setup scripts
-4. Evaluate SSO solutions (Okta/Keycloak) for future release
+1. **🔴 CRITICAL**: Review branch protection rules (see BRANCH_PROTECTION_GUIDE.md)
+   - Verify "Allow GitHub Actions to create and approve pull requests" is enabled
+   - Ensure `main` branch is not locked
+   - Check that status checks are configured correctly
+2. Test auto-fix workflow on next PR
+3. Monitor workflow chain (versioning → release)
+4. Contributors will be prompted to run setup scripts
+5. Evaluate SSO solutions (Okta/Keycloak) for future release
+
+### Branch Protection Configuration Required
+
+⚠️ **IMPORTANT**: The automated workflows may be blocked by branch protection rules. Before testing:
+
+1. Go to Repository Settings → Actions → General
+2. Enable: "Allow GitHub Actions to create and approve pull requests"
+3. Review branch protection rules for `main` and `dev`
+4. Ensure branches are not locked
+5. See BRANCH_PROTECTION_GUIDE.md for detailed configuration
+
+Common issues if not configured:
+- Versioning workflow can't push tags
+- Release workflow can't create releases
+- Auto-fix workflow can't push commits to PR branches
 
 ## References
 

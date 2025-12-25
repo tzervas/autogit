@@ -101,12 +101,29 @@ jobs:
             if [[ "$TAG_NAME" == *"-dev."* ]]; then
               SOURCE_BRANCH="dev"
               echo "✅ Development release triggered by tag push: $TAG_NAME"
-            else
+            elif [[ "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               SOURCE_BRANCH="main"
               echo "✅ Production release triggered by tag push: $TAG_NAME"
+            else
+              # For other tag patterns, try to determine from git history
+              echo "ℹ️  Determining source branch from git history for tag: $TAG_NAME"
+              # Check which branch contains this tag
+              if git branch -r --contains "refs/tags/$TAG_NAME" | grep -q "origin/main"; then
+                SOURCE_BRANCH="main"
+              elif git branch -r --contains "refs/tags/$TAG_NAME" | grep -q "origin/dev"; then
+                SOURCE_BRANCH="dev"
+              else
+                # Default to dev for feature branches
+                SOURCE_BRANCH="dev"
+              fi
+              echo "✅ Determined source branch: $SOURCE_BRANCH"
             fi
             
             SHOULD_RELEASE="true"
+          else
+            echo "⚠️  Workflow triggered but conditions not met"
+            echo "Event: ${{ github.event_name }}"
+            echo "Ref: ${{ github.ref }}"
           fi
           
           echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT

@@ -10,16 +10,16 @@
 
 AutoGit is a fully self-hosted GitOps platform that automatically manages and scales GitLab runners across multiple architectures (amd64, arm64, RISC-V) with GPU-aware scheduling (AMD, NVIDIA, Intel). Built with security, lightweight performance, and ease of deployment in mind.
 
-> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully self-hosted Homeland instance with automated, lifecycle-managed runners. While some manual tasks remain, this release proves the concept and provides a functioning foundation for continued refinement toward the 1.0.0 release.
+> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully self-hosted homelab instance with automated, lifecycle-managed runners. While some manual tasks remain, this release proves the concept and provides a functioning foundation for continued refinement toward the 1.0.0 release.
 
 ### Key Features
 
 - 🚀 **Dynamic Runner Autoscaling** - Automatically provisions right-sized runners based on job queue
 - 🏗️ **Multi-Architecture Support** - AMD64 native (MVP), ARM64 native + QEMU emulation (planned), RISC-V QEMU (future)
-- 🎮 **GPU-Aware Scheduling** - Intelligent allocation of AMD, NVIDIA, and Intel GPUs
-- 🔐 **Centralized SSO** - Unified authentication with Authelia
-- 🔒 **Automated SSL/TLS** - Let's Encrypt integration via cert-manager
-- 🌐 **Self-Hosted DNS** - LAN-isolated access with CoreDNS
+- 🎮 **GPU-Aware Scheduling** - Intelligent allocation of AMD, NVIDIA, and Intel GPUs _(planned)_
+- 🔐 **Centralized SSO** - Unified authentication _(planned - Okta/Keycloak evaluation deferred to focus on core functionality)_
+- 🔒 **Automated SSL/TLS** - Let's Encrypt integration via cert-manager _(planned)_
+- 🌐 **Self-Hosted DNS** - LAN-isolated access with CoreDNS _(planned)_
 - 📦 **Flexible Deployment** - Scale from Docker Compose to Kubernetes/Helm
 - ⚖️ **MIT Licensed** - Using only compatible FOSS components
 

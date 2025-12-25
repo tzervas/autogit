@@ -22,21 +22,25 @@ See [Multi-Architecture Strategy](../../MULTI_ARCH_STRATEGY.md) for complete det
 
 1. **Git Server** - Version control and repository management
 2. **Runner Coordinator** - Dynamic runner lifecycle management
-3. **GPU Detector** - GPU discovery and allocation
-4. **Fleeting Plugin** - Custom autoscaling implementation
+3. **GPU Detector** - GPU discovery and allocation _(planned)_
+4. **Fleeting Plugin** - Custom autoscaling implementation _(planned)_
 
-### Infrastructure Components
+### Infrastructure Components (Planned)
 
-1. **Traefik** - Ingress controller and reverse proxy
-2. **Authelia** - Centralized SSO and authentication
-3. **CoreDNS** - Internal DNS management
-4. **cert-manager** - Automated TLS certificate management
+The following components are planned for future releases:
 
-### Data Layer
+1. **Traefik** - Ingress controller and reverse proxy _(planned)_
+2. **SSO/Authentication** - Centralized authentication _(planned - Okta/Keycloak evaluation deferred to focus on core functionality)_
+3. **CoreDNS** - Internal DNS management _(planned)_
+4. **cert-manager** - Automated TLS certificate management _(planned)_
 
-1. **PostgreSQL** - Primary relational database
-2. **Redis** - Caching and session storage
-3. **MinIO** - Object storage for artifacts
+**Current MVP Status**: Docker Compose with Git Server (GitLab CE) and basic services.
+
+### Data Layer (Planned)
+
+1. **PostgreSQL** - Primary relational database _(planned - GitLab CE uses bundled PostgreSQL currently)_
+2. **Redis** - Caching and session storage _(planned - GitLab CE uses bundled Redis currently)_
+3. **MinIO** - Object storage for artifacts _(planned)_
 
 ## Architectural Principles
 
@@ -55,16 +59,14 @@ See [Design Principles](design-principles.md) for details.
 ```
 User Request
     ↓
-Traefik (Ingress)
+Git Server (GitLab CE)
     ↓
-Authelia (Auth) ← → GitLab/Git Server
+Runner Coordinator ← → Docker Runtime
     ↓
-Runner Coordinator
-    ↓
-Runner Manager → GPU Detector
-    ↓
-Docker/K8s (Runtime)
+CI/CD Jobs Execute
 ```
+
+**Note**: Advanced infrastructure components (Traefik, SSO, DNS, cert-manager) are planned for future releases.
 
 See [Component Diagram](components.md) for detailed interactions.
 

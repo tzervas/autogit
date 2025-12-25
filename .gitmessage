@@ -1,0 +1,30 @@
+# <type>(<scope>): <subject>
+#
+# Types:
+#   feat:     A new feature
+#   fix:      A bug fix
+#   docs:     Documentation only changes
+#   style:    Code style changes (formatting, missing semi colons, etc)
+#   refactor: Code change that neither fixes a bug nor adds a feature
+#   perf:     Code change that improves performance
+#   test:     Adding or updating tests
+#   chore:    Changes to build process or auxiliary tools
+#   ci:       Changes to CI/CD configuration
+#   build:    Changes to build system or dependencies
+#   revert:   Reverts a previous commit
+#
+# Scope: The area of the codebase affected (e.g., api, auth, runners, workflows)
+#
+# Subject: Short imperative description (max 50 chars)
+#
+# Body (optional): Explain what and why, not how (wrap at 72 chars)
+#
+# Footer (optional): Reference issues, breaking changes
+#   Closes #123
+#   BREAKING CHANGE: <description>
+#
+# Examples:
+#   feat(runners): add GPU detection and allocation
+#   fix(auth): resolve token refresh race condition
+#   docs(readme): update installation instructions
+#   ci(workflows): optimize Docker build caching

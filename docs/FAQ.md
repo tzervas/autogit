@@ -127,10 +127,17 @@ Secrets are managed through:
 
 ### Can I use SSO?
 
-Yes! AutoGit integrates with Authelia for centralized SSO supporting:
-- LDAP/Active Directory
-- OAuth2/OIDC
+**Current Status**: SSO is **planned but not yet implemented**.
+
+During initial planning, Okta and Keycloak were evaluated as SSO solutions, but the decision was made to focus on building and proving the core platform functionality first. SSO integration will be addressed in a future release.
+
+**Future Plans**:
+- LDAP/Active Directory integration
+- OAuth2/OIDC support
 - Multi-factor authentication
+- Evaluation of Okta, Keycloak, or other SSO solutions
+
+For now, authentication is handled directly by the Git server (GitLab CE) using its built-in user management.
 
 ## Performance
 

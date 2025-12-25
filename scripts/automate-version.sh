@@ -54,6 +54,14 @@ CURRENT_VERSION=$(get_current_version)
 echo -e "${YELLOW}Current Branch:${NC} $CURRENT_BRANCH"
 echo -e "${YELLOW}Current Version:${NC} $CURRENT_VERSION"
 
+# Configure git for signing if in GitHub Actions
+if [ -n "$GITHUB_ACTIONS" ]; then
+    echo -e "${YELLOW}Configuring git for GitHub Actions...${NC}"
+    git config user.name "github-actions[bot]"
+    git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    # GitHub Actions commits are signed automatically via web interface
+fi
+
 if [[ $CURRENT_BRANCH == "main" ]]; then
     # On main, we do full releases
     echo -e "${YELLOW}Detected main branch. Preparing for a full release...${NC}"

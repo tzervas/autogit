@@ -18,6 +18,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write  # Required to trigger workflows when pushing branches/creating PRs
 
 jobs:
   create-fix-pr:

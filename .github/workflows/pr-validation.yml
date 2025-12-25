@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write  # Required to trigger workflows when pushing commits to PR branches
 
 jobs:
   # ============================================================================

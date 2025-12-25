@@ -15,6 +15,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write  # Required to trigger workflows when pushing to feature branches
 
 jobs:
   sync-to-features:

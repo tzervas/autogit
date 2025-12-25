@@ -136,6 +136,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
+      actions: write  # Required if creating tags in manual mode that might trigger workflows
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

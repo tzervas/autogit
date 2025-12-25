@@ -1,9 +1,9 @@
 stages:
-  - validate
-  - test
-  - build
-  - publish
-  - integration
+- validate
+- test
+- build
+- publish
+- integration
 
 # =============================================================================
 # GLOBAL VARIABLES
@@ -69,18 +69,18 @@ validate:syntax:
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "🔍 Validating Python syntax..."
-    - find . -name "*.py" -type f | head -10 | xargs -I {} python -m py_compile {}
-    - echo "✅ Syntax validation passed!"
+  - echo "🔍 Validating Python syntax..."
+  - find . -name "*.py" -type f | head -10 | xargs -I {} python -m py_compile {}
+  - echo "✅ Syntax validation passed!"
 
 validate:dependencies:
   stage: validate
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "🔍 Checking Python dependencies..."
-    - pip install --dry-run -r services/runner-coordinator/requirements.txt || echo "Requirements check complete"
-    - echo "✅ Dependencies validated!"
+  - echo "🔍 Checking Python dependencies..."
+  - pip install --dry-run -r services/runner-coordinator/requirements.txt || echo "Requirements check complete"
+  - echo "✅ Dependencies validated!"
 
 # =============================================================================
 # STAGE 2: TESTING - Comprehensive test suite
@@ -91,29 +91,36 @@ test:hello:
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "🚀 Hello from AutoGit self-hosted runner!"
-    - echo "Runner architecture - $(uname -m)"
-    - echo "Python version - $(python --version)"
-    - python -c "import sys; print(f'Python executable - {sys.executable}')"
-    - echo "✅ Basic connectivity test passed!"
+  - echo "🚀 Hello from AutoGit self-hosted runner!"
+  - echo "Runner architecture - $(uname -m)"
+  - echo "Python version - $(python --version)"
+  - python -c "import sys; print(f'Python executable - {sys.executable}')"
+  - echo "✅ Basic connectivity test passed!"
 
 test:job1:
   stage: test
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "🔧 Testing system resources..."
-    - echo "Available CPUs - $(nproc)"
-    - echo "✅ Resource check passed!"
+  - echo "🔧 Testing system resources..."
+  - echo "Available CPUs - $(nproc)"
+  - echo "✅ Resource check passed!"
 
 test:job2:
   stage: test
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "⚡ Testing single-threaded performance..."
-    - python -c "import time; start = time.time(); result = sum(i**2 for i in range(1000000)); elapsed = time.time() - start; print(f'Computed in {elapsed:.4f}s')"
-    - echo "✅ Performance test passed!"
+  - echo "⚡ Testing single-threaded performance..."
+  - |
+    python -c "
+    import time
+    start = time.time()
+    result = sum(i**2 for i in range(1000000))
+    elapsed = time.time() - start
+    print(f'Computed in {elapsed:.4f}s')
+    "
+  - echo "✅ Performance test passed!"
 
 # =============================================================================
 # STAGE 3: BUILD - Docker image builds (GitLab Registry)
@@ -129,8 +136,8 @@ build:git-server:
   retry:
     max: 2
     when:
-      - runner_system_failure
-      - script_failure
+    - runner_system_failure
+    - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
@@ -139,57 +146,57 @@ build:git-server:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   before_script:
     # Validate registry is available
-    - |
-      echo "🔐 Validating GitLab Registry authentication..."
-      if [ -z "${CI_REGISTRY}" ]; then
-        echo "⚠️ CI_REGISTRY not set - GitLab Container Registry may not be enabled"
-        echo "ℹ️ Building without registry push (local build only)"
-        export SKIP_REGISTRY_PUSH="true"
-      else
-        echo "✅ Registry URL = ${CI_REGISTRY}"
-      fi
+  - |
+    echo "🔐 Validating GitLab Registry authentication..."
+    if [ -z "${CI_REGISTRY}" ]; then
+      echo "⚠️ CI_REGISTRY not set - GitLab Container Registry may not be enabled"
+      echo "ℹ️ Building without registry push (local build only)"
+      export SKIP_REGISTRY_PUSH="true"
+    else
+      echo "✅ Registry URL = ${CI_REGISTRY}"
+    fi
   script:
-    - echo "🏗️ Building Git Server image..."
-    - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-    - mkdir -p /kaniko/.docker
+  - echo "🏗️ Building Git Server image..."
+  - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+  - mkdir -p /kaniko/.docker
     # Use CI_JOB_TOKEN for secure GitLab Registry authentication
     # This token is automatically provided and scoped to this job
-    - |
-      if [ "${SKIP_REGISTRY_PUSH}" = "true" ]; then
-        echo "{\"auths\":{}}" > /kaniko/.docker/config.json
-        echo "⚠️ Registry push disabled - building without push"
-        /kaniko/executor \
-          --context "${CI_PROJECT_DIR}/services/git-server" \
-          --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile" \
-          --no-push \
-          --build-arg "VERSION=${VERSION}" \
-          --build-arg "VARIANT=${BUILD_VARIANT}" \
-          --build-arg "ARCH=${BUILD_ARCH}" \
-          --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --build-arg "VCS_REF=${CI_COMMIT_SHA}"
-      else
-        echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' 'gitlab-ci-token' \"${CI_JOB_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-        /kaniko/executor \
-          --context "${CI_PROJECT_DIR}/services/git-server" \
-          --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}" \
-          --build-arg "VERSION=${VERSION}" \
-          --build-arg "VARIANT=${BUILD_VARIANT}" \
-          --build-arg "ARCH=${BUILD_ARCH}" \
-          --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --build-arg "VCS_REF=${CI_COMMIT_SHA}" \
-          --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
-          --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
-          --cache=true \
-          --cache-ttl=168h
-      fi
+  - |
+    if [ "${SKIP_REGISTRY_PUSH}" = "true" ]; then
+      echo "{\"auths\":{}}" > /kaniko/.docker/config.json
+      echo "⚠️ Registry push disabled - building without push"
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}/services/git-server" \
+        --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile" \
+        --no-push \
+        --build-arg "VERSION=${VERSION}" \
+        --build-arg "VARIANT=${BUILD_VARIANT}" \
+        --build-arg "ARCH=${BUILD_ARCH}" \
+        --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+    else
+      echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' 'gitlab-ci-token' \"${CI_JOB_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}/services/git-server" \
+        --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}" \
+        --build-arg "VERSION=${VERSION}" \
+        --build-arg "VARIANT=${BUILD_VARIANT}" \
+        --build-arg "ARCH=${BUILD_ARCH}" \
+        --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --build-arg "VCS_REF=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
+        --cache=true \
+        --cache-ttl=168h
+    fi
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+  - if: $CI_COMMIT_TAG
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 build:runner-coordinator:
   stage: build
@@ -198,8 +205,8 @@ build:runner-coordinator:
   retry:
     max: 2
     when:
-      - runner_system_failure
-      - script_failure
+    - runner_system_failure
+    - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
@@ -208,56 +215,56 @@ build:runner-coordinator:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   before_script:
     # Validate registry is available
-    - |
-      echo "🔐 Validating GitLab Registry authentication..."
-      if [ -z "${CI_REGISTRY}" ]; then
-        echo "⚠️ CI_REGISTRY not set - GitLab Container Registry may not be enabled"
-        echo "ℹ️ Building without registry push (local build only)"
-        export SKIP_REGISTRY_PUSH="true"
-      else
-        echo "✅ Registry URL = ${CI_REGISTRY}"
-      fi
+  - |
+    echo "🔐 Validating GitLab Registry authentication..."
+    if [ -z "${CI_REGISTRY}" ]; then
+      echo "⚠️ CI_REGISTRY not set - GitLab Container Registry may not be enabled"
+      echo "ℹ️ Building without registry push (local build only)"
+      export SKIP_REGISTRY_PUSH="true"
+    else
+      echo "✅ Registry URL = ${CI_REGISTRY}"
+    fi
   script:
-    - echo "🏗️ Building Runner Coordinator image..."
-    - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-    - mkdir -p /kaniko/.docker
+  - echo "🏗️ Building Runner Coordinator image..."
+  - echo "📋 Image naming - ${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+  - mkdir -p /kaniko/.docker
     # Use CI_JOB_TOKEN for secure GitLab Registry authentication
-    - |
-      if [ "${SKIP_REGISTRY_PUSH}" = "true" ]; then
-        echo "{\"auths\":{}}" > /kaniko/.docker/config.json
-        echo "⚠️ Registry push disabled - building without push"
-        /kaniko/executor \
-          --context "${CI_PROJECT_DIR}/services/runner-coordinator" \
-          --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile" \
-          --no-push \
-          --build-arg "VERSION=${VERSION}" \
-          --build-arg "VARIANT=${BUILD_VARIANT}" \
-          --build-arg "ARCH=${BUILD_ARCH}" \
-          --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --build-arg "VCS_REF=${CI_COMMIT_SHA}"
-      else
-        echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' 'gitlab-ci-token' \"${CI_JOB_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-        /kaniko/executor \
-          --context "${CI_PROJECT_DIR}/services/runner-coordinator" \
-          --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}" \
-          --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}" \
-          --build-arg "VERSION=${VERSION}" \
-          --build-arg "VARIANT=${BUILD_VARIANT}" \
-          --build-arg "ARCH=${BUILD_ARCH}" \
-          --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --build-arg "VCS_REF=${CI_COMMIT_SHA}" \
-          --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-          --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
-          --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
-          --cache=true \
-          --cache-ttl=168h
-      fi
+  - |
+    if [ "${SKIP_REGISTRY_PUSH}" = "true" ]; then
+      echo "{\"auths\":{}}" > /kaniko/.docker/config.json
+      echo "⚠️ Registry push disabled - building without push"
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}/services/runner-coordinator" \
+        --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile" \
+        --no-push \
+        --build-arg "VERSION=${VERSION}" \
+        --build-arg "VARIANT=${BUILD_VARIANT}" \
+        --build-arg "ARCH=${BUILD_ARCH}" \
+        --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --build-arg "VCS_REF=${CI_COMMIT_SHA}"
+    else
+      echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' 'gitlab-ci-token' \"${CI_JOB_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}/services/runner-coordinator" \
+        --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${IMAGE_TAG}" \
+        --destination "${CI_REGISTRY_IMAGE}/${SERVICE_NAME}:${LATEST_TAG}" \
+        --build-arg "VERSION=${VERSION}" \
+        --build-arg "VARIANT=${BUILD_VARIANT}" \
+        --build-arg "ARCH=${BUILD_ARCH}" \
+        --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --build-arg "VCS_REF=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" \
+        --label "org.opencontainers.image.source=${CI_PROJECT_URL}" \
+        --cache=true \
+        --cache-ttl=168h
+    fi
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+  - if: $CI_COMMIT_TAG
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # =============================================================================
 # STAGE 4: PUBLISH - Push images to GitHub Container Registry
@@ -270,8 +277,8 @@ publish:git-server-ghcr:
   retry:
     max: 2
     when:
-      - runner_system_failure
-      - script_failure
+    - runner_system_failure
+    - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
@@ -280,47 +287,31 @@ publish:git-server-ghcr:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   before_script:
     # Validate GHCR credentials are available (must be set in GitLab CI/CD Variables)
-    - |
-      echo "🔐 Validating GHCR authentication..."
-      if [ -z "${GHCR_USER}" ] || [ -z "${GHCR_TOKEN}" ]; then
-        echo "❌ ERROR: GHCR credentials not configured"
-        echo "ℹ️ Please set GHCR_USER and GHCR_TOKEN in GitLab CI/CD Variables"
-        echo "   - GHCR_USER: Your GitHub username"
-        echo "   - GHCR_TOKEN: GitHub PAT with packages:write scope (masked, protected)"
-        exit 1
-      fi
-      echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
-      # Set the full image name (ghcr.io/owner/prefix-service)
-      export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
-      echo "📦 Target image = ${GHCR_IMAGE}"
+  - |
+    echo "🔐 Validating GHCR authentication..."
+    if [ -z "${GHCR_USER}" ] || [ -z "${GHCR_TOKEN}" ]; then
+      echo "❌ ERROR: GHCR credentials not configured"
+      echo "ℹ️ Please set GHCR_USER and GHCR_TOKEN in GitLab CI/CD Variables"
+      echo "   - GHCR_USER: Your GitHub username"
+      echo "   - GHCR_TOKEN: GitHub PAT with packages:write scope (masked, protected)"
+      exit 1
+    fi
+    echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
+    # Set the full image name (ghcr.io/owner/prefix-service)
+    export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
+    echo "📦 Target image = ${GHCR_IMAGE}"
   script:
-    - echo "📦 Publishing Git Server to GHCR..."
-    - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-    - mkdir -p /kaniko/.docker
+  - echo "📦 Publishing Git Server to GHCR..."
+  - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+  - mkdir -p /kaniko/.docker
     # Create Docker config with GHCR credentials (secrets are masked in logs)
-    - |
-      echo "{\"auths\":{\"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}/services/git-server"
-      --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}"
-      --build-arg "VERSION=${VERSION}"
-      --build-arg "VARIANT=${BUILD_VARIANT}"
-      --build-arg "ARCH=${BUILD_ARCH}"
-      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
-      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
-      --label "org.opencontainers.image.source=${PROJECT_URL}"
-      --cache=true
-      --cache-ttl=168h
+  - |
+    echo "{\"auths\":{\"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/services/git-server" --dockerfile "${CI_PROJECT_DIR}/services/git-server/Dockerfile" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}" --build-arg "VERSION=${VERSION}" --build-arg "VARIANT=${BUILD_VARIANT}" --build-arg "ARCH=${BUILD_ARCH}" --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" --build-arg "VCS_REF=${CI_COMMIT_SHA}" --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" --label "org.opencontainers.image.source=${PROJECT_URL}" --cache=true --cache-ttl=168h
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
-    - if: $CI_COMMIT_TAG
-  # No needs - GHCR publish is independent of GitLab Registry builds
+  - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+  - if: $CI_COMMIT_TAG
+    # No needs - GHCR publish is independent of GitLab Registry builds
 
 publish:runner-coordinator-ghcr:
   stage: publish
@@ -328,8 +319,8 @@ publish:runner-coordinator-ghcr:
   retry:
     max: 2
     when:
-      - runner_system_failure
-      - script_failure
+    - runner_system_failure
+    - script_failure
   image:
     name: gcr.io/kaniko-project/executor:v1.23.0-debug
     entrypoint: [""]
@@ -338,45 +329,29 @@ publish:runner-coordinator-ghcr:
     BUILD_VARIANT: ${CI_COMMIT_TAG:+release}${CI_COMMIT_BRANCH:+snapshot}
   before_script:
     # Validate GHCR credentials are available
-    - |
-      echo "🔐 Validating GHCR authentication..."
-      if [ -z "${GHCR_USER}" ] || [ -z "${GHCR_TOKEN}" ]; then
-        echo "❌ ERROR: GHCR credentials not configured"
-        echo "ℹ️ Please set GHCR_USER and GHCR_TOKEN in GitLab CI/CD Variables"
-        exit 1
-      fi
-      echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
-      # Set the full image name (ghcr.io/owner/prefix-service)
-      export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
-      echo "📦 Target image = ${GHCR_IMAGE}"
+  - |
+    echo "🔐 Validating GHCR authentication..."
+    if [ -z "${GHCR_USER}" ] || [ -z "${GHCR_TOKEN}" ]; then
+      echo "❌ ERROR: GHCR credentials not configured"
+      echo "ℹ️ Please set GHCR_USER and GHCR_TOKEN in GitLab CI/CD Variables"
+      exit 1
+    fi
+    echo "✅ GHCR credentials configured for user '${GHCR_USER}'"
+    # Set the full image name (ghcr.io/owner/prefix-service)
+    export GHCR_IMAGE="${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}"
+    echo "📦 Target image = ${GHCR_IMAGE}"
   script:
-    - echo "📦 Publishing Runner Coordinator to GHCR..."
-    - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-    - mkdir -p /kaniko/.docker
+  - echo "📦 Publishing Runner Coordinator to GHCR..."
+  - echo "📋 Image naming - ${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
+  - mkdir -p /kaniko/.docker
     # Create Docker config with GHCR credentials
-    - |
-      echo "{\"auths\":{\"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}/services/runner-coordinator"
-      --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}"
-      --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}"
-      --build-arg "VERSION=${VERSION}"
-      --build-arg "VARIANT=${BUILD_VARIANT}"
-      --build-arg "ARCH=${BUILD_ARCH}"
-      --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      --build-arg "VCS_REF=${CI_COMMIT_SHA}"
-      --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-      --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}"
-      --label "org.opencontainers.image.source=${PROJECT_URL}"
-      --cache=true
-      --cache-ttl=168h
+  - |
+    echo "{\"auths\":{\"${GHCR_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' \"${GHCR_USER}\" \"${GHCR_TOKEN}\" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  - /kaniko/executor --context "${CI_PROJECT_DIR}/services/runner-coordinator" --dockerfile "${CI_PROJECT_DIR}/services/runner-coordinator/Dockerfile" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${VERSION}-${BUILD_ARCH}-${BUILD_VARIANT}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${IMAGE_TAG}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${CI_COMMIT_REF_SLUG}" --destination "${GHCR_REGISTRY}/${GHCR_OWNER}/${GHCR_PREFIX}-${SERVICE_NAME}:${LATEST_TAG}" --build-arg "VERSION=${VERSION}" --build-arg "VARIANT=${BUILD_VARIANT}" --build-arg "ARCH=${BUILD_ARCH}" --build-arg "BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" --build-arg "VCS_REF=${CI_COMMIT_SHA}" --label "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" --label "org.opencontainers.image.revision=${CI_COMMIT_SHA}" --label "org.opencontainers.image.source=${PROJECT_URL}" --cache=true --cache-ttl=168h
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
-    - if: $CI_COMMIT_TAG
-  # No needs - GHCR publish is independent of GitLab Registry builds
+  - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"
+  - if: $CI_COMMIT_TAG
+    # No needs - GHCR publish is independent of GitLab Registry builds
 
 # =============================================================================
 # STAGE 5: INTEGRATION - End-to-end tests
@@ -387,8 +362,8 @@ integration:smoke-test:
   tags: [docker]
   image: python:3.11-slim
   script:
-    - echo "🔗 Running smoke test..."
-    - apt-get update && apt-get install -y --no-install-recommends curl
-    - echo "Testing connectivity..."
-    - echo "✅ Smoke test completed!"
+  - echo "🔗 Running smoke test..."
+  - apt-get update && apt-get install -y --no-install-recommends curl
+  - echo "Testing connectivity..."
+  - echo "✅ Smoke test completed!"
   allow_failure: true

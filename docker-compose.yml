@@ -1,3 +1,4 @@
+---
 services:
   # Git server - GitLab CE provides version control functionality
   git-server:

@@ -3,11 +3,11 @@ name: Release
 
 # This workflow creates releases and publishes Docker images to GHCR.
 # It runs when:
-# 1. A version tag (v*.*.*) is pushed to the repository
+# 1. A version tag (v*.*.*) is pushed to the repository (typically by versioning workflow)
 # 2. Manually triggered via workflow_dispatch (with version override option)
-# 3. PR merged from dev into main (automatic release)
-#    Note: Uses 'pull_request.types: [closed]' but checks 'merged == true' to ensure
-#    only merged PRs trigger releases, not cancelled/closed PRs
+#
+# Note: The versioning workflow creates tags automatically on PR merges to main/dev.
+# This workflow then triggers on those tag pushes to create GitHub releases.
 #
 # Features:
 # - Runs on self-hosted runners with ample resources for parallel builds
@@ -26,13 +26,8 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
-    branches:
-      - main
-  pull_request:
-    types: [closed]  # Triggers on PR close, but job checks for 'merged == true' to filter out cancelled PRs
-    branches:
-      - main
+      - 'v*.*.*'      # Production releases (e.g., v0.3.0)
+      - 'v*.*.*-dev.*' # Development pre-releases (e.g., v0.3.1-dev.20241224)
   workflow_dispatch:
     inputs:
       source_branch:
@@ -66,15 +61,11 @@ jobs:
     name: Validate Release Requirements
     runs-on: self-hosted
     # Only run if:
-    # 1. Push to main branch (not tags)
-    # 2. PR merged into main from dev
-    # 3. Manual workflow dispatch
-    # 4. Tag push
+    # 1. Tag push (from versioning workflow or manual)
+    # 2. Manual workflow dispatch
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main') ||
-      (github.event_name == 'workflow_dispatch') ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
+      (github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       pull-requests: read
@@ -102,31 +93,20 @@ jobs:
             SOURCE_BRANCH="${{ inputs.source_branch }}"
             SHOULD_RELEASE="true"
             echo "✅ Manual release triggered from $SOURCE_BRANCH branch"
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            # PR event - must be merged (not just closed) into main from dev
-            if [ "${{ github.event.pull_request.merged }}" = "true" ] && \
-               [ "${{ github.event.pull_request.base.ref }}" = "main" ] && \
-               [ "${{ github.event.pull_request.head.ref }}" = "dev" ]; then
-              SOURCE_BRANCH="main"
-              SHOULD_RELEASE="true"
-              echo "✅ Release triggered by dev → main merge (PR #${{ github.event.pull_request.number }})"
-            else
-              if [ "${{ github.event.pull_request.merged }}" != "true" ]; then
-                echo "ℹ️ PR #${{ github.event.pull_request.number }} was closed without merging - skipping release"
-              else
-                echo "ℹ️ PR #${{ github.event.pull_request.number }} not from dev to main - skipping release"
-              fi
-            fi
           elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            # Tag push
-            SOURCE_BRANCH="main"
+            # Tag push (from versioning workflow or manual)
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            
+            # Determine source branch based on tag pattern
+            if [[ "$TAG_NAME" == *"-dev."* ]]; then
+              SOURCE_BRANCH="dev"
+              echo "✅ Development release triggered by tag push: $TAG_NAME"
+            else
+              SOURCE_BRANCH="main"
+              echo "✅ Production release triggered by tag push: $TAG_NAME"
+            fi
+            
             SHOULD_RELEASE="true"
-            echo "✅ Release triggered by tag push"
-          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            # Direct push to main
-            SOURCE_BRANCH="main"
-            SHOULD_RELEASE="true"
-            echo "✅ Release triggered by push to main"
           fi
           
           echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
@@ -200,23 +180,10 @@ jobs:
                 fi
               fi
             fi
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            # PR merged into main - extract version from PR title or auto-increment
-            PR_TITLE="${{ github.event.pull_request.title }}"
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-            echo "📋 Merged PR #$PR_NUMBER: $PR_TITLE"
-            
-            # Try to extract version from PR title
-            EXTRACTED_VERSION=$(echo "$PR_TITLE" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
-            
-            if [ -n "$EXTRACTED_VERSION" ]; then
-              VERSION="$EXTRACTED_VERSION"
-              echo "✅ Extracted version from PR title: $VERSION"
-            fi
           elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            # Tag push - use the tag
+            # Tag push (from versioning workflow) - use the tag directly
             VERSION=${GITHUB_REF#refs/tags/}
-            echo "✅ Using tag from push event: $VERSION"
+            echo "✅ Using version from tag: $VERSION"
           fi
           
           # If no version determined yet, auto-increment from latest tag
@@ -231,7 +198,7 @@ jobs:
             PATCH=$(echo "$LATEST_TAG" | sed 's/v//' | cut -d. -f3 | cut -d- -f1)
             
             # Determine increment type based on branch or commit messages
-            if [ "${{ needs.validate-release.outputs.source_branch }}" = "main" ] || [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            if [ "${{ needs.validate-release.outputs.source_branch }}" = "main" ]; then
               # For main branch, check recent commits for version hints
               RECENT_COMMITS=$(git log --oneline -20)
               

@@ -2,24 +2,55 @@
 
 ## Overview
 
-The updated release workflow provides flexible, automated release management with support for:
-- Automatic releases triggered by PR merges
-- Manual releases with version control options
-- Intelligent version detection from PR data
-- Parallel Docker image builds on self-hosted runners
+The release system consists of two workflows working together:
+1. **Versioning Workflow** - Automatically creates version tags on PR merges
+2. **Release Workflow** - Creates GitHub releases and publishes Docker images when tags are pushed
+
+### Versioning Workflow (Automatic Tagging)
+
+- Triggers when PRs are merged into `main` or `dev`
+- Only runs if there are actual code changes (excludes docs-only PRs)
+- Creates production tags (e.g., `v0.3.0`) for main branch
+- Creates dev tags (e.g., `v0.3.1-dev.20241224`) for dev branch
+
+### Release Workflow (Release Creation)
+
+- Triggers when version tags are pushed (from versioning workflow)
+- Creates GitHub releases with auto-generated notes
+- Builds and publishes Docker images to GHCR in parallel
+- Supports manual triggers with version override options
+
+## Workflow Integration
+
+```
+PR Merge → dev/main
+    ↓
+Versioning Workflow
+    ├─ Check for code changes
+    ├─ Create version tag
+    └─ Push tag to GitHub
+        ↓
+Release Workflow (triggered by tag push)
+    ├─ Create GitHub release
+    └─ Build & publish Docker images
+```
 
 ## Trigger Mechanisms
 
-### 1. Automatic Release on PR Merge (dev → main)
+### 1. Automatic Release (Recommended)
 
-When a PR is merged from `dev` into `main`, the workflow automatically:
-- Detects the merge event (filters out closed-without-merge PRs)
-- Extracts version information from the PR title (e.g., "Release v0.3.0")
-- Falls back to auto-increment if no version found in PR title
-- Generates release notes from the PR description
-- Creates the release and publishes Docker images
+**For Production Releases:**
+1. Merge feature PR into `dev` for testing
+2. Create PR from `dev` to `main` with code changes
+3. Merge PR - versioning workflow creates production tag
+4. Release workflow automatically creates release and publishes images
 
-**Important**: The workflow uses `pull_request.types: [closed]` but checks `merged == true` to ensure only merged PRs trigger releases, not cancelled/closed PRs.
+**For Development Releases:**
+1. Merge feature PR into `dev` with code changes
+2. Versioning workflow creates dev tag
+3. Release workflow creates pre-release
+
+**Note**: Documentation-only PRs won't trigger versioning or releases.
 
 ### 2. Manual Release via Workflow Dispatch
 
@@ -33,30 +64,47 @@ Trigger manually from GitHub Actions UI with:
 - **manual_version**: Custom version (e.g., v0.3.0) - only used when version_mode is "manual"
 - **create_tag**: Create git tag if it doesn't exist (default: true)
 
-### 3. Tag Push
+## Code Change Detection
 
-Traditional release trigger - pushing a version tag (v*.*.*) triggers the workflow.
+The versioning workflow only triggers on PRs with actual code changes. The following file patterns are excluded:
 
-### 4. Direct Push to Main
+**Excluded (Won't Trigger Versioning):**
+- `*.md` - Markdown documentation
+- `docs/` - Documentation directory
+- `.github/workflows/` - Workflow files
+- `.gitignore`, `LICENSE`, `README.md`, `CHANGELOG.md`
+- `*.txt` - Text files
 
-Pushing directly to main branch also triggers a release.
+**Included (Will Trigger Versioning):**
+- Source code files (`*.py`, `*.js`, `*.go`, etc.)
+- Service files in `services/`
+- Scripts in `scripts/`
+- Configuration files (`*.yml`, `*.json`, `*.toml`)
+- Docker files
 
 ## Version Detection Logic
 
-### Auto Mode (version_mode: auto)
+### Versioning Workflow (Automatic Tags)
 
-1. **From PR Title**: Extracts version pattern like `v0.3.0` from PR title
-   - Examples: "Release v0.3.0", "Merge v0.3.0 changes", "v0.3.0"
-   
-2. **Auto-increment**: If no version in PR title, increments from latest tag
-   - Checks recent commits for version bump hints:
-     - "BREAKING CHANGE" or "major" → major version bump (v1.0.0 → v2.0.0)
-     - "feat", "feature", or "minor" → minor version bump (v0.2.0 → v0.3.0)
-     - Otherwise → patch version bump (v0.2.1 → v0.2.2)
+For production releases (main branch):
+- Creates semantic version tags: `v0.3.0`, `v1.0.0`, etc.
+- Version based on automate-version.sh script
 
-### Manual Mode (version_mode: manual)
+For development releases (dev branch):
+- Creates pre-release tags: `v0.3.1-dev.20241224130354`
+- Includes timestamp for uniqueness
 
-Uses the provided `manual_version` input directly. Must match format: `vX.Y.Z`
+### Release Workflow (From Tags)
+
+When triggered by tag push:
+- Uses the tag version directly (no recalculation needed)
+- Determines release type from tag pattern:
+  - Production: `v0.3.0` (no suffix)
+  - Development: `v0.3.1-dev.*` (has -dev suffix)
+
+When triggered manually:
+1. **Auto Mode**: Extracts version from last merged PR title
+2. **Manual Mode**: Uses provided version directly
 
 ## Release Notes Generation
 
@@ -114,34 +162,55 @@ This checks for:
 
 ## Example Usage
 
-### Scenario 1: Automatic Release from PR
-1. Create PR from `dev` to `main` with title: "Release v0.3.0"
-2. Add detailed changes in PR description
-3. Merge the PR
-4. Workflow automatically:
-   - Creates release v0.3.0
-   - Uses PR description for release notes
-   - Builds and publishes Docker images
+### Scenario 1: Automatic Production Release
+```
+1. Develop features on feature branches
+2. Merge features into dev for testing
+3. Create PR: dev → main (with code changes)
+4. Merge PR
+5. Versioning workflow:
+   - Detects code changes
+   - Creates tag v0.3.0
+6. Release workflow:
+   - Triggered by tag push
+   - Creates GitHub release
+   - Publishes Docker images
+```
 
-### Scenario 2: Manual Release with Auto-detection
-1. Go to Actions → Release workflow
-2. Click "Run workflow"
-3. Select:
-   - source_branch: `dev`
-   - version_mode: `auto`
-4. Workflow automatically:
-   - Gets last merged PR into dev
-   - Extracts version from PR title
-   - Creates release with PR details
+### Scenario 2: Automatic Development Release
+```
+1. Create feature PR to dev (with code changes)
+2. Merge PR into dev
+3. Versioning workflow:
+   - Detects code changes
+   - Creates tag v0.3.1-dev.20241224
+4. Release workflow:
+   - Triggered by tag push
+   - Creates pre-release
+   - Publishes Docker images
+```
 
-### Scenario 3: Manual Release with Custom Version
-1. Go to Actions → Release workflow
-2. Click "Run workflow"
-3. Select:
-   - source_branch: `main`
-   - version_mode: `manual`
-   - manual_version: `v0.4.0`
-4. Workflow creates release v0.4.0 from main branch
+### Scenario 3: Documentation Update (No Release)
+```
+1. Update documentation files only
+2. Create PR to main or dev
+3. Merge PR
+4. Versioning workflow:
+   - Checks changed files
+   - Detects only docs changes
+   - Skips versioning (no tag created)
+5. No release created
+```
+
+### Scenario 4: Manual Release
+```
+1. Go to Actions → Release workflow → Run workflow
+2. Select:
+   - source_branch: dev
+   - version_mode: manual
+   - manual_version: v0.4.0
+3. Workflow creates v0.4.0 release manually
+```
 
 ## Permissions Required
 

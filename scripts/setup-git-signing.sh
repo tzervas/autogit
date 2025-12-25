@@ -20,14 +20,14 @@ echo ""
 if [ -n "$GITHUB_ACTIONS" ]; then
     echo -e "${YELLOW}🤖 Running in GitHub Actions${NC}"
     echo -e "${YELLOW}   Commits will be automatically signed by GitHub${NC}"
-    
+
     # Configure git for GitHub Actions
     git config user.name "github-actions[bot]"
     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-    
+
     # GitHub Actions commits are automatically signed via web interface
     # No need to configure GPG
-    
+
     echo -e "${GREEN}✓ Git configured for GitHub Actions${NC}"
     exit 0
 fi
@@ -37,21 +37,21 @@ echo -e "${YELLOW}📍 Configuring for local development${NC}"
 echo ""
 
 # Set commit message template
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+REPO_ROOT=$(git rev-parse --show-toplevel 2> /dev/null || pwd)
 git config commit.template "$REPO_ROOT/.gitmessage"
 echo -e "${GREEN}✓ Commit message template configured${NC}"
 
 # Check if GPG is available
-if command -v gpg &>/dev/null; then
+if command -v gpg &> /dev/null; then
     echo -e "${YELLOW}🔐 GPG is available${NC}"
-    
+
     # Check if user has a GPG key
-    if gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep -q "sec"; then
+    if gpg --list-secret-keys --keyid-format LONG 2> /dev/null | grep -q "sec"; then
         echo -e "${GREEN}✓ GPG key found${NC}"
-        
+
         # Get the first GPG key ID
         KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep "sec" | head -1 | awk '{print $2}' | cut -d'/' -f2)
-        
+
         if [ -n "$KEY_ID" ]; then
             echo -e "${YELLOW}   Using GPG key: $KEY_ID${NC}"
             git config user.signingkey "$KEY_ID"
@@ -82,6 +82,6 @@ echo ""
 echo -e "${YELLOW}Current configuration:${NC}"
 git config --get user.name && echo -e "  Name: $(git config --get user.name)"
 git config --get user.email && echo -e "  Email: $(git config --get user.email)"
-git config --get commit.template &>/dev/null && echo -e "  Template: Configured"
-git config --get commit.gpgsign &>/dev/null && echo -e "  GPG Signing: Enabled" || echo -e "  GPG Signing: Disabled"
+git config --get commit.template &> /dev/null && echo -e "  Template: Configured"
+git config --get commit.gpgsign &> /dev/null && echo -e "  GPG Signing: Enabled" || echo -e "  GPG Signing: Disabled"
 echo ""

@@ -42,13 +42,13 @@ step "Pre-flight checks..."
 echo ""
 
 info "Checking services..."
-if ! curl -sf "${COORDINATOR_URL}/health" >/dev/null 2>&1; then
+if ! curl -sf "${COORDINATOR_URL}/health" > /dev/null 2>&1; then
     error "Runner Coordinator is not responding"
     exit 1
 fi
 success "Runner Coordinator: UP"
 
-if ! curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; then
+if ! curl -sf "${GITLAB_URL}/" > /dev/null 2>&1; then
     error "GitLab is not responding"
     exit 1
 fi
@@ -60,7 +60,7 @@ INITIAL_RUNNERS=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
 echo "  Active runners: ${INITIAL_RUNNERS}"
 
 info "Current containers:"
-ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --format '{{.Names}}'" 2>/dev/null | while read -r name; do
+ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --format '{{.Names}}'" 2> /dev/null | while read -r name; do
     if [ -n "$name" ]; then
         echo "  • ${name}"
     fi
@@ -131,27 +131,27 @@ while true; do
     if [ "$STATUS" != "$LAST_STATUS" ]; then
         TIMESTAMP=$(date +"%H:%M:%S")
         case $STATUS in
-        "created" | "waiting_for_resource" | "preparing")
-            info "[${TIMESTAMP}] Pipeline: ${STATUS}"
-            ;;
-        "pending")
-            info "[${TIMESTAMP}] Pipeline: ${STATUS} (waiting for runner)"
-            ;;
-        "running")
-            success "[${TIMESTAMP}] Pipeline: ${STATUS}"
-            ;;
-        "success")
-            success "[${TIMESTAMP}] Pipeline: ${STATUS}"
-            break
-            ;;
-        "failed")
-            error "[${TIMESTAMP}] Pipeline: ${STATUS}"
-            break
-            ;;
-        "canceled")
-            warning "[${TIMESTAMP}] Pipeline: ${STATUS}"
-            break
-            ;;
+            "created" | "waiting_for_resource" | "preparing")
+                info "[${TIMESTAMP}] Pipeline: ${STATUS}"
+                ;;
+            "pending")
+                info "[${TIMESTAMP}] Pipeline: ${STATUS} (waiting for runner)"
+                ;;
+            "running")
+                success "[${TIMESTAMP}] Pipeline: ${STATUS}"
+                ;;
+            "success")
+                success "[${TIMESTAMP}] Pipeline: ${STATUS}"
+                break
+                ;;
+            "failed")
+                error "[${TIMESTAMP}] Pipeline: ${STATUS}"
+                break
+                ;;
+            "canceled")
+                warning "[${TIMESTAMP}] Pipeline: ${STATUS}"
+                break
+                ;;
         esac
         LAST_STATUS=$STATUS
     fi
@@ -206,7 +206,7 @@ if [ "$RUNNER_SPAWNED" = "true" ]; then
 
     for i in {1..30}; do
         RUNNER_COUNT=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
-        CONTAINER_COUNT=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --filter 'status=running' -q" 2>/dev/null | wc -l)
+        CONTAINER_COUNT=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --filter 'status=running' -q" 2> /dev/null | wc -l)
 
         TIMESTAMP=$(date +"%H:%M:%S")
         echo -ne "\r[${TIMESTAMP}] Active runners: ${RUNNER_COUNT} | Containers: ${CONTAINER_COUNT} | Waiting: ${i}x2s"

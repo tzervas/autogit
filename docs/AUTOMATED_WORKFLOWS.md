@@ -1,16 +1,17 @@
 # Automated Workflow System
 
-This document describes the automated workflow system that ensures code quality, proper versioning, and verified commits.
+This document describes the automated workflow system that ensures code quality, proper versioning,
+and verified commits.
 
 ## Overview
 
 The AutoGit repository now includes a comprehensive automation system that:
 
 1. **Auto-fixes code** before commits using pre-commit hooks
-2. **Validates and signs commits** to ensure authenticity
-3. **Automatically versions releases** based on branch and changes
-4. **Triggers release workflows** when tags are pushed
-5. **Annotates commits** with details about automated fixes
+1. **Validates and signs commits** to ensure authenticity
+1. **Automatically versions releases** based on branch and changes
+1. **Triggers release workflows** when tags are pushed
+1. **Annotates commits** with details about automated fixes
 
 ## Components
 
@@ -26,11 +27,13 @@ Pre-commit hooks automatically run before each commit to:
 - Validate commit messages follow conventional format
 
 **Setup:**
+
 ```bash
 ./scripts/setup-pre-commit.sh
 ```
 
 **Manual run:**
+
 ```bash
 pre-commit run --all-files
 ```
@@ -47,6 +50,7 @@ The `.github/workflows/pre-commit-auto-fix.yml` workflow runs on all pull reques
 **Trigger:** Automatically on PR open, sync, or reopen
 
 **What it fixes:**
+
 - Code formatting
 - YAML/JSON syntax
 - Shell script formatting
@@ -61,20 +65,23 @@ The `.github/workflows/versioning.yml` workflow creates version tags when:
 - PRs are merged into `dev` (development pre-releases)
 
 **Version Format:**
+
 - Main branch: `vX.Y.Z` (e.g., `v0.3.0`)
 - Dev branch: `vX.Y.Z-dev.TIMESTAMP` (e.g., `v0.3.0-dev.20241225`)
 
-**Code Change Detection:**
-The workflow only creates versions when actual code changes are detected (excluding docs, CI configs, etc.)
+**Code Change Detection:** The workflow only creates versions when actual code changes are detected
+(excluding docs, CI configs, etc.)
 
 ### 4. Release Workflow
 
-The `.github/workflows/release.yml` workflow creates GitHub releases and publishes Docker images when:
+The `.github/workflows/release.yml` workflow creates GitHub releases and publishes Docker images
+when:
 
 - A version tag is pushed (triggered by versioning workflow)
 - Manually triggered via workflow_dispatch
 
 **Features:**
+
 - Automatic version detection from tags or PR titles
 - Release notes generation from PR descriptions
 - Multi-architecture Docker image builds
@@ -85,16 +92,19 @@ The `.github/workflows/release.yml` workflow creates GitHub releases and publish
 All commits are verified and signed:
 
 **GitHub Actions:**
+
 - Commits from GitHub Actions are automatically signed by GitHub
 - Uses `github-actions[bot]` identity
 - No GPG configuration needed
 
 **Local Development:**
+
 ```bash
 ./scripts/setup-git-signing.sh
 ```
 
 This script:
+
 - Configures commit message template
 - Sets up GPG signing if available
 - Provides instructions for key generation
@@ -140,6 +150,7 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -151,6 +162,7 @@ All commits must follow the [Conventional Commits](https://www.conventionalcommi
 - `ci`: CI/CD changes
 
 **Examples:**
+
 ```
 feat(runners): add GPU detection and allocation
 fix(auth): resolve token refresh race condition
@@ -167,6 +179,7 @@ When pre-commit hooks or workflows apply fixes, the commit message includes:
 - Automated signature
 
 **Example commit message:**
+
 ```
 style: Apply automated code fixes
 
@@ -187,11 +200,12 @@ Auto-fixes applied by pre-commit hooks:
 If pre-commit hooks fail:
 
 1. Review the error message
-2. Fix the issue manually if needed
-3. Run `pre-commit run --all-files` to verify
-4. Commit again
+1. Fix the issue manually if needed
+1. Run `pre-commit run --all-files` to verify
+1. Commit again
 
 **Skip hooks (not recommended):**
+
 ```bash
 git commit --no-verify
 ```
@@ -201,18 +215,20 @@ git commit --no-verify
 If workflows don't trigger:
 
 1. Check workflow permissions in repository settings
-2. Verify "Allow GitHub Actions to create and approve pull requests" is enabled
-3. Check workflow logs for errors
+1. Verify "Allow GitHub Actions to create and approve pull requests" is enabled
+1. Check workflow logs for errors
 
 ### Commit signing issues
 
 If commits aren't signed:
 
 **For GitHub Actions:**
+
 - Commits are automatically signed by GitHub
 - No action needed
 
 **For local development:**
+
 ```bash
 # Generate GPG key
 gpg --full-generate-key
@@ -229,24 +245,29 @@ gpg --armor --export YOUR_KEY_ID
 ## Best Practices
 
 1. **Always run setup scripts:**
+
    ```bash
    ./scripts/setup-pre-commit.sh
    ./scripts/setup-git-signing.sh
    ```
 
-2. **Let pre-commit fix issues:**
+1. **Let pre-commit fix issues:**
+
    - Don't skip pre-commit hooks
    - Review auto-fixes before pushing
 
-3. **Use conventional commit format:**
+1. **Use conventional commit format:**
+
    - Use the commit template (`.gitmessage`)
    - Be specific in scope and subject
 
-4. **Review automated PR fixes:**
+1. **Review automated PR fixes:**
+
    - Check the auto-fix commits in PRs
    - Ensure they're correct before merging
 
-5. **Monitor workflow runs:**
+1. **Monitor workflow runs:**
+
    - Check Actions tab for workflow status
    - Address failures promptly
 

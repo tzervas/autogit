@@ -18,7 +18,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Check if Python is installed
-if ! command -v python3 &>/dev/null; then
+if ! command -v python3 &> /dev/null; then
     echo -e "${RED}❌ Python 3 is not installed. Please install Python 3.11+${NC}"
     exit 1
 fi
@@ -27,7 +27,7 @@ PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
 echo -e "${GREEN}✓ Found Python $PYTHON_VERSION${NC}"
 
 # Check if pip is installed
-if ! command -v pip3 &>/dev/null; then
+if ! command -v pip3 &> /dev/null; then
     echo -e "${RED}❌ pip3 is not installed. Please install pip3${NC}"
     exit 1
 fi
@@ -40,12 +40,12 @@ echo -e "${YELLOW}📦 Installing/upgrading pre-commit...${NC}"
 pip3 install --user --upgrade pre-commit
 
 # Verify installation
-if ! command -v pre-commit &>/dev/null; then
+if ! command -v pre-commit &> /dev/null; then
     echo -e "${YELLOW}⚠️  pre-commit not found in PATH${NC}"
     echo -e "${YELLOW}   Adding ~/.local/bin to PATH for this session${NC}"
     export PATH="$HOME/.local/bin:$PATH"
 
-    if ! command -v pre-commit &>/dev/null; then
+    if ! command -v pre-commit &> /dev/null; then
         echo -e "${RED}❌ Failed to install pre-commit${NC}"
         exit 1
     fi
@@ -55,7 +55,7 @@ echo -e "${GREEN}✓ pre-commit installed successfully${NC}"
 echo ""
 
 # Navigate to repository root
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+REPO_ROOT=$(git rev-parse --show-toplevel 2> /dev/null || pwd)
 cd "$REPO_ROOT"
 
 echo -e "${YELLOW}📍 Repository root: $REPO_ROOT${NC}"

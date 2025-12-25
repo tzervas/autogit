@@ -2,11 +2,14 @@
 
 ## Overview
 
-Branch protection rules can block automated workflows if not configured correctly. This guide explains the required settings for AutoGit's automated workflow system to function properly.
+Branch protection rules can block automated workflows if not configured correctly. This guide
+explains the required settings for AutoGit's automated workflow system to function properly.
 
 ## Current Issue
 
-**Problem**: Branch protection rules on `main` (and potentially `dev`) may block automated workflows from:
+**Problem**: Branch protection rules on `main` (and potentially `dev`) may block automated workflows
+from:
+
 - Creating tags (versioning workflow)
 - Pushing commits (auto-fix workflow)
 - Creating releases (release workflow)
@@ -33,14 +36,14 @@ Branch Protection Rules for: main
   ☐ Require signed commits
     - If enabled: GitHub Actions commits ARE signed automatically
     - Safe to enable
-    
+
   ☐ Require linear history
     - If enabled: May block merge commits
     - Recommended: Keep DISABLED for main
-    
+
   ☐ Require deployments to succeed before merging
     - Configure based on your deployment strategy
-    
+
   ☐ Lock branch
     - Must be DISABLED for automation to work
     - Blocks ALL pushes including from GitHub Actions
@@ -48,10 +51,10 @@ Branch Protection Rules for: main
 🔑 CRITICAL SETTINGS (Must Be Configured):
   ☑ Allow force pushes
     - MUST be DISABLED (already should be)
-    
+
   ☑ Allow deletions
     - MUST be DISABLED (already should be)
-    
+
   ☑ Allow GitHub Actions to create and approve pull requests
     - MUST be ENABLED in Repository Settings → Actions → General
     - This is separate from branch protection!
@@ -109,7 +112,7 @@ If you DO protect feature branches:
 Workflow Permissions:
   ☑ Read and write permissions
     - Required for: Creating tags, pushing commits, commenting on PRs
-  
+
   ☑ Allow GitHub Actions to create and approve pull requests
     - CRITICAL: Must be enabled for automated workflows
     - Without this: Versioning and auto-merge workflows will fail
@@ -117,20 +120,22 @@ Workflow Permissions:
 
 ### Actions Secrets and Variables
 
-No additional secrets are required for the automated workflows. They use `GITHUB_TOKEN` which is automatically provided.
+No additional secrets are required for the automated workflows. They use `GITHUB_TOKEN` which is
+automatically provided.
 
 ## Common Issues and Solutions
 
 ### Issue 1: Versioning Workflow Can't Push Tags
 
 **Symptoms:**
+
 ```
 Error: refusing to allow a GitHub Actions bot to create or update workflow
 Error: Resource not accessible by integration
 ```
 
-**Solution:**
-Enable in Settings → Actions → General:
+**Solution:** Enable in Settings → Actions → General:
+
 ```
 ☑ Allow GitHub Actions to create and approve pull requests
 ```
@@ -138,28 +143,31 @@ Enable in Settings → Actions → General:
 ### Issue 2: Auto-fix Workflow Can't Push Commits
 
 **Symptoms:**
+
 ```
 Error: Protected branch update failed
 Error: Required status checks must pass
 ```
 
-**Solution:**
-Either:
-1. Add `github-actions[bot]` as an exception to branch protection, OR
-2. Ensure the workflow runs BEFORE the PR is created (not after)
+**Solution:** Either:
 
-**Our approach**: The auto-fix workflow runs on the PR branch (before merge), so it doesn't need to push to protected branches.
+1. Add `github-actions[bot]` as an exception to branch protection, OR
+1. Ensure the workflow runs BEFORE the PR is created (not after)
+
+**Our approach**: The auto-fix workflow runs on the PR branch (before merge), so it doesn't need to
+push to protected branches.
 
 ### Issue 3: Release Workflow Fails
 
 **Symptoms:**
+
 ```
 Error: Cannot create release
 Error: Insufficient permissions
 ```
 
-**Solution:**
-Check workflow permissions in the YAML file:
+**Solution:** Check workflow permissions in the YAML file:
+
 ```yaml
 permissions:
   contents: write  # Required for creating releases
@@ -169,24 +177,25 @@ permissions:
 ### Issue 4: Signed Commits Required
 
 **Symptoms:**
+
 ```
 Error: Commits must be signed
 ```
 
-**Solution:**
-Good news! GitHub Actions commits ARE automatically signed by GitHub. If you're seeing this error:
+**Solution:** Good news! GitHub Actions commits ARE automatically signed by GitHub. If you're seeing
+this error:
 
 1. Check if you're using a PAT (Personal Access Token) - these don't sign commits
-2. Use `GITHUB_TOKEN` instead - it provides automatic signing
-3. Verify the commit is from `github-actions[bot]`
+1. Use `GITHUB_TOKEN` instead - it provides automatic signing
+1. Verify the commit is from `github-actions[bot]`
 
 ## Checking Current Protection Rules
 
 ### Via GitHub UI
 
 1. Go to: Repository → Settings → Branches
-2. Look for "Branch protection rules"
-3. Check settings for `main`, `dev`, and any patterns
+1. Look for "Branch protection rules"
+1. Check settings for `main`, `dev`, and any patterns
 
 ### Via GitHub CLI
 
@@ -217,16 +226,16 @@ curl -H "Authorization: token $GITHUB_TOKEN" \
 
 ### Optimal Settings Matrix
 
-| Feature | main | dev | feature/** |
-|---------|------|-----|------------|
-| Require PR | ✅ Yes | ✅ Yes | ❌ No |
-| Require approvals | ✅ 1+ | ✅ 1 | ❌ No |
-| Require status checks | ✅ Yes | ✅ Yes | ⚠️ Optional |
-| Signed commits | ✅ Yes | ⚠️ Optional | ❌ No |
-| Linear history | ❌ No | ❌ No | ❌ No |
-| Allow force pushes | ❌ No | ❌ No | ✅ Yes |
-| Allow deletions | ❌ No | ❌ No | ✅ Yes |
-| Lock branch | ❌ No | ❌ No | ❌ No |
+| Feature               | main   | dev         | feature/\*\* |
+| --------------------- | ------ | ----------- | ------------ |
+| Require PR            | ✅ Yes | ✅ Yes      | ❌ No        |
+| Require approvals     | ✅ 1+  | ✅ 1        | ❌ No        |
+| Require status checks | ✅ Yes | ✅ Yes      | ⚠️ Optional  |
+| Signed commits        | ✅ Yes | ⚠️ Optional | ❌ No        |
+| Linear history        | ❌ No  | ❌ No       | ❌ No        |
+| Allow force pushes    | ❌ No  | ❌ No       | ✅ Yes       |
+| Allow deletions       | ❌ No  | ❌ No       | ✅ Yes       |
+| Lock branch           | ❌ No  | ❌ No       | ❌ No        |
 
 ### Actions Permissions
 
@@ -254,19 +263,19 @@ gh workflow run release.yml --field source_branch=dev --field version_mode=auto
 ### Test Auto-fix Workflow
 
 1. Create a test PR with formatting issues
-2. Auto-fix workflow should run
-3. Commits should be pushed back to PR branch
-4. No protection errors should occur
+1. Auto-fix workflow should run
+1. Commits should be pushed back to PR branch
+1. No protection errors should occur
 
 ## Updating Branch Protection
 
 ### Via GitHub UI
 
 1. Go to: Settings → Branches
-2. Click "Edit" on the rule for `main`
-3. Adjust settings per recommendations above
-4. Click "Save changes"
-5. Repeat for `dev` if needed
+1. Click "Edit" on the rule for `main`
+1. Adjust settings per recommendations above
+1. Click "Save changes"
+1. Repeat for `dev` if needed
 
 ### Via GitHub CLI
 
@@ -300,10 +309,10 @@ resource "github_branch_protection" "main" {
   }
 
   enforce_admins = false  # Allow admins to bypass for emergencies
-  
+
   # Critical: Don't lock the branch
   lock_branch = false
-  
+
   # Allow Actions to work
   allows_force_pushes = false
   allows_deletions    = false
@@ -314,7 +323,8 @@ resource "github_branch_protection" "main" {
 
 If automated workflows are failing, check:
 
-- [ ] Repository Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" is ENABLED
+- [ ] Repository Settings → Actions → General → "Allow GitHub Actions to create and approve pull
+  requests" is ENABLED
 - [ ] Branch protection rule does NOT have "Lock branch" enabled
 - [ ] Workflow YAML files have correct `permissions:` sections
 - [ ] You're using `GITHUB_TOKEN` not a PAT
@@ -324,19 +334,22 @@ If automated workflows are failing, check:
 ## Priority Actions for Repository Owner
 
 ### 🔴 CRITICAL (Do This First)
+
 1. Check if "Allow GitHub Actions to create and approve pull requests" is enabled
-2. Verify `main` branch is not locked
-3. Test versioning workflow manually
+1. Verify `main` branch is not locked
+1. Test versioning workflow manually
 
 ### 🟡 RECOMMENDED (Do Soon)
+
 1. Review and update branch protection rules per this guide
-2. Test the complete workflow chain
-3. Document any custom protection rules
+1. Test the complete workflow chain
+1. Document any custom protection rules
 
 ### 🟢 OPTIONAL (Nice to Have)
+
 1. Set up branch protection for `dev`
-2. Configure status check requirements
-3. Set up CODEOWNERS file
+1. Configure status check requirements
+1. Set up CODEOWNERS file
 
 ## Documentation References
 
@@ -344,8 +357,7 @@ If automated workflows are failing, check:
 - [GitHub Actions Permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication)
 - [Workflow Permissions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#permissions)
 
----
+______________________________________________________________________
 
-**Status**: Configuration guide for automated workflows
-**Date**: 2025-12-25
-**Action Required**: Repository owner should review and adjust branch protection rules
+**Status**: Configuration guide for automated workflows **Date**: 2025-12-25 **Action Required**:
+Repository owner should review and adjust branch protection rules

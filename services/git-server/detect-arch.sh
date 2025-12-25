@@ -34,18 +34,18 @@ detect_architecture() {
     arch=$(uname -m)
 
     case "$arch" in
-    x86_64 | amd64)
-        echo "amd64"
-        ;;
-    aarch64 | arm64)
-        echo "arm64"
-        ;;
-    riscv64)
-        echo "riscv"
-        ;;
-    *)
-        echo "unknown"
-        ;;
+        x86_64 | amd64)
+            echo "amd64"
+            ;;
+        aarch64 | arm64)
+            echo "arm64"
+            ;;
+        riscv64)
+            echo "riscv"
+            ;;
+        *)
+            echo "unknown"
+            ;;
     esac
 }
 
@@ -54,18 +54,18 @@ get_dockerfile() {
     local arch=$1
 
     case "$arch" in
-    amd64)
-        echo "services/git-server/Dockerfile.amd64"
-        ;;
-    arm64)
-        echo "services/git-server/Dockerfile.arm64"
-        ;;
-    riscv)
-        echo "services/git-server/Dockerfile.riscv"
-        ;;
-    *)
-        echo "services/git-server/Dockerfile"
-        ;;
+        amd64)
+            echo "services/git-server/Dockerfile.amd64"
+            ;;
+        arm64)
+            echo "services/git-server/Dockerfile.arm64"
+            ;;
+        riscv)
+            echo "services/git-server/Dockerfile.riscv"
+            ;;
+        *)
+            echo "services/git-server/Dockerfile"
+            ;;
     esac
 }
 
@@ -74,18 +74,18 @@ get_arch_display_name() {
     local arch=$1
 
     case "$arch" in
-    amd64)
-        echo "AMD64 (x86_64) - Native"
-        ;;
-    arm64)
-        echo "ARM64 (aarch64) - Native"
-        ;;
-    riscv)
-        echo "RISC-V (riscv64) - QEMU Emulation (Experimental)"
-        ;;
-    *)
-        echo "Unknown"
-        ;;
+        amd64)
+            echo "AMD64 (x86_64) - Native"
+            ;;
+        arm64)
+            echo "ARM64 (aarch64) - Native"
+            ;;
+        riscv)
+            echo "RISC-V (riscv64) - QEMU Emulation (Experimental)"
+            ;;
+        *)
+            echo "Unknown"
+            ;;
     esac
 }
 
@@ -94,18 +94,18 @@ get_arch_support() {
     local arch=$1
 
     case "$arch" in
-    amd64)
-        echo "Production Ready (MVP)"
-        ;;
-    arm64)
-        echo "Supported (Phase 2)"
-        ;;
-    riscv)
-        echo "Experimental (Phase 3)"
-        ;;
-    *)
-        echo "Unsupported"
-        ;;
+        amd64)
+            echo "Production Ready (MVP)"
+            ;;
+        arm64)
+            echo "Supported (Phase 2)"
+            ;;
+        riscv)
+            echo "Experimental (Phase 3)"
+            ;;
+        *)
+            echo "Unsupported"
+            ;;
     esac
 }
 
@@ -142,29 +142,29 @@ main() {
 
     # Display recommendations based on architecture
     case "$DETECTED_ARCH" in
-    amd64)
-        print_info "Recommendations for AMD64:"
-        echo "  - Native performance, no emulation needed"
-        echo "  - Full GitLab CE feature support"
-        echo "  - Production ready"
-        echo "  - Recommended resources: 4 cores, 8GB RAM, 60GB+ storage"
-        ;;
-    arm64)
-        print_info "Recommendations for ARM64:"
-        echo "  - Native performance on ARM64 hosts"
-        echo "  - Full GitLab CE feature support"
-        echo "  - May require more time for first startup"
-        echo "  - Recommended resources: 4 cores, 8GB RAM, 60GB+ storage"
-        print_warn "Note: Ensure ARM64 GitLab CE image is available"
-        ;;
-    riscv)
-        print_warn "RISC-V Support is Experimental:"
-        echo "  - Runs via QEMU emulation"
-        echo "  - Significantly slower than native"
-        echo "  - Limited GitLab CE support"
-        echo "  - For testing and future compatibility only"
-        print_error "NOT RECOMMENDED for production use"
-        ;;
+        amd64)
+            print_info "Recommendations for AMD64:"
+            echo "  - Native performance, no emulation needed"
+            echo "  - Full GitLab CE feature support"
+            echo "  - Production ready"
+            echo "  - Recommended resources: 4 cores, 8GB RAM, 60GB+ storage"
+            ;;
+        arm64)
+            print_info "Recommendations for ARM64:"
+            echo "  - Native performance on ARM64 hosts"
+            echo "  - Full GitLab CE feature support"
+            echo "  - May require more time for first startup"
+            echo "  - Recommended resources: 4 cores, 8GB RAM, 60GB+ storage"
+            print_warn "Note: Ensure ARM64 GitLab CE image is available"
+            ;;
+        riscv)
+            print_warn "RISC-V Support is Experimental:"
+            echo "  - Runs via QEMU emulation"
+            echo "  - Significantly slower than native"
+            echo "  - Limited GitLab CE support"
+            echo "  - For testing and future compatibility only"
+            print_error "NOT RECOMMENDED for production use"
+            ;;
     esac
 
     echo ""
@@ -175,7 +175,7 @@ main() {
 
     # Optionally create a .arch file for other scripts to read
     if [ "${CREATE_ARCH_FILE:-false}" == "true" ]; then
-        echo "$DETECTED_ARCH" >.detected_arch
+        echo "$DETECTED_ARCH" > .detected_arch
         print_success "Architecture saved to .detected_arch"
     fi
 

@@ -5,10 +5,10 @@ This guide covers how to write and maintain documentation for AutoGit.
 ## Documentation Principles
 
 1. **Documentation is code** - Same rigor, same commit, same review
-2. **Keep it current** - Update docs with every code change
-3. **Make it discoverable** - Use INDEX.md as source of truth
-4. **Write for humans** - Clear, concise, with examples
-5. **Show, don't just tell** - Include code examples and diagrams
+1. **Keep it current** - Update docs with every code change
+1. **Make it discoverable** - Use INDEX.md as source of truth
+1. **Write for humans** - Clear, concise, with examples
+1. **Show, don't just tell** - Include code examples and diagrams
 
 ## Documentation Structure
 
@@ -89,7 +89,7 @@ See [API Reference](../api/runner-manager.md) for details.
 
 Always include practical examples:
 
-```markdown
+````markdown
 ## Configuration Example
 
 ```yaml
@@ -97,10 +97,11 @@ runners:
   - name: docker-runner
     executor: docker
     limit: 10
-```
+````
 
 This configuration creates a Docker runner with a maximum of 10 concurrent jobs.
-```
+
+````
 
 ## Documentation Types
 
@@ -131,7 +132,7 @@ Minimal example to get started.
 
 - [Parent Component](../parent/README.md)
 - [Related Component](../related/README.md)
-```
+````
 
 ### Architecture Decision Records (ADRs)
 
@@ -167,7 +168,7 @@ See [ADR Template](../architecture/adr/template.md) for the complete template.
 
 Document all public APIs:
 
-```markdown
+````markdown
 ## Method Name
 
 Brief description.
@@ -190,8 +191,9 @@ Description of return value.
 
 ```python
 result = api.method_name(param1="value", param2=20)
-```
-```
+````
+
+````
 
 ### Configuration Documentation
 
@@ -220,12 +222,13 @@ Detailed description of what this option controls.
 
 ```yaml
 option_name: example_value
-```
+````
 
 ### Notes
 
 Additional information, warnings, or best practices.
-```
+
+````
 
 ## Documentation Update Checklist
 
@@ -262,7 +265,7 @@ All PRs with code changes must include documentation updates.
 # Check all links in documentation
 npm install -g markdown-link-check
 find docs -name "*.md" -exec markdown-link-check {} \;
-```
+````
 
 ### Example Code Validation
 
@@ -271,6 +274,7 @@ All code examples should be tested:
 ```python
 # Test examples in docstring
 import doctest
+
 doctest.testmod()
 ```
 
@@ -287,9 +291,9 @@ doctest.testmod()
 When deprecating features:
 
 1. Add deprecation notice to documentation
-2. Update examples to show new approach
-3. Keep deprecated docs for 2 versions
-4. Remove after deprecation period
+1. Update examples to show new approach
+1. Keep deprecated docs for 2 versions
+1. Remove after deprecation period
 
 Example deprecation notice:
 
@@ -337,13 +341,14 @@ See [Glossary](../GLOSSARY.md) for complete terminology list.
 
 Use Mermaid for diagrams in Markdown:
 
-```markdown
+````markdown
 ```mermaid
 graph TD
     A[User] --> B[Traefik]
     B --> C[GitLab]
     B --> D[Runner Coordinator]
-```
+````
+
 ```
 
 ## Getting Help
@@ -360,3 +365,4 @@ If you need help with documentation:
 - [Markdown Guide](https://www.markdownguide.org/)
 - [Google Developer Documentation Style Guide](https://developers.google.com/style)
 - [Write the Docs](https://www.writethedocs.org/)
+```

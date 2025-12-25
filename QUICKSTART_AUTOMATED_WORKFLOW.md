@@ -3,6 +3,7 @@
 ## Overview
 
 AutoGit now includes a fully automated development workflow that handles:
+
 - ✅ Code quality checks before every commit
 - ✅ Automatic code formatting and fixing
 - ✅ Verified and signed commits
@@ -49,12 +50,14 @@ git commit -m "feat(runners): add new feature"
 ```
 
 **What happens:**
+
 1. Pre-commit hooks check your code
-2. Auto-fixes are applied (formatting, whitespace, etc.)
-3. If fixes were made, you'll see what changed
-4. Commit succeeds with clean code
+1. Auto-fixes are applied (formatting, whitespace, etc.)
+1. If fixes were made, you'll see what changed
+1. Commit succeeds with clean code
 
 **Use this commit format:**
+
 ```
 <type>(<scope>): <description>
 
@@ -71,23 +74,26 @@ git push origin feature/my-awesome-feature
 Then create a PR on GitHub targeting `dev` branch.
 
 **What happens automatically:**
+
 1. Pre-commit auto-fix workflow runs
-2. Any missed fixes are applied
-3. Changes are committed back to your PR
-4. You get a comment showing what was fixed
+1. Any missed fixes are applied
+1. Changes are committed back to your PR
+1. You get a comment showing what was fixed
 
 ### Step 5: Merge
 
 Once approved, merge your PR into `dev`.
 
 **What happens automatically:**
+
 1. Versioning workflow creates a version tag (e.g., `v0.3.1-dev.20241225`)
-2. Release workflow triggers
-3. GitHub release is created
-4. Docker images are published
+1. Release workflow triggers
+1. GitHub release is created
+1. Docker images are published
 
 **For production releases:**
-- Merge `dev` → `main` 
+
+- Merge `dev` → `main`
 - Creates production version (e.g., `v0.3.0`)
 - Publishes production release
 
@@ -104,6 +110,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 ```
 
 ### Types
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -134,18 +141,21 @@ git commit -m "Update file.py"
 Pre-commit hooks automatically fix:
 
 ### File Hygiene
+
 - Trailing whitespace
 - Missing newlines at end of file
 - Mixed line endings (converts to LF)
 - Large files check
 
 ### Code Formatting
+
 - **Python**: Black formatter, isort imports
 - **Shell scripts**: shfmt formatting
 - **YAML**: Pretty formatting
 - **Markdown**: Consistent formatting
 
 ### Validation
+
 - YAML/JSON syntax
 - Shell scripts (shellcheck)
 - Dockerfiles (hadolint)
@@ -179,9 +189,10 @@ git commit -m "fix: resolve lint issues"
 ### Hook is too strict
 
 If a hook is blocking you incorrectly:
+
 1. Try to fix the underlying issue first
-2. Check `.pre-commit-config.yaml` for hook configuration
-3. Report the issue so we can adjust the hooks
+1. Check `.pre-commit-config.yaml` for hook configuration
+1. Report the issue so we can adjust the hooks
 
 ### Need to update hooks
 
@@ -247,13 +258,11 @@ Here's the complete automated workflow:
 
 ## Benefits of This System
 
-✅ **Consistent Code Quality**: All code is automatically formatted
-✅ **Fewer Review Comments**: Linting catches issues before review
-✅ **Faster Reviews**: Reviewers focus on logic, not style
-✅ **Automatic Releases**: Version and release on merge
-✅ **Verified Commits**: All commits are signed and verified
-✅ **Less Manual Work**: Automation handles routine tasks
+✅ **Consistent Code Quality**: All code is automatically formatted ✅ **Fewer Review Comments**:
+Linting catches issues before review ✅ **Faster Reviews**: Reviewers focus on logic, not style ✅
+**Automatic Releases**: Version and release on merge ✅ **Verified Commits**: All commits are signed
+and verified ✅ **Less Manual Work**: Automation handles routine tasks
 
----
+______________________________________________________________________
 
 **Ready to contribute?** Run the setup scripts and start coding! 🚀

@@ -3,27 +3,35 @@
 **Self-Hosted GitOps Platform with Dynamic Multi-Architecture Runner Management**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)]()
-[![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white)]()
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](<>)
+[![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white)](<>)
 
 ## Overview
 
-AutoGit is a fully self-hosted GitOps platform that automatically manages and scales GitLab runners across multiple architectures (amd64, arm64, RISC-V) with GPU-aware scheduling (AMD, NVIDIA, Intel). Built with security, lightweight performance, and ease of deployment in mind.
+AutoGit is a fully self-hosted GitOps platform that automatically manages and scales GitLab runners
+across multiple architectures (amd64, arm64, RISC-V) with GPU-aware scheduling (AMD, NVIDIA, Intel).
+Built with security, lightweight performance, and ease of deployment in mind.
 
-> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully self-hosted homelab instance with automated, lifecycle-managed runners. While some manual tasks remain, this release proves the concept and provides a functioning foundation for continued refinement toward the 1.0.0 release.
+> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully
+> self-hosted homelab instance with automated, lifecycle-managed runners. While some manual tasks
+> remain, this release proves the concept and provides a functioning foundation for continued
+> refinement toward the 1.0.0 release.
 
 ### Key Features
 
 - 🚀 **Dynamic Runner Autoscaling** - Automatically provisions right-sized runners based on job queue
-- 🏗️ **Multi-Architecture Support** - AMD64 native (MVP), ARM64 native + QEMU emulation (planned), RISC-V QEMU (future)
+- 🏗️ **Multi-Architecture Support** - AMD64 native (MVP), ARM64 native + QEMU emulation (planned),
+  RISC-V QEMU (future)
 - 🎮 **GPU-Aware Scheduling** - Intelligent allocation of AMD, NVIDIA, and Intel GPUs _(planned)_
-- 🔐 **Centralized SSO** - Unified authentication _(planned - Okta/Keycloak evaluation deferred to focus on core functionality)_
+- 🔐 **Centralized SSO** - Unified authentication _(planned - Okta/Keycloak evaluation deferred to
+  focus on core functionality)_
 - 🔒 **Automated SSL/TLS** - Let's Encrypt integration via cert-manager _(planned)_
 - 🌐 **Self-Hosted DNS** - LAN-isolated access with CoreDNS _(planned)_
 - 📦 **Flexible Deployment** - Scale from Docker Compose to Kubernetes/Helm
 - ⚖️ **MIT Licensed** - Using only compatible FOSS components
 
 **Architecture Focus**:
+
 - **MVP**: AMD64 native only (current testing)
 - **Phase 2**: ARM64 native support + QEMU fallback (post-deployment)
 - **Phase 3**: RISC-V QEMU emulation (future)
@@ -42,7 +50,8 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 
 ## Quick Start
 
-> ⚠️ **Important**: Please review [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) before deploying to understand what features are production-ready vs. experimental.
+> ⚠️ **Important**: Please review [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) before
+> deploying to understand what features are production-ready vs. experimental.
 
 ### Prerequisites
 
@@ -71,7 +80,9 @@ docker compose up -d
 # See DEPLOYMENT_READINESS.md for current status
 ```
 
-See [Installation Guide](docs/installation/README.md) and [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature status.
+See [Installation Guide](docs/installation/README.md) and
+[DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature
+status.
 
 ## Project Structure
 
@@ -91,11 +102,13 @@ autogit/
 ## Services
 
 ### Git Server
+
 - **Purpose**: Version control system
 - **Ports**: 3000 (HTTP), 2222 (SSH)
 - **Features**: Repository management, SSH access
 
 ### Runner Coordinator
+
 - **Purpose**: Manage automated runners
 - **Port**: 8080
 - **Features**: Runner lifecycle, GPU/compute coordination

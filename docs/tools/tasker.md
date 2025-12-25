@@ -2,21 +2,25 @@
 
 ## Overview
 
-The Tasker tool is a command-line utility that helps manage and execute work items from the project's task tracker. It parses `TASK_TRACKER.md`, identifies the next actionable work item, and automates common workflows like branch creation and task setup.
+The Tasker tool is a command-line utility that helps manage and execute work items from the
+project's task tracker. It parses `TASK_TRACKER.md`, identifies the next actionable work item, and
+automates common workflows like branch creation and task setup.
 
 ## Purpose
 
 In a large project with multiple milestones and subtasks, it can be challenging to:
+
 - Identify what to work on next
 - Keep track of task priorities and dependencies
 - Follow consistent workflows when starting new tasks
 - Maintain visibility into project progress
 
 The Tasker tool solves these problems by:
+
 1. **Parsing** the task tracker into structured data
-2. **Identifying** the next actionable work item based on priority and status
-3. **Automating** common workflows (branch creation, summary generation)
-4. **Providing** clear visibility into project status and progress
+1. **Identifying** the next actionable work item based on priority and status
+1. **Automating** common workflows (branch creation, summary generation)
+1. **Providing** clear visibility into project status and progress
 
 ## Quick Start
 
@@ -45,16 +49,19 @@ For complete documentation, see [tools/tasker/README.md](../../tools/tasker/READ
 ## Use Cases
 
 ### Daily Workflow
+
 1. Check what task is next
-2. Execute the task workflow
-3. Begin working on the task
+1. Execute the task workflow
+1. Begin working on the task
 
 ### Project Management
+
 1. Review milestone progress
-2. Identify upcoming tasks
-3. Track project status
+1. Identify upcoming tasks
+1. Track project status
 
 ### CI/CD Integration
+
 Automate task identification and setup in CI/CD pipelines
 
 ## Examples

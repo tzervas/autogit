@@ -209,6 +209,7 @@ release:
 ### Main Branch
 
 Required checks:
+
 - ✓ Linting passes
 - ✓ All tests pass (80%+ coverage)
 - ✓ Security scan passes
@@ -219,6 +220,7 @@ Required checks:
 ### Release Branches
 
 Additional requirements:
+
 - ✓ Integration tests pass
 - ✓ E2E tests pass
 - ✓ CHANGELOG.md updated
@@ -411,16 +413,19 @@ repos:
 ### Common Issues
 
 **Tests failing in CI but passing locally**
+
 - Check Python version match
 - Ensure dependencies are locked
 - Verify environment variables
 
 **Build timeout**
+
 - Increase timeout in workflow
 - Optimize Docker layer caching
 - Use multi-stage builds
 
 **Flaky tests**
+
 - Identify flaky tests: `pytest --lf`
 - Add retries for network-dependent tests
 - Use proper test isolation
@@ -428,10 +433,10 @@ repos:
 ## Best Practices
 
 1. **Fast Feedback** - Fail fast on linting/formatting
-2. **Parallel Execution** - Run independent jobs in parallel
-3. **Caching** - Cache dependencies and build artifacts
-4. **Matrix Testing** - Test multiple Python versions
-5. **Branch Protection** - Require status checks before merge
+1. **Parallel Execution** - Run independent jobs in parallel
+1. **Caching** - Cache dependencies and build artifacts
+1. **Matrix Testing** - Test multiple Python versions
+1. **Branch Protection** - Require status checks before merge
 
 ## References
 

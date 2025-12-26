@@ -2,11 +2,15 @@
 
 ## Role
 
-You are the **Software Engineer Agent** for AutoGit. Your primary responsibility is **implementing production-quality code**, writing comprehensive tests, and ensuring code quality through reviews and best practices.
+You are the **Software Engineer Agent** for AutoGit. Your primary responsibility is **implementing
+production-quality code**, writing comprehensive tests, and ensuring code quality through reviews
+and best practices.
 
 ## Shared Context
 
-**REQUIRED READING**: Before starting any work, read `.github/agents/shared-context.md` which contains:
+**REQUIRED READING**: Before starting any work, read `.github/agents/shared-context.md` which
+contains:
+
 - Project requirements and technical stack
 - Architecture principles (SOLID, DRY, KISS, YAGNI)
 - Core components and their documentation
@@ -213,6 +217,7 @@ class DockerRunnerManager:
 
 Test coverage: Unit tests for DockerRunnerManager class.
 """
+
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 import docker
@@ -240,22 +245,16 @@ class TestDockerRunnerManager:
         return RunnerConfig(
             image="gitlab/gitlab-runner:latest",
             network="autogit",
-            labels={"app": "runner"}
+            labels={"app": "runner"},
         )
 
     @pytest.fixture
-    def manager(
-        self,
-        docker_client: Mock,
-        config: RunnerConfig
-    ) -> DockerRunnerManager:
+    def manager(self, docker_client: Mock, config: RunnerConfig) -> DockerRunnerManager:
         """DockerRunnerManager instance fixture."""
         return DockerRunnerManager(docker_client, config)
 
     def test_provision_amd64_runner_success(
-        self,
-        manager: DockerRunnerManager,
-        docker_client: Mock
+        self, manager: DockerRunnerManager, docker_client: Mock
     ) -> None:
         """Test successful provisioning of amd64 runner without GPU."""
         # Arrange
@@ -272,9 +271,7 @@ class TestDockerRunnerManager:
         assert "amd64" in manager._active_runners.values()
 
     def test_provision_with_nvidia_gpu(
-        self,
-        manager: DockerRunnerManager,
-        docker_client: Mock
+        self, manager: DockerRunnerManager, docker_client: Mock
     ) -> None:
         """Test provisioning runner with NVIDIA GPU."""
         # Arrange
@@ -291,19 +288,14 @@ class TestDockerRunnerManager:
         # Verify GPU runtime was specified
         assert "nvidia" in str(call_args)
 
-    def test_provision_invalid_architecture(
-        self,
-        manager: DockerRunnerManager
-    ) -> None:
+    def test_provision_invalid_architecture(self, manager: DockerRunnerManager) -> None:
         """Test provisioning with invalid architecture raises ValueError."""
         # Act & Assert
         with pytest.raises(ValueError, match="Invalid architecture"):
             manager.provision("invalid-arch")
 
     def test_provision_docker_failure(
-        self,
-        manager: DockerRunnerManager,
-        docker_client: Mock
+        self, manager: DockerRunnerManager, docker_client: Mock
     ) -> None:
         """Test provisioning handles Docker errors gracefully."""
         # Arrange
@@ -317,10 +309,7 @@ class TestDockerRunnerManager:
 
     @pytest.mark.parametrize("architecture", ["amd64", "arm64", "riscv"])
     def test_provision_all_architectures(
-        self,
-        manager: DockerRunnerManager,
-        docker_client: Mock,
-        architecture: str
+        self, manager: DockerRunnerManager, docker_client: Mock, architecture: str
     ) -> None:
         """Test provisioning works for all supported architectures."""
         # Arrange
@@ -417,34 +406,34 @@ src/fleeting-plugin/
 **Documentation**: `docs/development/common-tasks.md`
 
 1. Create module structure (see File Structure Standards above)
-2. Implement core functionality
-3. Add protocol/interface definition
-4. Write comprehensive tests
-5. Add README.md to component directory
-6. Update API documentation
-7. Update component list in architecture docs
-8. Add configuration examples
-9. Update `docs/INDEX.md`
+1. Implement core functionality
+1. Add protocol/interface definition
+1. Write comprehensive tests
+1. Add README.md to component directory
+1. Update API documentation
+1. Update component list in architecture docs
+1. Add configuration examples
+1. Update `docs/INDEX.md`
 
 ### Modifying Existing Code
 
 1. Read existing code and tests
-2. Understand current behavior
-3. Write new tests for desired behavior
-4. Modify code minimally
-5. Ensure all tests pass (old and new)
-6. Update documentation
-7. Review with Evaluator
+1. Understand current behavior
+1. Write new tests for desired behavior
+1. Modify code minimally
+1. Ensure all tests pass (old and new)
+1. Update documentation
+1. Review with Evaluator
 
 ### Adding Dependencies
 
 **Documentation**: `docs/development/licensing.md`
 
 1. Check license compatibility (MIT, Apache 2.0, BSD)
-2. Add to `pyproject.toml` or `requirements.txt`
-3. Document in `LICENSES.md`
-4. Check transitive dependencies
-5. Update documentation if dependency adds features
+1. Add to `pyproject.toml` or `requirements.txt`
+1. Document in `LICENSES.md`
+1. Check transitive dependencies
+1. Update documentation if dependency adds features
 
 ## Best Practices
 
@@ -515,14 +504,14 @@ Your work is successful when:
 When you receive a coding task:
 
 1. **Read task requirements** from Project Manager
-2. **Review shared context** (`.github/agents/shared-context.md`)
-3. **Check existing code** in the area you'll be working
-4. **Review relevant docs** (`docs/INDEX.md`)
-5. **Plan your approach** and discuss if complex
-6. **Implement incrementally** with tests
-7. **Update documentation** as you code
-8. **Submit for review** to Evaluator
+1. **Review shared context** (`.github/agents/shared-context.md`)
+1. **Check existing code** in the area you'll be working
+1. **Review relevant docs** (`docs/INDEX.md`)
+1. **Plan your approach** and discuss if complex
+1. **Implement incrementally** with tests
+1. **Update documentation** as you code
+1. **Submit for review** to Evaluator
 
----
+______________________________________________________________________
 
 **Remember**: Quality over speed. Write code that you'll be proud to maintain in 6 months!

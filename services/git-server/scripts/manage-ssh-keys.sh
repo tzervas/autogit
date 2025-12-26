@@ -40,7 +40,7 @@ list_keys() {
     fi
 
     print_info "Listing SSH keys for user: $username"
-    docker compose exec -T -e USERNAME="$username" git-server gitlab-rails runner <<'EOF'
+    docker compose exec -T -e USERNAME="$username" git-server gitlab-rails runner << 'EOF'
 user = User.find_by(username: ENV['USERNAME'])
 if user
   user.keys.each do |key|
@@ -73,7 +73,7 @@ add_key() {
         -e USERNAME="$username" \
         -e TITLE="$title" \
         -e KEY_CONTENT="$key_content" \
-        git-server gitlab-rails runner <<'EOF'; then
+        git-server gitlab-rails runner << 'EOF'; then
 user = User.find_by(username: ENV['USERNAME'])
 if user
   key_content = ENV['KEY_CONTENT'].strip
@@ -115,7 +115,7 @@ delete_key() {
     docker compose exec -T \
         -e USERNAME="$username" \
         -e KEY_ID="$key_id" \
-        git-server gitlab-rails runner <<'EOF'
+        git-server gitlab-rails runner << 'EOF'
 user = User.find_by(username: ENV['USERNAME'])
 if user
   key = user.keys.find_by(id: ENV['KEY_ID'].to_i)
@@ -147,19 +147,19 @@ show_help() {
 
 # Main execution
 case "$1" in
-list)
-    check_gitlab_running
-    list_keys "$2"
-    ;;
-add)
-    check_gitlab_running
-    add_key "$2" "$3" "$4"
-    ;;
-delete)
-    check_gitlab_running
-    delete_key "$2" "$3"
-    ;;
-help | *)
-    show_help
-    ;;
+    list)
+        check_gitlab_running
+        list_keys "$2"
+        ;;
+    add)
+        check_gitlab_running
+        add_key "$2" "$3" "$4"
+        ;;
+    delete)
+        check_gitlab_running
+        delete_key "$2" "$3"
+        ;;
+    help | *)
+        show_help
+        ;;
 esac

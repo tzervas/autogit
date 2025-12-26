@@ -19,7 +19,7 @@ print_error() {
 
 DOMAIN=${1:-gitlab.autogit.local}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_DIR="$(cd "$SCRIPT_DIR/../config" 2>/dev/null && pwd)"
+CONFIG_DIR="$(cd "$SCRIPT_DIR/../config" 2> /dev/null && pwd)"
 
 if [ -z "$CONFIG_DIR" ]; then
     print_error "Could not resolve config directory at $SCRIPT_DIR/../config"

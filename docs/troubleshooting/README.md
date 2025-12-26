@@ -28,16 +28,18 @@ kubectl logs <pod-name>
 **Symptoms**: Containers fail to start or restart repeatedly
 
 **Possible Causes**:
+
 - Port conflicts
 - Missing environment variables
 - Insufficient resources
 - Configuration errors
 
 **Solutions**:
+
 1. Check logs: `docker compose logs <service>`
-2. Verify ports are available: `netstat -tulpn | grep <port>`
-3. Check `.env` file for missing variables
-4. Verify resource limits
+1. Verify ports are available: `netstat -tulpn | grep <port>`
+1. Check `.env` file for missing variables
+1. Verify resource limits
 
 See [Installation Issues](installation.md) for details.
 
@@ -46,16 +48,18 @@ See [Installation Issues](installation.md) for details.
 **Symptoms**: Runners don't appear in GitLab or can't execute jobs
 
 **Possible Causes**:
+
 - Incorrect registration token
 - Network connectivity issues
 - Runner service not running
 - Configuration mismatch
 
 **Solutions**:
+
 1. Verify registration token in GitLab
-2. Check network connectivity: `docker compose logs runner-coordinator`
-3. Restart runner service: `docker compose restart runner-coordinator`
-4. Review configuration in `config/config.yml`
+1. Check network connectivity: `docker compose logs runner-coordinator`
+1. Restart runner service: `docker compose restart runner-coordinator`
+1. Review configuration in `config/config.yml`
 
 See [Runner Issues](runners.md) for details.
 
@@ -64,16 +68,18 @@ See [Runner Issues](runners.md) for details.
 **Symptoms**: GPUs not visible to runners
 
 **Possible Causes**:
+
 - Missing drivers
 - Missing container runtime (nvidia-container-toolkit)
 - Incorrect configuration
 - GPU not supported
 
 **Solutions**:
+
 1. Verify drivers: `nvidia-smi` (NVIDIA) or equivalent
-2. Check container runtime: `docker run --gpus all nvidia/cuda:11.0-base nvidia-smi`
-3. Review configuration in `config/gpu/gpu-config.yaml`
-4. Check GPU compatibility
+1. Check container runtime: `docker run --gpus all nvidia/cuda:11.0-base nvidia-smi`
+1. Review configuration in `config/gpu/gpu-config.yaml`
+1. Check GPU compatibility
 
 See [GPU Issues](gpu.md) for details.
 
@@ -82,16 +88,18 @@ See [GPU Issues](gpu.md) for details.
 **Symptoms**: Slow builds, high latency, resource exhaustion
 
 **Possible Causes**:
+
 - Insufficient resources
 - Network bottlenecks
 - Poor caching
 - Too many concurrent jobs
 
 **Solutions**:
+
 1. Monitor resource usage: `docker stats` or `kubectl top nodes`
-2. Check network: `docker compose logs traefik`
-3. Enable caching in `.gitlab-ci.yml`
-4. Adjust runner limits in configuration
+1. Check network: `docker compose logs traefik`
+1. Enable caching in `.gitlab-ci.yml`
+1. Adjust runner limits in configuration
 
 See [Performance Issues](performance.md) for details.
 
@@ -172,21 +180,25 @@ docker compose exec runner-coordinator nslookup gitlab
 If you can't resolve the issue:
 
 1. **Search Documentation**
+
    - Check [FAQ](../FAQ.md)
    - Review [Configuration Guide](../configuration/README.md)
    - Read relevant component docs
 
-2. **Search Existing Issues**
+1. **Search Existing Issues**
+
    - Search [GitHub Issues](https://github.com/tzervas/autogit/issues)
    - Check for similar problems
 
-3. **Gather Information**
+1. **Gather Information**
+
    - Service logs
    - Configuration files (sanitize secrets!)
    - System information
    - Steps to reproduce
 
-4. **Ask for Help**
+1. **Ask for Help**
+
    - Open a [GitHub Issue](https://github.com/tzervas/autogit/issues/new)
    - Post in [GitHub Discussions](https://github.com/tzervas/autogit/discussions)
    - Include all gathered information

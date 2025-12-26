@@ -6,124 +6,124 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 stages:
-  - validate
-  - test
-  - build
-  - deploy
+- validate
+- test
+- build
+- deploy
 
 # Quick validation job - should spawn runner within 30 seconds
 validate:syntax:
   stage: validate
   script:
-    - echo "=== Validating AutoGit project ==="
-    - echo "Runner: ${CI_RUNNER_DESCRIPTION}"
-    - echo "Job ID: ${CI_JOB_ID}"
-    - echo "Pipeline ID: ${CI_PIPELINE_ID}"
-    - echo "Commit: ${CI_COMMIT_SHORT_SHA}"
-    - |
-      if [ -f "pyproject.toml" ]; then
-        echo "✓ pyproject.toml found"
-      fi
-    - |
-      if [ -f "docker-compose.yml" ]; then
-        echo "✓ docker-compose.yml found"
-      fi
-    - echo "Validation complete!"
+  - echo "=== Validating AutoGit project ==="
+  - echo "Runner: ${CI_RUNNER_DESCRIPTION}"
+  - echo "Job ID: ${CI_JOB_ID}"
+  - echo "Pipeline ID: ${CI_PIPELINE_ID}"
+  - echo "Commit: ${CI_COMMIT_SHORT_SHA}"
+  - |
+    if [ -f "pyproject.toml" ]; then
+      echo "✓ pyproject.toml found"
+    fi
+  - |
+    if [ -f "docker-compose.yml" ]; then
+      echo "✓ docker-compose.yml found"
+    fi
+  - echo "Validation complete!"
   tags:
-    - autogit
-    - docker
-    - amd64
+  - autogit
+  - docker
+  - amd64
   only:
-    - branches
-    - tags
+  - branches
+  - tags
 
 # Parallel test jobs - should spawn multiple runners
 test:python:unit:
   stage: test
   image: python:3.11-slim
   before_script:
-    - echo "Setting up Python environment"
-    - pip install --upgrade pip
+  - echo "Setting up Python environment"
+  - pip install --upgrade pip
   script:
-    - echo "Running Python unit tests"
-    - python --version
-    - pip --version
-    - echo "Simulating test execution..."
-    - sleep 10
-    - echo "✓ All unit tests passed"
+  - echo "Running Python unit tests"
+  - python --version
+  - pip --version
+  - echo "Simulating test execution..."
+  - sleep 10
+  - echo "✓ All unit tests passed"
   tags:
-    - autogit
-    - docker
-    - python
+  - autogit
+  - docker
+  - python
   artifacts:
     reports:
       junit: test-results.xml
     when: always
     expire_in: 1 week
   only:
-    - branches
+  - branches
 
 test:docker:build:
   stage: test
   image: docker:24-cli
   services:
-    - docker:24-dind
+  - docker:24-dind
   script:
-    - echo "Testing Docker builds"
-    - docker --version
-    - echo "Building test image..."
-    - |
-      cat > Dockerfile.test << 'EOF'
-      FROM alpine:latest
-      RUN echo "Test build successful"
-      EOF
-    - docker build -t test-image:latest -f Dockerfile.test .
-    - echo "✓ Docker build successful"
+  - echo "Testing Docker builds"
+  - docker --version
+  - echo "Building test image..."
+  - |
+    cat > Dockerfile.test << 'EOF'
+    FROM alpine:latest
+    RUN echo "Test build successful"
+    EOF
+  - docker build -t test-image:latest -f Dockerfile.test .
+  - echo "✓ Docker build successful"
   tags:
-    - autogit
-    - docker
+  - autogit
+  - docker
   only:
-    - branches
+  - branches
 
 test:integration:api:
   stage: test
   image: python:3.11-slim
   script:
-    - echo "Running API integration tests"
-    - pip install requests pytest
-    - |
-      cat > test_api.py << 'EOF'
-      def test_example():
-          assert True, "Example test"
-      EOF
-    - pytest test_api.py -v
-    - echo "✓ API integration tests passed"
+  - echo "Running API integration tests"
+  - pip install requests pytest
+  - |
+    cat > test_api.py << 'EOF'
+    def test_example():
+        assert True, "Example test"
+    EOF
+  - pytest test_api.py -v
+  - echo "✓ API integration tests passed"
   tags:
-    - autogit
-    - docker
-    - integration
+  - autogit
+  - docker
+  - integration
   only:
-    - branches
+  - branches
 
 # Load testing - demonstrates resource allocation
 test:load:cpu:
   stage: test
   script:
-    - echo "Running CPU load test"
-    - echo "This job simulates heavy computation"
-    - |
-      # Simulate CPU work
-      for i in {1..5}; do
-        echo "Iteration $i of 5"
-        dd if=/dev/zero of=/dev/null bs=1M count=500 2>&1 | grep -v records
-        sleep 2
-      done
-    - echo "✓ CPU load test complete"
+  - echo "Running CPU load test"
+  - echo "This job simulates heavy computation"
+  - |
+    # Simulate CPU work
+    for i in {1..5}; do
+      echo "Iteration $i of 5"
+      dd if=/dev/zero of=/dev/null bs=1M count=500 2>&1 | grep -v records
+      sleep 2
+    done
+  - echo "✓ CPU load test complete"
   tags:
-    - autogit
-    - docker
+  - autogit
+  - docker
   only:
-    - branches
+  - branches
   when: manual
 
 # Parallel build jobs - should spawn multiple runners simultaneously
@@ -131,85 +131,85 @@ build:service:git-server:
   stage: build
   image: docker:24-cli
   services:
-    - docker:24-dind
+  - docker:24-dind
   script:
-    - echo "Building git-server service"
-    - cd services/git-server
-    - docker build -t autogit-git-server:test .
-    - echo "✓ git-server built"
+  - echo "Building git-server service"
+  - cd services/git-server
+  - docker build -t autogit-git-server:test .
+  - echo "✓ git-server built"
   tags:
-    - autogit
-    - docker
-    - build
+  - autogit
+  - docker
+  - build
   only:
-    - main
-    - develop
+  - main
+  - develop
   when: manual
 
 build:service:runner-coordinator:
   stage: build
   image: docker:24-cli
   services:
-    - docker:24-dind
+  - docker:24-dind
   script:
-    - echo "Building runner-coordinator service"
-    - cd services/runner-coordinator
-    - docker build -t autogit-runner-coordinator:test .
-    - echo "✓ runner-coordinator built"
+  - echo "Building runner-coordinator service"
+  - cd services/runner-coordinator
+  - docker build -t autogit-runner-coordinator:test .
+  - echo "✓ runner-coordinator built"
   tags:
-    - autogit
-    - docker
-    - build
+  - autogit
+  - docker
+  - build
   only:
-    - main
-    - develop
+  - main
+  - develop
   when: manual
 
 # Long-running job to test cooldown behavior
 test:long:running:
   stage: test
   script:
-    - echo "Starting long-running job"
-    - echo "This job will take 2 minutes to complete"
-    - |
-      for i in {1..12}; do
-        echo "Progress: $(($i * 10))% complete"
-        sleep 10
-      done
-    - echo "✓ Long-running job complete"
+  - echo "Starting long-running job"
+  - echo "This job will take 2 minutes to complete"
+  - |
+    for i in {1..12}; do
+      echo "Progress: $(($i * 10))% complete"
+      sleep 10
+    done
+  - echo "✓ Long-running job complete"
   tags:
-    - autogit
-    - docker
+  - autogit
+  - docker
   only:
-    - branches
+  - branches
   when: manual
 
 # Multi-architecture job (if multi-arch runners available)
 test:arch:amd64:
   stage: test
   script:
-    - echo "Testing on AMD64 architecture"
-    - uname -m
-    - echo "Expected: x86_64"
-    - test "$(uname -m)" = "x86_64" && echo "✓ Correct architecture"
+  - echo "Testing on AMD64 architecture"
+  - uname -m
+  - echo "Expected: x86_64"
+  - test "$(uname -m)" = "x86_64" && echo "✓ Correct architecture"
   tags:
-    - autogit
-    - amd64
+  - autogit
+  - amd64
   only:
-    - branches
+  - branches
 
 test:arch:arm64:
   stage: test
   script:
-    - echo "Testing on ARM64 architecture"
-    - uname -m
-    - echo "Expected: aarch64"
-    - test "$(uname -m)" = "aarch64" && echo "✓ Correct architecture"
+  - echo "Testing on ARM64 architecture"
+  - uname -m
+  - echo "Expected: aarch64"
+  - test "$(uname -m)" = "aarch64" && echo "✓ Correct architecture"
   tags:
-    - autogit
-    - arm64
+  - autogit
+  - arm64
   only:
-    - branches
+  - branches
   allow_failure: true  # May not have ARM64 runners
 
 # GPU job (if GPU runners available)
@@ -217,91 +217,91 @@ test:gpu:nvidia:
   stage: test
   image: nvidia/cuda:12.0.0-base-ubuntu22.04
   script:
-    - echo "Testing GPU availability"
-    - nvidia-smi || echo "NVIDIA GPU not available"
-    - |
-      if command -v nvidia-smi &> /dev/null; then
-        echo "✓ GPU detected"
-        nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv
-      else
-        echo "⚠ No GPU detected (expected if no GPU runners)"
-      fi
+  - echo "Testing GPU availability"
+  - nvidia-smi || echo "NVIDIA GPU not available"
+  - |
+    if command -v nvidia-smi &> /dev/null; then
+      echo "✓ GPU detected"
+      nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv
+    else
+      echo "⚠ No GPU detected (expected if no GPU runners)"
+    fi
   tags:
-    - autogit
-    - gpu
-    - nvidia
+  - autogit
+  - gpu
+  - nvidia
   only:
-    - branches
+  - branches
   allow_failure: true  # May not have GPU runners
 
 # Deployment job - demonstrates full pipeline
 deploy:staging:
   stage: deploy
   script:
-    - echo "Deploying to staging environment"
-    - echo "Environment: staging"
-    - echo "Deployment target: ${CI_ENVIRONMENT_NAME}"
-    - |
-      # Simulate deployment
-      echo "1. Pulling latest images..."
-      sleep 2
-      echo "2. Stopping old containers..."
-      sleep 2
-      echo "3. Starting new containers..."
-      sleep 2
-      echo "4. Running health checks..."
-      sleep 2
-      echo "✓ Deployment successful!"
+  - echo "Deploying to staging environment"
+  - echo "Environment: staging"
+  - echo "Deployment target: ${CI_ENVIRONMENT_NAME}"
+  - |
+    # Simulate deployment
+    echo "1. Pulling latest images..."
+    sleep 2
+    echo "2. Stopping old containers..."
+    sleep 2
+    echo "3. Starting new containers..."
+    sleep 2
+    echo "4. Running health checks..."
+    sleep 2
+    echo "✓ Deployment successful!"
   environment:
     name: staging
     url: http://staging.autogit.local
   tags:
-    - autogit
-    - docker
-    - deploy
+  - autogit
+  - docker
+  - deploy
   only:
-    - develop
+  - develop
   when: manual
 
 deploy:production:
   stage: deploy
   script:
-    - echo "Deploying to production environment"
-    - echo "Environment: production"
-    - echo "⚠ This is a production deployment"
-    - |
-      # Simulate production deployment
-      echo "1. Creating backup..."
-      sleep 3
-      echo "2. Pulling latest images..."
-      sleep 2
-      echo "3. Rolling deployment..."
-      sleep 5
-      echo "4. Verifying health checks..."
-      sleep 3
-      echo "✓ Production deployment successful!"
+  - echo "Deploying to production environment"
+  - echo "Environment: production"
+  - echo "⚠ This is a production deployment"
+  - |
+    # Simulate production deployment
+    echo "1. Creating backup..."
+    sleep 3
+    echo "2. Pulling latest images..."
+    sleep 2
+    echo "3. Rolling deployment..."
+    sleep 5
+    echo "4. Verifying health checks..."
+    sleep 3
+    echo "✓ Production deployment successful!"
   environment:
     name: production
     url: http://autogit.local
   tags:
-    - autogit
-    - docker
-    - deploy
-    - production
+  - autogit
+  - docker
+  - deploy
+  - production
   only:
-    - main
+  - main
   when: manual
   needs:
-    - deploy:staging
+  - deploy:staging
 
 # Cleanup job - runs after pipeline completion
 cleanup:artifacts:
   stage: .post
   script:
-    - echo "Cleaning up temporary artifacts"
-    - echo "Pipeline complete!"
-    - echo "Dynamic runners will be cleaned up after cooldown period"
+  - echo "Cleaning up temporary artifacts"
+  - echo "Pipeline complete!"
+  - echo "Dynamic runners will be cleaned up after cooldown period"
   tags:
-    - autogit
-    - docker
+  - autogit
+  - docker
   when: always

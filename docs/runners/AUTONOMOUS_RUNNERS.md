@@ -3,6 +3,7 @@
 ## 🎯 Overview
 
 AutoGit provides **fully autonomous, zero-footprint CI/CD runners** that:
+
 - ✅ **Spawn automatically** when GitLab jobs are queued
 - ✅ **Register themselves** with GitLab without manual intervention
 - ✅ **Execute jobs** in isolated containers
@@ -20,6 +21,7 @@ Password: CHANGE_ME_SECURE_PASSWORD (from GITLAB_ROOT_PASSWORD env var)
 ```
 
 **Important Links:**
+
 - Projects: http://192.168.1.170:3000/dashboard/projects
 - Admin Area: http://192.168.1.170:3000/admin
 - CI/CD Runners: http://192.168.1.170:3000/admin/runners
@@ -119,13 +121,13 @@ watch -n 2 'ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps
 
 The runner coordinator accepts these environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GITLAB_URL` | `http://autogit-git-server:3000` | GitLab instance URL |
-| `GITLAB_TOKEN` | (none) | Personal access token for API access |
-| `GITLAB_RUNNER_REGISTRATION_TOKEN` | (none) | Token for registering new runners |
-| `RUNNER_COOLDOWN_MINUTES` | `5` | Minutes to wait before cleaning up idle runners |
-| `MAX_IDLE_RUNNERS` | `0` | Number of runners to keep warm (0 = pure zero-footprint) |
+| Variable                           | Default                          | Description                                              |
+| ---------------------------------- | -------------------------------- | -------------------------------------------------------- |
+| `GITLAB_URL`                       | `http://autogit-git-server:3000` | GitLab instance URL                                      |
+| `GITLAB_TOKEN`                     | (none)                           | Personal access token for API access                     |
+| `GITLAB_RUNNER_REGISTRATION_TOKEN` | (none)                           | Token for registering new runners                        |
+| `RUNNER_COOLDOWN_MINUTES`          | `5`                              | Minutes to wait before cleaning up idle runners          |
+| `MAX_IDLE_RUNNERS`                 | `0`                              | Number of runners to keep warm (0 = pure zero-footprint) |
 
 ### Configuration Files
 
@@ -149,6 +151,7 @@ services:
 ```
 
 Then restart:
+
 ```bash
 docker compose up -d runner-coordinator
 ```
@@ -189,6 +192,7 @@ curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
 ## 🔄 Lifecycle Explained
 
 ### 1. Idle State (Zero Footprint)
+
 ```
 Only running: autogit-git-server, autogit-runner-coordinator
 Runners: 0
@@ -196,6 +200,7 @@ Containers: 2
 ```
 
 ### 2. Job Arrives
+
 ```
 GitLab: Job queued → pending
 Coordinator: Detects pending job (within 10 seconds)
@@ -204,6 +209,7 @@ Time: ~5-15 seconds
 ```
 
 ### 3. Runner Registration
+
 ```
 Coordinator: Registers runner with GitLab
 Runner: Starts gitlab-runner service
@@ -212,6 +218,7 @@ Status: Runner shows as "idle"
 ```
 
 ### 4. Job Execution
+
 ```
 GitLab: Assigns job to runner
 Runner: Executes job in isolated container
@@ -220,6 +227,7 @@ Duration: Varies by job
 ```
 
 ### 5. Job Complete
+
 ```
 Runner: Reports completion to GitLab
 Status: Runner transitions to "idle"
@@ -227,6 +235,7 @@ Cooldown: Timer starts (default: 5 minutes)
 ```
 
 ### 6. Cleanup
+
 ```
 Coordinator: Detects runner idle past cooldown
 Action:
@@ -242,16 +251,19 @@ Result: Zero footprint restored
 ### No Runners Spawning
 
 **Check coordinator logs:**
+
 ```bash
 ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker logs autogit-runner-coordinator' | grep -i error
 ```
 
 **Common issues:**
+
 - `GITLAB_TOKEN` not set → No API access to poll for jobs
 - `GITLAB_RUNNER_REGISTRATION_TOKEN` not set → Can't register new runners
 - Network issues → Check `docker network ls` includes `autogit-network`
 
 **Fix:**
+
 ```bash
 # Regenerate tokens and reconfigure
 bash scripts/setup-gitlab-automation.sh
@@ -261,11 +273,13 @@ bash scripts/first-time-setup.sh
 ### Runners Not Cleaning Up
 
 **Check cooldown setting:**
+
 ```bash
 curl http://192.168.1.170:8080/status | jq .cooldown_minutes
 ```
 
 **Force cleanup manually:**
+
 ```bash
 ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps -a --filter "name=autogit-runner" -q | xargs docker rm -f'
 ```
@@ -273,11 +287,13 @@ ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps -a --filter
 ### GitLab Jobs Stay Pending
 
 **Verify runner registration token:**
+
 1. Login to GitLab: http://192.168.1.170:3000
-2. Go to Admin Area → CI/CD → Runners
-3. Check if runners appear (even if offline)
-4. Copy the registration token
-5. Update environment:
+1. Go to Admin Area → CI/CD → Runners
+1. Check if runners appear (even if offline)
+1. Copy the registration token
+1. Update environment:
+
 ```bash
 echo "GITLAB_RUNNER_REGISTRATION_TOKEN=your_token_here" >> .env
 ```
@@ -285,6 +301,7 @@ echo "GITLAB_RUNNER_REGISTRATION_TOKEN=your_token_here" >> .env
 ### Database Issues
 
 **Reset coordinator database:**
+
 ```bash
 ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-runner-coordinator rm /app/runner_coordinator.db'
 ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker restart autogit-runner-coordinator'
@@ -347,10 +364,10 @@ Coordinator detects GPU requirement and spawns runner with GPU access.
 ### Best Practices
 
 1. **Change default password** immediately after first login
-2. **Enable 2FA** for root account in GitLab
-3. **Rotate tokens** regularly (every 90 days)
-4. **Monitor logs** for suspicious activity
-5. **Keep system updated** - rebuild images periodically
+1. **Enable 2FA** for root account in GitLab
+1. **Rotate tokens** regularly (every 90 days)
+1. **Monitor logs** for suspicious activity
+1. **Keep system updated** - rebuild images periodically
 
 ## 📖 Additional Resources
 
@@ -373,6 +390,7 @@ Your dynamic runner system is working correctly when:
 ## 🎉 You're All Set!
 
 Your AutoGit instance now has:
+
 - ✅ Fully autonomous runner management
 - ✅ Zero-footprint when idle
 - ✅ Automatic spawning and cleanup
@@ -380,6 +398,7 @@ Your AutoGit instance now has:
 - ✅ No manual runner registration needed
 
 **Start using it:**
+
 ```bash
 # Login and create your first project
 open http://192.168.1.170:3000

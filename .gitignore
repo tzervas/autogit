@@ -46,3 +46,7 @@ data/
 TASK_SUMMARY_*.md
 infrastructure/homelab/.terraform/
 infrastructure/homelab/*.tfstate*
+homelab-migration/data/
+homelab-migration/ssl/
+homelab-migration/*.log
+deployment-logs/

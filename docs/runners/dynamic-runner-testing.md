@@ -1,14 +1,15 @@
 # Dynamic Runner Testing Guide
 
-This guide walks through testing the AutoGit dynamic runner system that automatically spawns and culls runners based on demand.
+This guide walks through testing the AutoGit dynamic runner system that automatically spawns and
+culls runners based on demand.
 
 ## System Overview
 
 The AutoGit dynamic runner system consists of:
 
 1. **GitLab CE** - Git server and CI/CD orchestrator
-2. **Runner Coordinator** - FastAPI service that manages runner lifecycle
-3. **Dynamic Runners** - Docker containers spawned on-demand for CI/CD jobs
+1. **Runner Coordinator** - FastAPI service that manages runner lifecycle
+1. **Dynamic Runners** - Docker containers spawned on-demand for CI/CD jobs
 
 ## How Dynamic Runners Work
 
@@ -17,19 +18,19 @@ The AutoGit dynamic runner system consists of:
 When a GitLab CI/CD pipeline is triggered:
 
 1. GitLab webhook notifies the Runner Coordinator
-2. Coordinator checks for available idle runners
-3. If no suitable runner exists, a new one is spawned
-4. Runner registers with GitLab and picks up the job
-5. Job executes in an isolated container
+1. Coordinator checks for available idle runners
+1. If no suitable runner exists, a new one is spawned
+1. Runner registers with GitLab and picks up the job
+1. Job executes in an isolated container
 
 ### Automatic Cleanup
 
 After job completion:
 
 1. Runner reports completion to Coordinator
-2. Runner enters "idle" state with cooldown timer
-3. After cooldown period (default: 5 minutes), runner is terminated
-4. Container is removed to free resources
+1. Runner enters "idle" state with cooldown timer
+1. After cooldown period (default: 5 minutes), runner is terminated
+1. Container is removed to free resources
 
 ## Testing Prerequisites
 
@@ -44,23 +45,24 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'n
 ```
 
 Expected output:
+
 - `autogit-git-server` - Up and healthy
 - `autogit-runner-coordinator` - Up and healthy
 
 ### 2. Access GitLab Web UI
 
 1. Navigate to: `http://192.168.1.170:3000`
-2. Login as `root` with your configured password
-3. If first login, check environment variable: `GITLAB_ROOT_PASSWORD`
+1. Login as `root` with your configured password
+1. If first login, check environment variable: `GITLAB_ROOT_PASSWORD`
 
 ### 3. Create Personal Access Token
 
 1. In GitLab: **User Settings** → **Access Tokens**
-2. Create token with scopes:
+1. Create token with scopes:
    - `api`
    - `read_api`
    - `write_repository`
-3. Save the token securely
+1. Save the token securely
 
 ## Test Scenario 1: Simple CI Pipeline
 
@@ -173,20 +175,24 @@ curl --request POST \
 You should see:
 
 1. **Spawning Phase** (within 10-30 seconds)
+
    - New `autogit-runner-*` containers appear
    - Coordinator logs show runner registration
    - Runners appear in `curl http://192.168.1.170:8080/runners`
 
-2. **Execution Phase**
+1. **Execution Phase**
+
    - Jobs execute in parallel across multiple runners
    - Each runner handles one job at a time
    - GitLab UI shows job progress
 
-3. **Cooldown Phase** (after jobs complete)
+1. **Cooldown Phase** (after jobs complete)
+
    - Runners enter "idle" state
    - Cooldown timer starts (5 minutes default)
 
-4. **Cleanup Phase** (after cooldown)
+1. **Cleanup Phase** (after cooldown)
+
    - Idle runners are terminated
    - Containers are removed
    - Only coordinator remains running
@@ -242,6 +248,7 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker logs -f autogi
 ```
 
 Look for:
+
 - `Dispatching job X for project Y`
 - `Runner registered successfully`
 - `Runner X finished, tearing down`
@@ -294,16 +301,19 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-r
 ### ❌ Common Issues
 
 **Problem**: Runners don't spawn
+
 - Check coordinator logs for errors
 - Verify Docker socket is accessible
 - Check network connectivity
 
 **Problem**: Runners spawn but don't pick up jobs
+
 - Verify runner registration with GitLab
 - Check runner tags match job requirements
 - Ensure GitLab can reach runners
 
 **Problem**: Runners never cleanup
+
 - Check coordinator background task is running
 - Verify cleanup logic in `job_manager.py`
 - Check Docker API connectivity
@@ -312,7 +322,7 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-r
 
 Track these metrics during testing:
 
-- **Spawn Time**: Time from job trigger to runner ready (target: <30s)
+- **Spawn Time**: Time from job trigger to runner ready (target: \<30s)
 - **Cleanup Time**: Time from idle to removed (default: 5 minutes)
 - **Concurrent Runners**: Number of runners active simultaneously
 - **Resource Usage**: CPU, memory, disk per runner
@@ -335,8 +345,8 @@ Edit `services/runner-coordinator/app/driver.py`:
 
 ```python
 # Modify spawn_runner() parameters
-cpu_limit=2.0,      # CPU cores
-mem_limit="2g",     # Memory limit
+cpu_limit = (2.0,)  # CPU cores
+mem_limit = ("2g",)  # Memory limit
 ```
 
 ### Adjust Polling Frequency
@@ -353,16 +363,19 @@ await asyncio.sleep(5)  # Poll every 5 seconds
 After successful testing:
 
 1. **Monitor production workloads**
+
    - Track runner creation patterns
    - Optimize cooldown periods
    - Adjust resource limits
 
-2. **Add metrics and alerting**
+1. **Add metrics and alerting**
+
    - Prometheus/Grafana integration
    - Alert on spawn failures
    - Track resource utilization
 
-3. **Implement advanced features**
+1. **Implement advanced features**
+
    - Runner pooling (keep N idle runners warm)
    - Priority queues
    - Cost optimization
@@ -392,13 +405,10 @@ ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker restart autogi
 
 The dynamic runner system is working correctly when:
 
-✅ Runners automatically spawn when jobs are queued
-✅ Multiple runners spawn for parallel jobs
-✅ Runners execute jobs successfully
-✅ Runners automatically cleanup after cooldown
-✅ No manual intervention required
-✅ System recovers from failures gracefully
-✅ Resource usage is optimized (no idle runners consuming resources)
+✅ Runners automatically spawn when jobs are queued ✅ Multiple runners spawn for parallel jobs ✅
+Runners execute jobs successfully ✅ Runners automatically cleanup after cooldown ✅ No manual
+intervention required ✅ System recovers from failures gracefully ✅ Resource usage is optimized (no
+idle runners consuming resources)
 
 ## Additional Resources
 

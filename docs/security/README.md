@@ -5,6 +5,7 @@ This guide covers security considerations for AutoGit deployments.
 ## Overview
 
 AutoGit is designed with security in mind:
+
 - **TLS everywhere** - All communication encrypted
 - **Centralized SSO** - Single sign-on with Authelia
 - **Network isolation** - Kubernetes network policies
@@ -43,6 +44,7 @@ See [Secrets Management](secrets.md) for details.
 ## Hardening
 
 Security hardening checklist:
+
 - [ ] Enable TLS for all services
 - [ ] Configure network policies
 - [ ] Set up SSO with Authelia
@@ -58,6 +60,7 @@ See [Hardening Guide](hardening.md) for detailed steps.
 ## Security Best Practices
 
 ### For Developers
+
 - No hardcoded secrets
 - Input validation on all external inputs
 - Dependency vulnerability scanning
@@ -66,6 +69,7 @@ See [Hardening Guide](hardening.md) for detailed steps.
 See [Development Security](../development/security.md) for details.
 
 ### For Operators
+
 - Regular backups
 - Audit logging
 - Access controls
@@ -84,21 +88,23 @@ See [Compliance Guide](compliance.md) for details.
 ## Vulnerability Management
 
 Process for handling security vulnerabilities:
+
 1. Detection (automated scanning)
-2. Assessment (severity, impact)
-3. Remediation (patches, workarounds)
-4. Verification (testing)
-5. Documentation (security advisories)
+1. Assessment (severity, impact)
+1. Remediation (patches, workarounds)
+1. Verification (testing)
+1. Documentation (security advisories)
 
 See [Vulnerability Management](vulnerability-management.md) for details.
 
 ## Incident Response
 
 If you discover a security issue:
+
 1. **Do not** open a public issue
-2. Email security@yourdomain.com
-3. Provide detailed information
-4. Allow time for remediation
+1. Email security@yourdomain.com
+1. Provide detailed information
+1. Allow time for remediation
 
 See [Incident Response](incident-response.md) for procedures.
 

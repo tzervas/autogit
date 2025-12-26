@@ -1,16 +1,17 @@
 # GitLab Security Configuration Guide
 
-**Component**: Git Server (GitLab CE)
-**Focus**: Security and Access Control
-**Last Updated**: 2025-12-22
+**Component**: Git Server (GitLab CE) **Focus**: Security and Access Control **Last Updated**:
+2025-12-22
 
 ## Overview
 
-This guide covers security best practices and configuration for the AutoGit Git Server. Proper security configuration is critical for protecting your code and infrastructure.
+This guide covers security best practices and configuration for the AutoGit Git Server. Proper
+security configuration is critical for protecting your code and infrastructure.
 
 ## Security Checklist
 
 ### Initial Setup Security
+
 - [x] Change default admin password immediately
 - [x] Disable user signup for private installations
 - [x] Configure strong password policies
@@ -20,6 +21,7 @@ This guide covers security best practices and configuration for the AutoGit Git 
 - [ ] Set up regular backups
 
 ### User Security
+
 - [x] Enforce minimum password length (12+ characters)
 - [x] Require password complexity
 - [ ] Enable 2FA for admin accounts
@@ -28,6 +30,7 @@ This guide covers security best practices and configuration for the AutoGit Git 
 - [ ] Remove inactive users
 
 ### Network Security
+
 - [x] Use Docker networks for service isolation
 - [ ] Configure reverse proxy (nginx/traefik)
 - [ ] Enable HTTPS/SSL
@@ -55,10 +58,10 @@ gitlab_rails['password_authentication_enabled_for_git'] = true
 ### Password Best Practices
 
 1. **Minimum Length**: Set to at least 12 characters
-2. **Complexity**: Require mix of character types
-3. **No Common Passwords**: GitLab blocks common passwords
-4. **Regular Changes**: Consider password expiration policies
-5. **No Reuse**: Prevent password reuse (configure separately)
+1. **Complexity**: Require mix of character types
+1. **No Common Passwords**: GitLab blocks common passwords
+1. **Regular Changes**: Consider password expiration policies
+1. **No Reuse**: Prevent password reuse (configure separately)
 
 ## Rate Limiting
 
@@ -80,6 +83,7 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
 ### Custom Rate Limiting
 
 Add trusted IPs to whitelist:
+
 ```ruby
 gitlab_rails['rack_attack_git_basic_auth'] = {
   'enabled' => true,
@@ -91,6 +95,7 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
 ```
 
 For stricter limits:
+
 ```ruby
 gitlab_rails['rack_attack_git_basic_auth'] = {
   'enabled' => true,
@@ -116,18 +121,18 @@ gitlab_rails['session_expire_delay'] = 480  # 8 hours
 ### Session Best Practices
 
 1. **Timeout**: Set appropriate session timeout
-2. **Remember Me**: Consider disabling for sensitive environments
-3. **Active Sessions**: Users should review and revoke as needed
-4. **Session Revocation**: Admins can force logout all users
+1. **Remember Me**: Consider disabling for sensitive environments
+1. **Active Sessions**: Users should review and revoke as needed
+1. **Session Revocation**: Admins can force logout all users
 
 ## Two-Factor Authentication
 
 ### Enabling 2FA
 
-**Individual Users**:
-Users can enable 2FA from User Settings → Account
+**Individual Users**: Users can enable 2FA from User Settings → Account
 
 **Require 2FA for All Users**:
+
 ```ruby
 gitlab_rails['two_factor_authentication'] = {
   'enabled' => true,
@@ -138,10 +143,10 @@ gitlab_rails['two_factor_authentication'] = {
 ### 2FA Best Practices
 
 1. **Admin Accounts**: Always enable 2FA for admins
-2. **Grace Period**: Give users time to set up
-3. **Recovery Codes**: Ensure users save recovery codes
-4. **Backup Methods**: Support multiple 2FA methods
-5. **Lost Access**: Have recovery process for admins
+1. **Grace Period**: Give users time to set up
+1. **Recovery Codes**: Ensure users save recovery codes
+1. **Backup Methods**: Support multiple 2FA methods
+1. **Lost Access**: Have recovery process for admins
 
 ## Network Security
 
@@ -160,6 +165,7 @@ Only services on this network can communicate directly.
 ### Firewall Configuration
 
 **Using UFW (Ubuntu)**:
+
 ```bash
 # Allow only necessary ports
 sudo ufw allow 2222/tcp  # SSH
@@ -171,6 +177,7 @@ sudo ufw allow from 192.168.1.0/24 to any port 3000
 ```
 
 **Using iptables**:
+
 ```bash
 # Allow GitLab ports
 iptables -A INPUT -p tcp --dport 2222 -j ACCEPT
@@ -183,6 +190,7 @@ iptables -A INPUT -p tcp --dport 3443 -j ACCEPT
 ### Using Let's Encrypt
 
 Update `gitlab.rb`:
+
 ```ruby
 external_url 'https://gitlab.yourdomain.com'
 
@@ -201,6 +209,7 @@ nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
 ```
 
 Mount certificates via volume:
+
 ```yaml
 volumes:
   - ./ssl:/etc/gitlab/ssl:ro
@@ -211,17 +220,20 @@ volumes:
 ### Disable User Signup
 
 For private installations:
+
 ```ruby
 gitlab_rails['gitlab_signup_enabled'] = false
 ```
 
 Or via Admin UI:
+
 1. Admin Area → Settings → General
-2. Sign-up restrictions → Disable sign-up
+1. Sign-up restrictions → Disable sign-up
 
 ### IP Restrictions (Optional)
 
 Restrict admin access by IP:
+
 ```ruby
 gitlab_rails['admin_allowed_ips'] = ['192.168.1.0/24', '10.0.0.0/8']
 ```
@@ -231,11 +243,13 @@ gitlab_rails['admin_allowed_ips'] = ['192.168.1.0/24', '10.0.0.0/8']
 ### Enable Audit Events
 
 Audit events are enabled by default. View them:
+
 1. Admin Area → Monitoring → Audit Events
 
 ### Log Locations
 
 Important log files:
+
 ```
 /var/log/gitlab/gitlab-rails/production.log
 /var/log/gitlab/gitlab-rails/api_json.log
@@ -244,6 +258,7 @@ Important log files:
 ```
 
 View logs:
+
 ```bash
 docker compose exec git-server tail -f /var/log/gitlab/gitlab-rails/production.log
 ```
@@ -253,6 +268,7 @@ docker compose exec git-server tail -f /var/log/gitlab/gitlab-rails/production.l
 ### Regular Updates
 
 Keep GitLab updated:
+
 ```bash
 # Check current version
 docker compose exec git-server gitlab-rake gitlab:env:info
@@ -266,6 +282,7 @@ docker compose up -d --build git-server
 ### Security Scanning
 
 GitLab includes security features:
+
 - Dependency scanning
 - Container scanning
 - Secret detection
@@ -278,11 +295,13 @@ Configure in `.gitlab-ci.yml` for projects.
 ### Automated Backups
 
 Configure backup schedule:
+
 ```ruby
 gitlab_rails['backup_keep_time'] = 604800  # 7 days
 ```
 
 Create backup:
+
 ```bash
 docker compose exec git-server gitlab-backup create
 ```
@@ -290,15 +309,16 @@ docker compose exec git-server gitlab-backup create
 ### Backup Security
 
 1. **Encryption**: Encrypt backup files
-2. **Off-site**: Store backups off-site
-3. **Regular Testing**: Test restore procedure
-4. **Access Control**: Restrict backup file access
+1. **Off-site**: Store backups off-site
+1. **Regular Testing**: Test restore procedure
+1. **Access Control**: Restrict backup file access
 
 ## Monitoring and Alerting
 
 ### Health Checks
 
 Built-in health endpoints:
+
 ```bash
 curl http://localhost:3000/-/health
 curl http://localhost:3000/-/readiness
@@ -308,6 +328,7 @@ curl http://localhost:3000/-/liveness
 ### Failed Login Monitoring
 
 Monitor failed logins:
+
 ```bash
 docker compose exec git-server grep "Failed Login" \
   /var/log/gitlab/gitlab-rails/production.log
@@ -324,26 +345,31 @@ GitLab exports Prometheus metrics on port 9090 (internal).
 If an account is compromised:
 
 1. **Block the account immediately**:
+
    ```bash
    ./services/git-server/scripts/manage-users.sh block <username>
    ```
 
-2. **Revoke all sessions**:
+1. **Revoke all sessions**:
+
    - Admin Area → Users → [Select User] → Impersonate/Edit
    - Force logout
 
-3. **Reset password**:
+1. **Reset password**:
+
    ```bash
    docker compose exec git-server gitlab-rake "gitlab:password:reset[username]"
    ```
 
-4. **Review access logs**:
+1. **Review access logs**:
+
    ```bash
    docker compose exec git-server grep "username" \
      /var/log/gitlab/gitlab-rails/audit_json.log
    ```
 
-5. **Check for unauthorized changes**:
+1. **Check for unauthorized changes**:
+
    - Review recent commits
    - Check project access changes
    - Review API token usage
@@ -351,11 +377,11 @@ If an account is compromised:
 ### Data Breach Response
 
 1. **Isolate the system**
-2. **Assess the scope**
-3. **Notify affected parties**
-4. **Preserve evidence**
-5. **Restore from clean backup**
-6. **Implement additional controls**
+1. **Assess the scope**
+1. **Notify affected parties**
+1. **Preserve evidence**
+1. **Restore from clean backup**
+1. **Implement additional controls**
 
 ## Compliance
 
@@ -369,6 +395,7 @@ If an account is compromised:
 ### SOC 2 / ISO 27001
 
 Relevant controls:
+
 - Access control (AC)
 - Audit and accountability (AU)
 - Identification and authentication (IA)
@@ -379,19 +406,22 @@ Relevant controls:
 ### Additional Hardening Steps
 
 1. **Disable unnecessary services**:
+
    ```ruby
    registry['enable'] = false
    pages['enable'] = false
    mattermost['enable'] = false
    ```
 
-2. **Limit rate of API requests**:
+1. **Limit rate of API requests**:
+
    ```ruby
    gitlab_rails['rate_limit_requests_per_period'] = 1000
    gitlab_rails['rate_limit_period'] = 60
    ```
 
-3. **Enable security headers**:
+1. **Enable security headers**:
+
    ```ruby
    nginx['proxy_set_headers'] = {
      "X-Frame-Options" => "DENY",
@@ -400,17 +430,18 @@ Relevant controls:
    }
    ```
 
-4. **Restrict admin interface**:
-   Only allow admin access from trusted networks
+1. **Restrict admin interface**: Only allow admin access from trusted networks
 
 ## Security Resources
 
 ### GitLab Security Resources
+
 - [GitLab Security Docs](https://docs.gitlab.com/ce/security/)
 - [Securing your GitLab instance](https://docs.gitlab.com/ce/security/hardening.html)
 - [GitLab Security Best Practices](https://docs.gitlab.com/ce/security/best_practices.html)
 
 ### External Resources
+
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker)
 - [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
@@ -418,27 +449,32 @@ Relevant controls:
 ## Regular Security Tasks
 
 ### Daily
+
 - [ ] Monitor failed login attempts
 - [ ] Review audit logs for suspicious activity
 - [ ] Check system health
 
 ### Weekly
+
 - [ ] Review user accounts and access
 - [ ] Check for GitLab security updates
 - [ ] Test backup restoration
 
 ### Monthly
+
 - [ ] Full security audit
 - [ ] Password policy review
 - [ ] Access control review
 - [ ] Update security documentation
 
 ### Quarterly
+
 - [ ] Penetration testing
 - [ ] Disaster recovery drill
 - [ ] Security training for users
 - [ ] Policy and procedure review
 
----
+______________________________________________________________________
 
-**Security is an ongoing process, not a one-time configuration. Regular reviews and updates are essential.**
+**Security is an ongoing process, not a one-time configuration. Regular reviews and updates are
+essential.**

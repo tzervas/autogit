@@ -1,0 +1,195 @@
+# GitLab Homelab Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+# RIGHT-SIZED for single-user + agents homelab (not public internet)
+#
+# Hardware: 28 cores / 56 threads / 120GB RAM
+# Allocation: 6 cores / 6GB RAM (5% of system - leaves 95% for other workloads)
+#
+# Sizing Rationale:
+# ─────────────────────────────────────────────────────────────────────────────
+# OBSERVED STEADY-STATE (2025-12-26):
+#   CPU: 0.85% of 12 cores = ~0.1 cores actual usage
+#   RAM: 4GB (Puma workers ~4×1GB + Sidekiq ~1GB + PostgreSQL ~150MB)
+#
+# ALLOCATION STRATEGY:
+#   Cores: 6 (60× observed, handles init burst + CI builds)
+#   RAM: 6GB (1.5× observed, room for growth + caching)
+#   PostgreSQL shared_buffers: 1GB (16% of allocation - standard ratio)
+#
+# This leaves your homelab with 22 cores / 114GB RAM for:
+#   - GPU runner workloads (inference/render on 3090Ti/5080)
+#   - Other containers/services
+#   - Development VMs
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: autogit-git-server
+    restart: unless-stopped
+    hostname: '${GITLAB_HOSTNAME:-gitlab.vectorweight.com}'
+
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |  # pragma: allowlist secret
+        #═══════════════════════════════════════════════════════════════════════
+        # EXTERNAL ACCESS
+        #═══════════════════════════════════════════════════════════════════════
+        # URL without port - Docker handles port mapping (8080:80)
+        external_url '${GITLAB_EXTERNAL_URL:-http://gitlab.vectorweight.com}'
+
+        # Puma binds to unix socket only (prevents port conflict with Docker)
+        puma['bind'] = 'unix:///var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
+        puma['port'] = nil
+
+        # SSH on non-standard port (rootless Docker)
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT:-2222}
+        gitlab_rails['time_zone'] = '${TZ:-UTC}'
+
+        #═══════════════════════════════════════════════════════════════════════
+        # APPLICATION WORKERS (tuned for 6 cores)
+        #═══════════════════════════════════════════════════════════════════════
+        # Puma: 2 workers × 4 threads = 8 concurrent requests
+        # Sufficient for 1-5 users + CI agents
+        puma['worker_processes'] = ${PUMA_WORKERS:-2}
+        puma['max_threads'] = ${PUMA_THREADS:-4}
+
+        # Sidekiq: background job processing
+        sidekiq['concurrency'] = ${SIDEKIQ_CONCURRENCY:-6}
+
+        # Database connection pool
+        gitlab_rails['db_pool'] = ${DB_POOL:-15}
+
+        # Unicorn (legacy fallback)
+        unicorn['worker_processes'] = ${UNICORN_WORKERS:-2}
+
+        #═══════════════════════════════════════════════════════════════════════
+        # POSTGRESQL (tuned for 6GB RAM allocation)
+        #═══════════════════════════════════════════════════════════════════════
+        # shared_buffers: 16% of container RAM (standard)
+        postgresql['shared_buffers'] = "${PG_SHARED_BUFFERS:-1GB}"
+
+        # effective_cache_size: 60% of container RAM
+        postgresql['effective_cache_size'] = "${PG_CACHE_SIZE:-4GB}"
+
+        # work_mem: per-operation memory (sort, hash)
+        postgresql['work_mem'] = "${PG_WORK_MEM:-16MB}"
+
+        # maintenance_work_mem: for migrations/vacuum (can be high)
+        postgresql['maintenance_work_mem'] = "${PG_MAINTENANCE_MEM:-512MB}"
+
+        # WAL settings
+        postgresql['checkpoint_completion_target'] = 0.9
+        postgresql['wal_buffers'] = "32MB"
+        postgresql['max_wal_size'] = "2GB"
+        postgresql['min_wal_size'] = "512MB"
+
+        # Parallel query (match core allocation)
+        postgresql['max_worker_processes'] = ${PG_MAX_WORKERS:-6}
+        postgresql['max_parallel_workers'] = ${PG_PARALLEL_WORKERS:-4}
+        postgresql['max_parallel_workers_per_gather'] = ${PG_PARALLEL_GATHER:-2}
+        postgresql['max_parallel_maintenance_workers'] = ${PG_PARALLEL_MAINT:-2}
+
+        # SSD optimization
+        postgresql['random_page_cost'] = 1.1
+        postgresql['effective_io_concurrency'] = 200
+
+        #═══════════════════════════════════════════════════════════════════════
+        # STORAGE & FEATURES
+        #═══════════════════════════════════════════════════════════════════════
+        gitlab_rails['shared_path'] = '/var/opt/gitlab/gitlab-rails/shared'
+        gitlab_rails['uploads_storage_path'] = '/var/opt/gitlab/gitlab-rails/shared'
+        gitlab_rails['artifacts_enabled'] = ${ARTIFACTS_ENABLED:-false}
+        gitlab_rails['lfs_enabled'] = ${LFS_ENABLED:-true}
+
+        # Container Registry (disabled by default for homelab)
+        registry['enable'] = ${REGISTRY_ENABLED:-false}
+
+        #═══════════════════════════════════════════════════════════════════════
+        # SECURITY
+        #═══════════════════════════════════════════════════════════════════════
+        gitlab_rails['session_expire_delay'] = ${SESSION_EXPIRE_DAYS:-7} * 86400
+        gitlab_rails['password_authentication_enabled_for_web'] = true
+        gitlab_rails['password_authentication_enabled_for_git'] = true
+
+        # NGINX (internal)
+        nginx['redirect_http_to_https'] = ${HTTPS_REDIRECT:-false}
+        # nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.crt"
+        # nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
+
+        #═══════════════════════════════════════════════════════════════════════
+        # DISABLED SERVICES (homelab - not needed)
+        #═══════════════════════════════════════════════════════════════════════
+        prometheus_monitoring['enable'] = ${PROMETHEUS_ENABLED:-false}
+        gitlab_exporter['enable'] = ${EXPORTER_ENABLED:-false}
+        gitlab_rails['smtp_enable'] = ${SMTP_ENABLED:-false}
+
+        #═══════════════════════════════════════════════════════════════════════
+        # GIT PERFORMANCE
+        #═══════════════════════════════════════════════════════════════════════
+        gitlab_shell['git_timeout'] = 800
+        gitaly['concurrency'] = [
+          { 'rpc' => "/gitaly.SmartHTTPService/PostReceivePack", 'max_concurrency' => 10 },
+          { 'rpc' => "/gitaly.SmartHTTPService/PostUploadPack", 'max_concurrency' => 10 }
+        ]
+
+    #═══════════════════════════════════════════════════════════════════════════
+    # CONTAINER RESOURCES
+    #═══════════════════════════════════════════════════════════════════════════
+    ports:
+      - "${HTTP_PORT:-8080}:80"     # HTTP (rootless-compatible)
+      - "${HTTPS_PORT:-8443}:443"   # HTTPS
+      - "${SSH_PORT:-2222}:22"      # SSH
+
+    volumes:
+      - gitlab-config:/etc/gitlab
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+
+    shm_size: '${SHM_SIZE:-2gb}'
+
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPU_LIMIT:-6.0}'
+          memory: ${MEMORY_LIMIT:-6G}
+        reservations:
+          cpus: '${CPU_RESERVE:-2.0}'
+          memory: ${MEMORY_RESERVE:-2G}
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/-/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s  # 5 min startup grace
+
+    networks:
+      - gitlab-network
+
+  #═════════════════════════════════════════════════════════════════════════════
+  # GITLAB RUNNER (optional - for local CI jobs)
+  #═════════════════════════════════════════════════════════════════════════════
+  runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: autogit-runner
+    restart: unless-stopped
+    volumes:
+      - runner-config:/etc/gitlab-runner
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      gitlab:
+        condition: service_healthy
+    networks:
+      - gitlab-network
+    profiles:
+      - runner  # Only start with: docker compose --profile runner up
+
+networks:
+  gitlab-network:
+    driver: bridge
+
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+  runner-config:

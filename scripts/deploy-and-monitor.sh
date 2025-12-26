@@ -25,7 +25,7 @@ export DOCKER_HOST=${DOCKER_HOST:-"unix:///run/user/1000/docker.sock"}
 cd infrastructure/homelab
 terraform apply -auto-approve \
     -var="ssh_user=$USER" \
-    -var="ssh_key_path=$KEY_PATH" >terraform_apply.log 2>&1 &
+    -var="ssh_key_path=$KEY_PATH" > terraform_apply.log 2>&1 &
 
 TF_PID=$!
 

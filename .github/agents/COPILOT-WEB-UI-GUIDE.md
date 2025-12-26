@@ -1,29 +1,31 @@
 # Copilot Web UI Agent Workflow Implementation Guide
 
-**Last Updated**: 2025-12-21
-**Status**: Active
+**Last Updated**: 2025-12-21 **Status**: Active
 
 ## Overview
 
-This document describes how to implement and use the AutoGit multiagent workflow in the GitHub Copilot web UI environment.
+This document describes how to implement and use the AutoGit multiagent workflow in the GitHub
+Copilot web UI environment.
 
 ## Agent Discovery in Copilot Web UI
 
-GitHub Copilot web UI automatically discovers agent configuration files in the `.github/agents/` directory. The system follows this hierarchy:
+GitHub Copilot web UI automatically discovers agent configuration files in the `.github/agents/`
+directory. The system follows this hierarchy:
 
 1. **Primary Agent File**: `.github/agents/agent.md` (root orchestrator)
-2. **Specialized Agent Files**: Other `.md` files in `.github/agents/`
-3. **Shared Context**: `.github/agents/shared-context.md` (referenced by all agents)
+1. **Specialized Agent Files**: Other `.md` files in `.github/agents/`
+1. **Shared Context**: `.github/agents/shared-context.md` (referenced by all agents)
 
 ## How Copilot Web UI Uses Agents
 
 ### Agent File Detection
 
-Copilot web UI reads all markdown files in `.github/agents/` and uses them as context for AI-assisted development. The files are read in this priority:
+Copilot web UI reads all markdown files in `.github/agents/` and uses them as context for
+AI-assisted development. The files are read in this priority:
 
 1. **agent.md** - Primary agent configuration (always loaded)
-2. **Other agent files** - Loaded based on task context
-3. **shared-context.md** - Common context (loaded when referenced)
+1. **Other agent files** - Loaded based on task context
+1. **shared-context.md** - Common context (loaded when referenced)
 
 ### Agent Invocation
 
@@ -62,6 +64,7 @@ You can explicitly mention an agent in your request:
 #### 3. Context-Based Selection (Automatic)
 
 Copilot automatically selects relevant agents based on:
+
 - File type being edited (`.py` → Software Engineer)
 - Directory location (`docs/` → Documentation Engineer)
 - Task keywords ("deploy", "docker" → DevOps Engineer)
@@ -74,8 +77,9 @@ Copilot automatically selects relevant agents based on:
 **User Request**: "Add support for AMD GPUs"
 
 **Agent Workflow**:
+
 1. **Root Agent** reads request, delegates to Project Manager
-2. **Project Manager** creates task breakdown:
+1. **Project Manager** creates task breakdown:
    ```markdown
    ## Task 1: Design GPU Detection Interface
    Assigned: Software Engineer
@@ -92,56 +96,60 @@ Copilot automatically selects relevant agents based on:
    ## Task 5: Update Documentation
    Assigned: Documentation Engineer
    ```
-3. Each agent executes their task in sequence
-4. **Evaluator** reviews final work
+1. Each agent executes their task in sequence
+1. **Evaluator** reviews final work
 
 ### Pattern 2: Bug Fix
 
 **User Request**: "Fix the runner provisioning timeout"
 
 **Agent Workflow**:
+
 1. **Root Agent** → **Software Engineer** (primary)
-2. **Software Engineer**:
+1. **Software Engineer**:
    - Analyzes code
    - Identifies issue
    - Implements fix
    - Writes tests
-3. **Evaluator** verifies fix works
-4. **Documentation Engineer** updates troubleshooting docs if needed
+1. **Evaluator** verifies fix works
+1. **Documentation Engineer** updates troubleshooting docs if needed
 
 ### Pattern 3: Documentation Update
 
 **User Request**: "Update the installation guide for Kubernetes"
 
 **Agent Workflow**:
+
 1. **Root Agent** → **Documentation Engineer** (primary)
-2. **Documentation Engineer**:
+1. **Documentation Engineer**:
    - Reviews current docs
    - Updates content
    - Checks links
    - Updates INDEX.md
-3. **DevOps Engineer** reviews for technical accuracy
-4. **Evaluator** approves changes
+1. **DevOps Engineer** reviews for technical accuracy
+1. **Evaluator** approves changes
 
 ### Pattern 4: Infrastructure Change
 
 **User Request**: "Update the Helm chart to support GPU workloads"
 
 **Agent Workflow**:
+
 1. **Root Agent** → **DevOps Engineer** (primary)
-2. **DevOps Engineer**:
+1. **DevOps Engineer**:
    - Updates Helm templates
    - Adds GPU device plugin config
    - Tests in staging
-3. **Security Engineer** reviews security implications
-4. **Documentation Engineer** updates installation docs
-5. **Evaluator** verifies deployment works
+1. **Security Engineer** reviews security implications
+1. **Documentation Engineer** updates installation docs
+1. **Evaluator** verifies deployment works
 
 ## Best Practices for Copilot Web UI
 
 ### 1. Clear Task Descriptions
 
 ✅ **Good**:
+
 ```markdown
 "Implement GPU detection for NVIDIA GPUs with the following requirements:
 - Detect using nvidia-smi
@@ -151,6 +159,7 @@ Copilot automatically selects relevant agents based on:
 ```
 
 ❌ **Bad**:
+
 ```markdown
 "Add GPU stuff"
 ```
@@ -272,29 +281,32 @@ Root Agent:
 **Problem**: Agent ignores specialized configuration
 
 **Solution**:
+
 1. Verify `.github/agents/agent.md` exists and is valid markdown
-2. Check agent file references shared-context.md correctly
-3. Explicitly mention agent: `@software-engineer: ...`
-4. Ensure task description is clear and specific
+1. Check agent file references shared-context.md correctly
+1. Explicitly mention agent: `@software-engineer: ...`
+1. Ensure task description is clear and specific
 
 ### Issue: Agents Not Coordinating
 
 **Problem**: Multiple agents working on same task, duplicating work
 
 **Solution**:
+
 1. Use root agent to delegate: Let `agent.md` coordinate
-2. Be explicit about which agent should be primary
-3. Use checkpoints - complete one agent's work before next
+1. Be explicit about which agent should be primary
+1. Use checkpoints - complete one agent's work before next
 
 ### Issue: Agent Missing Context
 
 **Problem**: Agent doesn't have necessary project context
 
 **Solution**:
+
 1. Ensure `shared-context.md` is complete and up-to-date
-2. Reference relevant documentation in request
-3. Point to ADRs for architectural context
-4. Include links to related code/docs
+1. Reference relevant documentation in request
+1. Point to ADRs for architectural context
+1. Include links to related code/docs
 
 ## Maintaining Agent Configuration
 
@@ -311,18 +323,21 @@ Update agent configurations when:
 ### How to Test Agent Changes
 
 1. **Small change testing**:
+
    ```markdown
    "Test: @software-engineer, what coding standards do you follow?"
    [Verify response matches updated standards]
    ```
 
-2. **Full workflow testing**:
+1. **Full workflow testing**:
+
    ```markdown
    "Please implement a small test feature end-to-end"
    [Verify all agents participate correctly]
    ```
 
-3. **Documentation sync**:
+1. **Documentation sync**:
+
    ```markdown
    "@documentation-engineer: Verify all docs match current code"
    [Check that agent catches discrepancies]
@@ -397,11 +412,12 @@ Track these metrics to measure multiagent workflow effectiveness:
 If you're having issues with the multiagent workflow:
 
 1. Check this guide first
-2. Review individual agent configuration files
-3. Test with simple tasks before complex ones
-4. Ask for clarification: "How should I structure this request for the agents?"
-5. Open an issue with details about the problem
+1. Review individual agent configuration files
+1. Test with simple tasks before complex ones
+1. Ask for clarification: "How should I structure this request for the agents?"
+1. Open an issue with details about the problem
 
----
+______________________________________________________________________
 
-**Remember**: The multiagent system works best when you provide clear, specific requests and allow the root agent to coordinate the workflow!
+**Remember**: The multiagent system works best when you provide clear, specific requests and allow
+the root agent to coordinate the workflow!

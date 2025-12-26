@@ -85,26 +85,27 @@ autogit completions fish > ~/.config/fish/completions/autogit.fish
 autogit completions nushell | save ~/.config/nushell/autogit-completions.nu
 ```
 
-See [docs/shell-completions.md](docs/shell-completions.md) for full details including Starship integration.
+See [docs/shell-completions.md](docs/shell-completions.md) for full details including Starship
+integration.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `autogit status` | Show GitLab instance status |
-| `autogit bootstrap` | Provision users and service accounts |
-| `autogit mirror add <source>` | Add GitHub → GitLab mirror |
-| `autogit mirror list` | List configured mirrors |
-| `autogit mirror sync <repo>` | Trigger immediate sync |
+| Command                        | Description                             |
+| ------------------------------ | --------------------------------------- |
+| `autogit status`               | Show GitLab instance status             |
+| `autogit bootstrap`            | Provision users and service accounts    |
+| `autogit mirror add <source>`  | Add GitHub → GitLab mirror              |
+| `autogit mirror list`          | List configured mirrors                 |
+| `autogit mirror sync <repo>`   | Trigger immediate sync                  |
 | `autogit mirror remove <repo>` | Remove mirror (with optional `--purge`) |
-| `autogit runner register` | Register new runner |
-| `autogit runner list` | List registered runners |
-| `autogit runner status [id]` | Show runner details |
-| `autogit runner remove <id>` | Remove runner |
-| `autogit config show` | Display current config |
-| `autogit config validate` | Validate config file |
-| `autogit config init` | Generate template config |
-| `autogit completions <shell>` | Generate shell completions |
+| `autogit runner register`      | Register new runner                     |
+| `autogit runner list`          | List registered runners                 |
+| `autogit runner status [id]`   | Show runner details                     |
+| `autogit runner remove <id>`   | Remove runner                           |
+| `autogit config show`          | Display current config                  |
+| `autogit config validate`      | Validate config file                    |
+| `autogit config init`          | Generate template config                |
+| `autogit completions <shell>`  | Generate shell completions              |
 
 ## Output Formats
 
@@ -118,10 +119,10 @@ autogit runner list --format=json
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `GITLAB_URL` | GitLab instance URL |
-| `GITLAB_TOKEN` | GitLab API token (PAT or OAuth) |
+| Variable         | Description                                |
+| ---------------- | ------------------------------------------ |
+| `GITLAB_URL`     | GitLab instance URL                        |
+| `GITLAB_TOKEN`   | GitLab API token (PAT or OAuth)            |
 | `AUTOGIT_CONFIG` | Config file path (default: `autogit.toml`) |
 
 ## License

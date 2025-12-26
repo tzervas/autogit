@@ -1,0 +1,261 @@
+---
+name: Automated Changelog Generator
+
+# Automatically generates changelog entries from merged PRs
+# Updates CHANGELOG.md and tracks version history
+# Runs on self-hosted runners for consistency
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Target version to generate changelog for (e.g., v0.3.0)'
+        required: false
+        type: string
+      include_all_prs:
+        description: 'Include all PRs since last release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  generate-changelog:
+    name: Generate Changelog
+    runs-on: self-hosted
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Get PR information
+        id: pr_info
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+            PR_BODY="${{ github.event.pull_request.body }}"
+            TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+          else
+            PR_NUMBER=""
+            PR_TITLE=""
+            PR_AUTHOR=""
+            PR_BODY=""
+            TARGET_BRANCH="${{ inputs.target_version && 'main' || 'dev' }}"
+          fi
+
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+          echo "pr_author=$PR_AUTHOR" >> $GITHUB_OUTPUT
+          echo "target_branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.target_version }}" ]; then
+            VERSION="${{ inputs.target_version }}"
+          else
+            # Get current version from pyproject.toml
+            CURRENT_VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2)
+
+            # Check if this is for main or dev
+            if [ "${{ steps.pr_info.outputs.target_branch }}" = "main" ]; then
+              # For main, increment minor version
+              MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+              MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+              PATCH=$(echo "$CURRENT_VERSION" | cut -d. -f3)
+              MINOR=$((MINOR + 1))
+              VERSION="$MAJOR.$MINOR.0"
+            else
+              # For dev, keep as unreleased
+              VERSION="Unreleased"
+            fi
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Target version: $VERSION"
+
+      - name: Extract conventional commit type
+        id: commit_type
+        run: |
+          PR_TITLE="${{ steps.pr_info.outputs.pr_title }}"
+
+          # Extract type from conventional commit format
+          if [[ "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.*\))?: ]]; then
+            TYPE="${BASH_REMATCH[1]}"
+          else
+            TYPE="changed"
+          fi
+
+          echo "type=$TYPE" >> $GITHUB_OUTPUT
+          echo "Commit type: $TYPE"
+
+      - name: Generate changelog entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TYPE="${{ steps.commit_type.outputs.type }}"
+          PR_NUMBER="${{ steps.pr_info.outputs.pr_number }}"
+          PR_TITLE="${{ steps.pr_info.outputs.pr_title }}"
+          PR_AUTHOR="${{ steps.pr_info.outputs.pr_author }}"
+          DATE=$(date +%Y-%m-%d)
+
+          # Map conventional commit types to changelog sections
+          case "$TYPE" in
+            feat) SECTION="Added" ;;
+            fix) SECTION="Fixed" ;;
+            docs) SECTION="Documentation" ;;
+            perf) SECTION="Performance" ;;
+            security) SECTION="Security" ;;
+            refactor|style) SECTION="Changed" ;;
+            ci|build|chore) SECTION="Infrastructure" ;;
+            *) SECTION="Changed" ;;
+          esac
+
+          # Create changelog entry
+          if [ -n "$PR_NUMBER" ]; then
+            ENTRY="- $PR_TITLE ([#$PR_NUMBER](https://github.com/${{ github.repository }}/pull/$PR_NUMBER)) by @$PR_AUTHOR"
+          else
+            ENTRY="- Manual changelog update"
+          fi
+
+          echo "section=$SECTION" >> $GITHUB_OUTPUT
+          echo "entry=$ENTRY" >> $GITHUB_OUTPUT
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+
+          echo "📝 Changelog entry: $ENTRY"
+          echo "📂 Section: $SECTION"
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SECTION="${{ steps.changelog.outputs.section }}"
+          ENTRY="${{ steps.changelog.outputs.entry }}"
+          DATE="${{ steps.changelog.outputs.date }}"
+
+          # Backup changelog
+          cp docs/status/CHANGELOG.md docs/status/CHANGELOG.md.bak
+
+          # Check if version section exists
+          if grep -q "## \[$VERSION\]" docs/status/CHANGELOG.md; then
+            echo "📝 Updating existing version section"
+
+            # Add entry to existing section
+            # Find the section, then find the subsection, then add entry
+            awk -v version="$VERSION" -v section="$SECTION" -v entry="$ENTRY" '
+              /^## \['"$VERSION"'\]/ { in_version=1 }
+              in_version && /^### '"$SECTION"'/ {
+                print
+                print entry
+                found_section=1
+                next
+              }
+              in_version && /^### / && !found_section {
+                # Insert new section before next section
+                print "### '"$SECTION"'"
+                print entry
+                print ""
+                found_section=1
+              }
+              in_version && /^## \[/ && !/^## \['"$VERSION"'\]/ { in_version=0 }
+              { print }
+            ' docs/status/CHANGELOG.md.bak > docs/status/CHANGELOG.md
+
+          else
+            echo "📝 Creating new version section"
+
+            # Create new version section after [Unreleased]
+            awk -v version="$VERSION" -v section="$SECTION" -v entry="$ENTRY" -v date="$DATE" '
+              /^## \[Unreleased\]/ {
+                print
+                getline
+                print
+                print ""
+                print "## ['"$VERSION"'] - '"$DATE"'"
+                print ""
+                print "### '"$SECTION"'"
+                print entry
+                next
+              }
+              { print }
+            ' docs/status/CHANGELOG.md.bak > docs/status/CHANGELOG.md
+          fi
+
+          # Update version links at bottom if needed
+          if [ "$VERSION" != "Unreleased" ] && ! grep -q "\[$VERSION\]:" docs/status/CHANGELOG.md; then
+            # Get previous version
+            PREV_VERSION=$(grep "^\[" docs/status/CHANGELOG.md | grep -v "Unreleased" | head -2 | tail -1 | cut -d'[' -f2 | cut -d']' -f1)
+
+            # Add new version link
+            sed -i "/^\[Unreleased\]:/a [$VERSION]: https://github.com/${{ github.repository }}/compare/v$PREV_VERSION...v$VERSION" docs/status/CHANGELOG.md
+          fi
+
+          echo "✅ CHANGELOG.md updated"
+
+      - name: Commit and push changelog
+        run: |
+          git add docs/status/CHANGELOG.md
+
+          if git diff --cached --quiet; then
+            echo "ℹ️  No changes to commit"
+            exit 0
+          fi
+
+          VERSION="${{ steps.version.outputs.version }}"
+
+          git commit -m "docs(changelog): update changelog for version $VERSION\n\nAutomated changelog update from PR #${{ steps.pr_info.outputs.pr_number }}\n\n🤖 This commit was automatically generated by the changelog workflow"
+
+          git push origin HEAD:${{ github.event.pull_request.base.ref || github.ref_name }}
+
+          echo "✅ Changelog committed and pushed"
+
+      - name: Create changelog summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SECTION="${{ steps.changelog.outputs.section }}"
+
+          cat > /tmp/changelog_summary.md << EOF
+          ## 📝 Changelog Updated
+
+          **Version**: $VERSION
+          **Section**: $SECTION
+          **Entry**: ${{ steps.changelog.outputs.entry }}
+
+          The changelog has been automatically updated in \`docs/status/CHANGELOG.md\`.
+
+          You can view the full changelog [here](https://github.com/${{ github.repository }}/blob/${{ github.event.pull_request.base.ref || github.ref_name }}/docs/status/CHANGELOG.md).
+          EOF
+
+          cat /tmp/changelog_summary.md
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('/tmp/changelog_summary.md', 'utf8');
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summary
+            });

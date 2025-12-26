@@ -1,17 +1,17 @@
 # GitLab Authentication and User Management
 
-**Component**: Git Server (GitLab CE) - Authentication
-**Version**: 16.11.0-ce.0
-**Status**: Production Ready
-**Last Updated**: 2025-12-22
+**Component**: Git Server (GitLab CE) - Authentication **Version**: 16.11.0-ce.0 **Status**:
+Production Ready **Last Updated**: 2025-12-22
 
 ## Overview
 
-This document describes the authentication setup and user management for the AutoGit Git Server. GitLab CE provides comprehensive authentication and user management capabilities out of the box.
+This document describes the authentication setup and user management for the AutoGit Git Server.
+GitLab CE provides comprehensive authentication and user management capabilities out of the box.
 
 ## Authentication Features
 
 ### Built-in Authentication
+
 - Username/password authentication
 - SSH key authentication
 - Personal access tokens
@@ -20,6 +20,7 @@ This document describes the authentication setup and user management for the Aut
 - Password complexity requirements
 
 ### Optional Authentication Methods
+
 - LDAP/Active Directory integration
 - OAuth2 providers (GitHub, Google, etc.)
 - SAML SSO
@@ -32,6 +33,7 @@ This document describes the authentication setup and user management for the Aut
 The root admin user password is set via the `GITLAB_ROOT_PASSWORD` environment variable.
 
 **Using .env file** (recommended):
+
 ```bash
 # Copy the example env file
 cp services/git-server/.env.example services/git-server/.env
@@ -42,6 +44,7 @@ vi services/git-server/.env
 ```
 
 **Using setup script**:
+
 ```bash
 # After GitLab is running, use the setup script
 export GITLAB_ROOT_PASSWORD='YourSecurePassword123!'
@@ -51,9 +54,9 @@ export GITLAB_ROOT_PASSWORD='YourSecurePassword123!'
 ### 2. First Login
 
 1. Start GitLab: `docker compose up -d git-server`
-2. Wait 3-5 minutes for initialization
-3. Access: http://localhost:3000
-4. Login with:
+1. Wait 3-5 minutes for initialization
+1. Access: http://localhost:3000
+1. Login with:
    - Username: `root`
    - Password: (value from `GITLAB_ROOT_PASSWORD`)
 
@@ -62,23 +65,28 @@ export GITLAB_ROOT_PASSWORD='YourSecurePassword123!'
 After first login:
 
 1. Go to **Admin Area** → **Settings** → **General**
-2. Expand **Sign-up restrictions**:
+
+1. Expand **Sign-up restrictions**:
+
    - Disable sign-up to prevent unauthorized registrations
    - Set domain restrictions if needed
    - Configure email confirmation requirements
 
-3. Expand **Sign-in restrictions**:
+1. Expand **Sign-in restrictions**:
+
    - Set session duration
    - Enable/disable password authentication
    - Configure failed login attempts handling
 
-4. Expand **Account and limit**:
+1. Expand **Account and limit**:
+
    - Set user limits
    - Configure project/group creation restrictions
 
 ## Password Policies
 
 ### Default Requirements
+
 - Minimum length: 12 characters (configurable)
 - Must include: uppercase, lowercase, number, and symbol
 - Cannot be a common password
@@ -96,6 +104,7 @@ gitlab_rails['password_authentication_enabled_for_git'] = true
 ```
 
 Apply changes:
+
 ```bash
 docker compose restart git-server
 ```
@@ -105,13 +114,15 @@ docker compose restart git-server
 ### Creating Users
 
 **Option 1: Using the Web UI** (recommended for few users)
+
 1. Login as admin
-2. Go to **Admin Area** → **Users** → **New User**
-3. Fill in user details
-4. Set password or send reset link
-5. Assign admin role if needed
+1. Go to **Admin Area** → **Users** → **New User**
+1. Fill in user details
+1. Set password or send reset link
+1. Assign admin role if needed
 
 **Option 2: Using the management script** (recommended for automation)
+
 ```bash
 # Create a regular user
 ./services/git-server/scripts/manage-users.sh create \
@@ -131,6 +142,7 @@ docker compose restart git-server
 ```
 
 **Option 3: Using GitLab API**
+
 ```bash
 curl --request POST \
   --header "PRIVATE-TOKEN: your-access-token" \
@@ -142,6 +154,7 @@ curl --request POST \
 ```
 
 ### Listing Users
+
 ```bash
 # Using management script
 ./services/git-server/scripts/manage-users.sh list
@@ -152,6 +165,7 @@ curl --header "PRIVATE-TOKEN: your-access-token" \
 ```
 
 ### Blocking/Unblocking Users
+
 ```bash
 # Block a user (prevents login)
 ./services/git-server/scripts/manage-users.sh block johndoe
@@ -161,6 +175,7 @@ curl --header "PRIVATE-TOKEN: your-access-token" \
 ```
 
 ### Deleting Users
+
 ```bash
 # Delete a user (cannot be undone)
 ./services/git-server/scripts/manage-users.sh delete johndoe
@@ -178,6 +193,7 @@ gitlab_rails['session_expire_delay'] = 10080  # 7 days in minutes
 ```
 
 ### Session Features
+
 - Automatic logout after inactivity
 - "Remember me" option on login
 - Active session viewing and termination
@@ -186,10 +202,11 @@ gitlab_rails['session_expire_delay'] = 10080  # 7 days in minutes
 ### Managing Sessions
 
 **View active sessions**:
+
 1. Login to GitLab
-2. Go to **User Settings** → **Active Sessions**
-3. View all active sessions with location and device info
-4. Revoke sessions as needed
+1. Go to **User Settings** → **Active Sessions**
+1. View all active sessions with location and device info
+1. Revoke sessions as needed
 
 ## Rate Limiting
 
@@ -208,6 +225,7 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
 ### Custom Rate Limiting
 
 To add IP addresses to whitelist (skip rate limiting):
+
 ```ruby
 gitlab_rails['rack_attack_git_basic_auth'] = {
   'enabled' => true,
@@ -223,15 +241,17 @@ gitlab_rails['rack_attack_git_basic_auth'] = {
 ### Enabling 2FA
 
 **For individual users**:
+
 1. Login to GitLab
-2. Go to **User Settings** → **Account**
-3. Click **Enable Two-Factor Authentication**
-4. Scan QR code with authenticator app
-5. Enter verification code
+1. Go to **User Settings** → **Account**
+1. Click **Enable Two-Factor Authentication**
+1. Scan QR code with authenticator app
+1. Enter verification code
 
 **Requiring 2FA for all users** (optional):
 
 Edit `gitlab.rb.template`:
+
 ```ruby
 gitlab_rails['two_factor_authentication'] = {
   'enabled' => true,
@@ -242,11 +262,12 @@ gitlab_rails['two_factor_authentication'] = {
 ### 2FA Recovery
 
 If a user loses 2FA access:
+
 1. Admin logs into GitLab
-2. Go to **Admin Area** → **Users**
-3. Find the user and click **Edit**
-4. Click **Disable Two-Factor Authentication**
-5. User can re-enable with new device
+1. Go to **Admin Area** → **Users**
+1. Find the user and click **Edit**
+1. Click **Disable Two-Factor Authentication**
+1. User can re-enable with new device
 
 ## LDAP/Active Directory Integration
 
@@ -277,12 +298,14 @@ EOS
 ```
 
 ### LDAP Features
+
 - Automatic user provisioning
 - Group synchronization
 - Password authentication via LDAP
 - Periodic user sync
 
 ### Testing LDAP Configuration
+
 ```bash
 docker compose exec git-server gitlab-rake gitlab:ldap:check
 ```
@@ -292,6 +315,7 @@ docker compose exec git-server gitlab-rake gitlab:ldap:check
 Integrate with external OAuth2 providers for SSO.
 
 ### Supported Providers
+
 - GitHub
 - Google
 - Azure AD
@@ -301,11 +325,13 @@ Integrate with external OAuth2 providers for SSO.
 ### GitHub OAuth Configuration
 
 1. Create OAuth App on GitHub:
+
    - Go to GitHub Settings → Developer settings → OAuth Apps
    - Create new OAuth App
    - Authorization callback URL: `http://localhost:3000/users/auth/github/callback`
 
-2. Configure in `gitlab.rb.template`:
+1. Configure in `gitlab.rb.template`:
+
 ```ruby
 gitlab_rails['omniauth_enabled'] = true
 gitlab_rails['omniauth_allow_single_sign_on'] = ['github']
@@ -323,12 +349,14 @@ gitlab_rails['omniauth_providers'] = [
 ## Security Best Practices
 
 ### Password Security
+
 - [x] Use strong passwords (min 12 characters)
 - [x] Enable password complexity requirements
 - [x] Configure password expiration (optional)
 - [x] Prevent password reuse
 
 ### Account Security
+
 - [x] Disable user signup for private installations
 - [x] Enable 2FA for admin accounts (recommended)
 - [x] Require 2FA for all users (optional)
@@ -336,12 +364,14 @@ gitlab_rails['omniauth_providers'] = [
 - [x] Remove unused accounts
 
 ### Session Security
+
 - [x] Set appropriate session timeout
 - [x] Enable rate limiting
 - [x] Monitor failed login attempts
 - [x] Review active sessions regularly
 
 ### Network Security
+
 - [x] Use HTTPS in production
 - [x] Restrict admin access by IP (optional)
 - [x] Enable audit logging
@@ -350,26 +380,30 @@ gitlab_rails['omniauth_providers'] = [
 ## Troubleshooting
 
 ### Cannot Login
+
 1. Verify GitLab is running: `docker compose ps git-server`
-2. Check logs: `docker compose logs git-server`
-3. Verify password is set: `echo $GITLAB_ROOT_PASSWORD`
-4. Try password reset: `./services/git-server/scripts/setup-admin.sh`
+1. Check logs: `docker compose logs git-server`
+1. Verify password is set: `echo $GITLAB_ROOT_PASSWORD`
+1. Try password reset: `./services/git-server/scripts/setup-admin.sh`
 
 ### Account Locked
+
 - Wait for ban period to expire (default 1 hour)
 - Or whitelist IP in rate limiting config
 - Admin can unlock from Admin Area
 
 ### 2FA Issues
+
 - Admin can disable 2FA for user from Admin Area
 - User re-enables with new device
 - Keep recovery codes safe
 
 ### LDAP Not Working
+
 1. Test connection: `docker compose exec git-server gitlab-rake gitlab:ldap:check`
-2. Verify credentials and DN paths
-3. Check network connectivity to LDAP server
-4. Review logs: `docker compose exec git-server tail -f /var/log/gitlab/gitlab-rails/production.log`
+1. Verify credentials and DN paths
+1. Check network connectivity to LDAP server
+1. Review logs: `docker compose exec git-server tail -f /var/log/gitlab/gitlab-rails/production.log`
 
 ## API Access
 
@@ -378,14 +412,15 @@ gitlab_rails['omniauth_providers'] = [
 Users can create personal access tokens for API/Git access:
 
 1. Login to GitLab
-2. Go to **User Settings** → **Access Tokens**
-3. Create token with required scopes:
+1. Go to **User Settings** → **Access Tokens**
+1. Create token with required scopes:
    - `api` - Full API access
    - `read_api` - Read-only API access
    - `read_repository` - Read repositories
    - `write_repository` - Write repositories
 
 ### Using Access Tokens
+
 ```bash
 # API request with token
 curl --header "PRIVATE-TOKEN: your-token" \
@@ -403,6 +438,6 @@ git clone http://oauth2:your-token@localhost:3000/username/repo.git
 - [GitLab OAuth2 Providers](https://docs.gitlab.com/ce/integration/oauth_provider.html)
 - [GitLab Security](https://docs.gitlab.com/ce/security/)
 
----
+______________________________________________________________________
 
 **Next Steps**: Configure SSH Access (Subtask 3)

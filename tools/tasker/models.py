@@ -9,6 +9,7 @@ from typing import List, Optional
 
 class TaskStatus(Enum):
     """Task status enumeration."""
+
     COMPLETE = "COMPLETE"
     READY = "READY"
     QUEUED = "QUEUED"
@@ -19,6 +20,7 @@ class TaskStatus(Enum):
 
 class Priority(Enum):
     """Task priority enumeration."""
+
     HIGH = "High"
     MEDIUM = "Medium"
     LOW = "Low"
@@ -27,6 +29,7 @@ class Priority(Enum):
 @dataclass
 class Task:
     """Represents a task or subtask in the task tracker."""
+
     id: str
     title: str
     status: TaskStatus
@@ -52,6 +55,7 @@ class Task:
 @dataclass
 class Milestone:
     """Represents a milestone containing multiple tasks."""
+
     id: str
     title: str
     status: TaskStatus
@@ -92,6 +96,7 @@ class Milestone:
 @dataclass
 class TaskTracker:
     """Represents the entire task tracker state."""
+
     milestones: List[Milestone] = field(default_factory=list)
     last_updated: Optional[str] = None
     current_phase: Optional[str] = None
@@ -104,9 +109,7 @@ class TaskTracker:
         considering dependencies and status.
         """
         # Find active (incomplete) milestones
-        active_milestones = [
-            m for m in self.milestones if not m.is_complete()
-        ]
+        active_milestones = [m for m in self.milestones if not m.is_complete()]
 
         if not active_milestones:
             return None

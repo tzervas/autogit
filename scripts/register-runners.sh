@@ -32,8 +32,8 @@ echo ""
 info "Getting runner registration token from GitLab..."
 
 RUNNER_TOKEN=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}" |
-    jq -r '.runners_token' 2>/dev/null)
+    "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}" \
+    | jq -r '.runners_token' 2> /dev/null)
 
 if [ -z "$RUNNER_TOKEN" ] || [ "$RUNNER_TOKEN" = "null" ]; then
     # Try to get the group or instance token
@@ -57,7 +57,7 @@ if [ -z "$RUNNER_TOKEN" ] || [ "$RUNNER_TOKEN" = "null" ]; then
         }" \
         "${GITLAB_URL}/api/v4/user/runners" 2>&1)
 
-    RUNNER_TOKEN=$(echo "$RUNNER_CREATE" | jq -r '.token' 2>/dev/null)
+    RUNNER_TOKEN=$(echo "$RUNNER_CREATE" | jq -r '.token' 2> /dev/null)
 fi
 
 if [ -z "$RUNNER_TOKEN" ] || [ "$RUNNER_TOKEN" = "null" ]; then
@@ -74,7 +74,7 @@ if [ -z "$RUNNER_TOKEN" ] || [ "$RUNNER_TOKEN" = "null" ]; then
         --network autogit-network \
         --restart unless-stopped \
         -v /run/user/1000/docker.sock:/var/run/docker.sock \
-        gitlab/gitlab-runner:latest" >/dev/null
+        gitlab/gitlab-runner:latest" > /dev/null
 
     success "Runner container created: ${RUNNER_NAME}"
 
@@ -114,9 +114,9 @@ fi
 # Verify runners are registered
 info "Checking registered runners..."
 RUNNERS=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/runners" 2>/dev/null || echo "[]")
+    "${GITLAB_URL}/api/v4/projects/${GITLAB_PROJECT_ID}/runners" 2> /dev/null || echo "[]")
 
-RUNNER_COUNT=$(echo "$RUNNERS" | jq '. | length' 2>/dev/null || echo "0")
+RUNNER_COUNT=$(echo "$RUNNERS" | jq '. | length' 2> /dev/null || echo "0")
 
 if [ "$RUNNER_COUNT" -gt 0 ]; then
     success "Found ${RUNNER_COUNT} registered runner(s):"

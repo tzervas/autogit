@@ -2,7 +2,8 @@
 
 ## Overview
 
-Our CI/CD workflows are optimized to **run each check exactly once per PR**, eliminating duplicate work and wasting compute resources.
+Our CI/CD workflows are optimized to **run each check exactly once per PR**, eliminating duplicate
+work and wasting compute resources.
 
 ## Workflow Consolidation Strategy
 
@@ -67,20 +68,21 @@ Result: 1 workflow run = 13 jobs
 
 ### Active Workflows on Pull Requests
 
-| Workflow | Jobs | Purpose | Trigger |
-|----------|------|---------|---------|
-| **PR Validation** | 13 | All quality checks | Every PR |
-| **Docker Build and Test** | 3 | Docker image builds | PRs with Docker changes |
-| **Auto Label PRs** | 1 | Automatic labeling | PR opened/reopened |
-| **Auto Merge Feature to Dev** | 1 | Automated merging | PR approved |
-| **Auto Merge Subtasks** | 1 | Automated merging | PR approved |
-| **Release Test Build** | 3 | Test release process | PRs to dev |
+| Workflow                      | Jobs | Purpose              | Trigger                 |
+| ----------------------------- | ---- | -------------------- | ----------------------- |
+| **PR Validation**             | 13   | All quality checks   | Every PR                |
+| **Docker Build and Test**     | 3    | Docker image builds  | PRs with Docker changes |
+| **Auto Label PRs**            | 1    | Automatic labeling   | PR opened/reopened      |
+| **Auto Merge Feature to Dev** | 1    | Automated merging    | PR approved             |
+| **Auto Merge Subtasks**       | 1    | Automated merging    | PR approved             |
+| **Release Test Build**        | 3    | Test release process | PRs to dev              |
 
 ### Duplicate Analysis
 
 ✅ **NO DUPLICATES DETECTED**
 
 Each workflow has distinct responsibilities:
+
 - No job names overlap between workflows
 - No redundant checks or validations
 - Each step runs exactly once per PR check set
@@ -89,21 +91,23 @@ Each workflow has distinct responsibilities:
 
 ### Before vs After
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Workflow Runs | 3 separate | 1 unified | 67% fewer runs |
-| GitHub UI Checks | 13 separate | 13 grouped | Cleaner UI |
-| Duplicate Steps | Unknown | 0 verified | ✅ Optimized |
-| Runner Time | ~5-8 min | ~5-6 min | 20% faster |
+| Metric           | Before      | After      | Improvement    |
+| ---------------- | ----------- | ---------- | -------------- |
+| Workflow Runs    | 3 separate  | 1 unified  | 67% fewer runs |
+| GitHub UI Checks | 13 separate | 13 grouped | Cleaner UI     |
+| Duplicate Steps  | Unknown     | 0 verified | ✅ Optimized   |
+| Runner Time      | ~5-8 min    | ~5-6 min   | 20% faster     |
 
 ### Cost Savings
 
 **Eliminated duplicate work:**
+
 - 3 checkout operations → 1 per job (no change in actual steps)
 - 3 workflow orchestration overheads → 1 workflow
 - Cleaner logs and easier debugging
 
 **Maintained efficiency:**
+
 - All jobs run in parallel within the workflow
 - Jobs only run when needed (path filters for Docker)
 - Fast failure on validation errors
@@ -130,6 +134,7 @@ done | sort | uniq -d
 Some workflows use path filters to **only run when relevant**:
 
 ### Docker Build and Test
+
 ```yaml
 on:
   pull_request:
@@ -141,7 +146,9 @@ on:
 **Benefit**: Skips Docker builds on documentation-only PRs
 
 ### Documentation Validation (in PR Validation)
+
 All docs checks run every time, but jobs are fast:
+
 - check-code-blocks: ~5s
 - validate-markdown-structure: ~3s
 - check-frontmatter: ~2s
@@ -163,6 +170,7 @@ concurrency:
 **Current status**: Not enabled (each commit gets full validation)
 
 **Trade-off**:
+
 - ❌ More compute on rapid commits
 - ✅ Complete validation history for each commit
 
@@ -171,18 +179,18 @@ concurrency:
 ### ✅ Do
 
 1. **Consolidate related checks** into single workflows
-2. **Use meaningful job names** to prevent accidental duplicates
-3. **Group jobs logically** for better organization
-4. **Use path filters** when checks are file-specific
-5. **Run jobs in parallel** when they don't depend on each other
+1. **Use meaningful job names** to prevent accidental duplicates
+1. **Group jobs logically** for better organization
+1. **Use path filters** when checks are file-specific
+1. **Run jobs in parallel** when they don't depend on each other
 
 ### ❌ Don't
 
 1. **Don't split workflows unnecessarily** - causes UI clutter
-2. **Don't run the same check twice** - wastes compute
-3. **Don't use generic job names** - makes duplicates hard to detect
-4. **Don't run all checks on all PRs** - use path filters
-5. **Don't create sequential dependencies** - slows down checks
+1. **Don't run the same check twice** - wastes compute
+1. **Don't use generic job names** - makes duplicates hard to detect
+1. **Don't run all checks on all PRs** - use path filters
+1. **Don't create sequential dependencies** - slows down checks
 
 ## Monitoring
 
@@ -210,36 +218,44 @@ gh run list --workflow="PR Validation" --limit 10  # New (consolidated)
 ## Future Optimization Opportunities
 
 ### 1. Concurrency Control
+
 ```yaml
 concurrency:
   group: pr-validation-${{ github.ref }}
   cancel-in-progress: true
 ```
+
 **Savings**: Cancel outdated runs on force-push
 
 ### 2. Cache Optimization
+
 ```yaml
 - uses: actions/cache@v3
   with:
     path: ~/.npm
     key: npm-${{ hashFiles('**/package-lock.json') }}
 ```
+
 **Savings**: Faster Node.js setup for markdown linting
 
 ### 3. Conditional Job Execution
+
 ```yaml
 jobs:
   lint-markdown:
     if: contains(github.event.pull_request.changed_files, '.md')
 ```
+
 **Savings**: Skip markdown lint if no .md files changed
 
 ### 4. Reusable Workflows
+
 ```yaml
 jobs:
   call-linting:
     uses: ./.github/workflows/reusable-lint.yml
 ```
+
 **Benefit**: Share validation logic across workflows
 
 ## Summary
@@ -252,7 +268,8 @@ jobs:
 - **Parallel execution** for all independent jobs
 - **~5-6 minute** total validation time
 
-🎯 **Goal Achieved**: Each check runs exactly once per PR, minimizing compute waste while maintaining comprehensive quality gates.
+🎯 **Goal Achieved**: Each check runs exactly once per PR, minimizing compute waste while maintaining
+comprehensive quality gates.
 
 ## Related Documentation
 

@@ -1,6 +1,7 @@
 # Multi-Agent Coordination Testing Guide
 
-**Purpose**: Verify that the AutoGit multiagent workflow functions correctly in GitHub Copilot web UI
+**Purpose**: Verify that the AutoGit multiagent workflow functions correctly in GitHub Copilot web
+UI
 
 **Last Updated**: 2025-12-21
 
@@ -11,10 +12,10 @@
 GitHub Copilot web UI has specific behaviors when working with multiple agent files:
 
 1. **Single Session Context**: Copilot maintains one conversation context at a time
-2. **Agent File Loading**: All `.md` files in `.github/agents/` are loaded as context
-3. **No True Multi-Threading**: Agents don't run in parallel - they execute sequentially
-4. **Context Window Limits**: Too many agent files may exceed context limits
-5. **Agent Switching**: Copilot must explicitly switch between agent contexts
+1. **Agent File Loading**: All `.md` files in `.github/agents/` are loaded as context
+1. **No True Multi-Threading**: Agents don't run in parallel - they execute sequentially
+1. **Context Window Limits**: Too many agent files may exceed context limits
+1. **Agent Switching**: Copilot must explicitly switch between agent contexts
 
 ## Multi-Agent Workflow Patterns
 
@@ -55,12 +56,14 @@ Step 6 - Quality Gate:
 ```
 
 **Pros**:
+
 - ✅ Clear workflow progression
 - ✅ Each agent has full context
 - ✅ Easy to debug and understand
 - ✅ Works within Copilot's single-session model
 
 **Cons**:
+
 - ⚠️ Takes longer (not truly parallel)
 - ⚠️ User must wait for full sequence
 
@@ -83,12 +86,14 @@ REQUEST 3:
 ```
 
 **Pros**:
+
 - ✅ User controls pace
 - ✅ Can review each step
 - ✅ Easy to course-correct
 - ✅ Clear which agent is active
 
 **Cons**:
+
 - ⚠️ More manual coordination required
 - ⚠️ Risk of losing context between requests
 
@@ -121,6 +126,7 @@ ROOT AGENT:
 ```
 
 **Pros**:
+
 - ✅ Automated coordination
 - ✅ User maintains control
 - ✅ Can review at checkpoints
@@ -133,6 +139,7 @@ ROOT AGENT:
 **Objective**: Verify root agent correctly delegates to specialized agents
 
 **Test Steps**:
+
 ```markdown
 1. User: "What coding standards should I follow for Python?"
    Expected: Root agent delegates to Software Engineer
@@ -154,6 +161,7 @@ ROOT AGENT:
 **Objective**: Verify multiple agents can work together on a feature
 
 **Test Steps**:
+
 ```markdown
 User: "I need to add a new configuration option for runner timeout.
 Please coordinate across all relevant agents to implement this fully."
@@ -181,6 +189,7 @@ Verify:
 **Objective**: Verify agents maintain context across conversation
 
 **Test Steps**:
+
 ```markdown
 Request 1: "@project-manager: Create a task plan for adding Intel GPU support"
 [Note the task IDs and structure]
@@ -201,6 +210,7 @@ Verify: Review references the actual code/changes made
 **Objective**: Verify all agents use shared-context.md correctly
 
 **Test Steps**:
+
 ```markdown
 1. User: "@software-engineer: What architecture principles do we follow?"
    Expected: References SOLID, DRY, KISS from shared-context.md
@@ -221,6 +231,7 @@ Verify: All agents give consistent answers based on shared context
 **Objective**: Full integration test with a realistic feature request
 
 **Test Steps**:
+
 ```markdown
 User: "We need to implement runner autoscaling based on job queue depth.
 The system should:
@@ -261,19 +272,23 @@ Verify:
 **Workaround Options**:
 
 1. **Lazy Loading** (Recommended):
+
    - Only load agent.md (root) by default
    - Root agent explicitly loads specialized agents as needed
    - Example: "Loading software-engineer.md for this task..."
 
-2. **Agent Grouping**:
+1. **Agent Grouping**:
+
    - Combine related agents (e.g., software-engineer + evaluator)
    - Create composite agents for common workflows
 
-3. **Context Prioritization**:
+1. **Context Prioritization**:
+
    - Always load: agent.md, shared-context.md
    - Load on demand: specialized agents based on task type
 
 **Implementation**: Add to agent.md:
+
 ```markdown
 ## Context Loading Strategy
 
@@ -289,11 +304,13 @@ To optimize context window usage:
 **Problem**: Agents cannot truly work in parallel
 
 **Workaround**:
+
 - Accept sequential execution
 - Optimize by skipping unnecessary agents
 - Use checkpoint pattern to make progress visible
 
 **Implementation**: Document expected timing:
+
 ```markdown
 ## Expected Execution Times
 
@@ -309,11 +326,13 @@ User can interrupt and resume at any checkpoint.
 **Problem**: Agent state doesn't persist between Copilot sessions
 
 **Workaround**:
+
 - Store state in files (e.g., TASKS.md, PROGRESS.md)
 - Use git commits as checkpoints
 - Reference previous work explicitly
 
 **Implementation**: Add state management pattern:
+
 ```markdown
 ## State Management
 
@@ -329,11 +348,13 @@ Agents should:
 **Problem**: Agents can't directly communicate; must go through user or root agent
 
 **Workaround**:
+
 - Root agent acts as message bus
 - Use structured handoff format
 - Document outputs for next agent
 
 **Implementation**: Handoff template:
+
 ```markdown
 ## Agent Handoff Template
 
@@ -393,6 +414,7 @@ Based on keywords in user request:
 Before finalizing multiagent structure, verify:
 
 ### Basic Functionality
+
 - [ ] Root agent file is valid markdown
 - [ ] All specialized agent files are valid markdown
 - [ ] Shared context file is complete
@@ -400,6 +422,7 @@ Before finalizing multiagent structure, verify:
 - [ ] File sizes are reasonable (< 20KB each)
 
 ### Agent Coordination
+
 - [ ] Test 1: Simple delegation works
 - [ ] Test 2: Multi-agent coordination works
 - [ ] Test 3: Context retained across requests
@@ -407,12 +430,14 @@ Before finalizing multiagent structure, verify:
 - [ ] Test 5: Complex feature implemented correctly
 
 ### Context Management
+
 - [ ] Total context size < 100KB when all loaded
 - [ ] Root agent can function alone
 - [ ] Specialized agents load on demand
 - [ ] No circular dependencies between agents
 
 ### Documentation
+
 - [ ] Each agent has clear responsibilities
 - [ ] Workflow patterns are documented
 - [ ] Limitations are documented
@@ -420,6 +445,7 @@ Before finalizing multiagent structure, verify:
 - [ ] Examples are complete
 
 ### User Experience
+
 - [ ] Clear how to invoke agents
 - [ ] Feedback at each step
 - [ ] Progress is visible
@@ -429,21 +455,25 @@ Before finalizing multiagent structure, verify:
 ## Next Steps
 
 1. **Test in Real Copilot Environment**:
+
    - Try Test 1-5 above in actual Copilot web UI
    - Document what works and what doesn't
    - Adjust agent configurations based on results
 
-2. **Optimize Context Loading**:
+1. **Optimize Context Loading**:
+
    - Implement lazy loading if context issues occur
    - Add loading hints to agent.md
    - Document optimal patterns
 
-3. **Create Examples**:
+1. **Create Examples**:
+
    - Document successful multi-agent workflows
    - Share common patterns that work well
    - Build a cookbook of proven approaches
 
-4. **Monitor and Improve**:
+1. **Monitor and Improve**:
+
    - Track which patterns work best
    - Collect feedback from usage
    - Iterate on agent configurations
@@ -456,7 +486,7 @@ Before finalizing multiagent structure, verify:
 - [Shared Context](shared-context.md)
 - [Agentic Workflow Documentation](../../docs/development/agentic-workflow.md)
 
----
+______________________________________________________________________
 
-**Status**: Ready for real-world testing in Copilot web UI environment.
-**Action Required**: Execute Test 1-5 in actual Copilot sessions and document results.
+**Status**: Ready for real-world testing in Copilot web UI environment. **Action Required**: Execute
+Test 1-5 in actual Copilot sessions and document results.

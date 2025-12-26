@@ -1,5 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+from app.main import app, get_db
+from app.models import Base
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -9,8 +12,6 @@ from sqlalchemy.pool import StaticPool
 # For now, we assume the environment is set up correctly or we use relative imports if possible
 # However, the previous run showed it could find app.main but failed on DB tables.
 
-from app.main import app, get_db
-from app.models import Base
 
 # Use a single connection for the in-memory database to keep it alive
 engine = create_engine(
@@ -20,6 +21,7 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 def override_get_db():
     db = TestingSessionLocal()
     try:
@@ -27,7 +29,9 @@ def override_get_db():
     finally:
         db.close()
 
+
 app.dependency_overrides[get_db] = override_get_db
+
 
 class TestRunnerCoordinatorIntegration(unittest.TestCase):
     def setUp(self):
@@ -42,7 +46,7 @@ class TestRunnerCoordinatorIntegration(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["status"], "healthy")
 
-    @patch('app.main.driver')
+    @patch("app.main.driver")
     def test_job_webhook_flow(self, mock_driver):
         # 1. Send job webhook
         payload = {
@@ -51,7 +55,7 @@ class TestRunnerCoordinatorIntegration(unittest.TestCase):
             "ref": "main",
             "checkout_sha": "abc123sha",
             "user_name": "testuser",
-            "project_name": "test-project"
+            "project_name": "test-project",
         }
         # Ensure we use the same engine for the app and the test
         response = self.client.post("/webhook/job", json=payload)
@@ -69,6 +73,7 @@ class TestRunnerCoordinatorIntegration(unittest.TestCase):
         payload = {"invalid": "data"}
         response = self.client.post("/webhook/job", json=payload)
         self.assertEqual(response.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,11 +1,6 @@
 services:
   gitlab:
-    image:        # Performance optimizations - RIGHT-SIZED
-        gitlab_rails['db_pool'] = 30
-        unicorn['worker_processes'] = 4
-        sidekiq['concurrency'] = 12
-        puma['worker_processes'] = 4
-        puma['max_threads'] = 8b/gitlab-ce:latest
+    image: gitlab/gitlab-ce:18.7.0-ce.0
     container_name: autogit-git-server
     restart: unless-stopped
     hostname: 'gitlab.vectorweight.com'

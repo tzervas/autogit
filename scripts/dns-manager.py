@@ -42,15 +42,15 @@ class DNSRecord:
 
 class DNSProvider(ABC):
     """Abstract base class for DNS providers"""
-    
+
     @abstractmethod
     def create_record(self, record: DNSRecord) -> bool:
         pass
-    
+
     @abstractmethod
     def delete_record(self, name: str, type: str) -> bool:
         pass
-    
+
     @abstractmethod
     def list_records(self) -> List[DNSRecord]:
         pass
@@ -58,7 +58,7 @@ class DNSProvider(ABC):
 
 class CloudflareProvider(DNSProvider):
     """Cloudflare DNS provider"""
-    
+
     def __init__(self, zone_id: str, api_token: str):
         self.zone_id = zone_id
         self.api_token = api_token
@@ -67,7 +67,7 @@ class CloudflareProvider(DNSProvider):
             "Authorization": f"Bearer {api_token}",
             "Content-Type": "application/json"
         }
-    
+
     def create_record(self, record: DNSRecord) -> bool:
         data = {
             "type": record.type,
@@ -76,10 +76,10 @@ class CloudflareProvider(DNSProvider):
             "ttl": record.ttl,
             "proxied": record.proxied
         }
-        
+
         response = requests.post(self.base_url, headers=self.headers, json=data)
         result = response.json()
-        
+
         if result.get("success"):
             print(f"✅ Created: {record.name} → {record.content}")
             return True
@@ -91,29 +91,29 @@ class CloudflareProvider(DNSProvider):
                 return True
             print(f"❌ Failed: {record.name} - {errors}")
             return False
-    
+
     def delete_record(self, name: str, type: str) -> bool:
         # First find the record
         params = {"name": name, "type": type}
         response = requests.get(self.base_url, headers=self.headers, params=params)
         result = response.json()
-        
+
         if not result.get("success") or not result.get("result"):
             print(f"⏭️  Not found: {name}")
             return True
-        
+
         record_id = result["result"][0]["id"]
         response = requests.delete(f"{self.base_url}/{record_id}", headers=self.headers)
-        
+
         if response.json().get("success"):
             print(f"✅ Deleted: {name}")
             return True
         return False
-    
+
     def list_records(self) -> List[DNSRecord]:
         response = requests.get(self.base_url, headers=self.headers)
         result = response.json()
-        
+
         records = []
         for r in result.get("result", []):
             records.append(DNSRecord(
@@ -128,28 +128,28 @@ class CloudflareProvider(DNSProvider):
 
 class ManualProvider(DNSProvider):
     """Manual provider - outputs required DNS records"""
-    
+
     def __init__(self, domain: str):
         self.domain = domain
         self.records: List[DNSRecord] = []
-    
+
     def create_record(self, record: DNSRecord) -> bool:
         self.records.append(record)
         return True
-    
+
     def delete_record(self, name: str, type: str) -> bool:
         return True
-    
+
     def list_records(self) -> List[DNSRecord]:
         return self.records
-    
+
     def output_instructions(self, target_ip: str):
         """Output manual DNS configuration instructions"""
         print("\n" + "=" * 70)
         print("DNS RECORDS REQUIRED")
         print("=" * 70)
         print(f"\nAdd these records to your DNS provider for {self.domain}:\n")
-        
+
         print("Option 1: Wildcard (recommended)")
         print("-" * 40)
         print(f"  Type: A")
@@ -157,14 +157,14 @@ class ManualProvider(DNSProvider):
         print(f"  Value: {target_ip}")
         print(f"  TTL: 300")
         print()
-        
+
         print("Option 2: Individual records")
         print("-" * 40)
         subdomains = ["gitlab", "grafana", "traefik", "api", "loki", "prometheus", "search"]
         for sub in subdomains:
             print(f"  {sub}.{self.domain}  A  {target_ip}  TTL:300")
         print()
-        
+
         print("For local development (add to /etc/hosts):")
         print("-" * 40)
         for sub in subdomains:
@@ -181,7 +181,7 @@ def load_config() -> dict:
         "CF_ZONE_ID": "",
         "DNS_PROVIDER": "manual"
     }
-    
+
     # Load from .env if exists
     env_files = [".env", ".env.platform"]
     for env_file in env_files:
@@ -192,12 +192,12 @@ def load_config() -> dict:
                     if line and not line.startswith("#") and "=" in line:
                         key, value = line.split("=", 1)
                         config[key.strip()] = value.strip().strip('"\'')
-    
+
     # Override from environment
     for key in config:
         if os.environ.get(key):
             config[key] = os.environ[key]
-    
+
     return config
 
 
@@ -213,7 +213,7 @@ def get_required_records(domain: str, target_ip: str) -> List[DNSRecord]:
         "search",      # Meilisearch
         "tempo",       # Tracing
     ]
-    
+
     records = []
     for sub in subdomains:
         records.append(DNSRecord(
@@ -223,57 +223,57 @@ def get_required_records(domain: str, target_ip: str) -> List[DNSRecord]:
             ttl=300,
             proxied=False
         ))
-    
+
     return records
 
 
 def main():
     parser = argparse.ArgumentParser(description="DNS Record Manager for AutoGit Platform")
-    parser.add_argument("--provider", choices=["cloudflare", "route53", "manual"], 
+    parser.add_argument("--provider", choices=["cloudflare", "route53", "manual"],
                        default="manual", help="DNS provider")
     parser.add_argument("--action", choices=["create", "delete", "list", "verify"],
                        default="list", help="Action to perform")
     parser.add_argument("--target-ip", help="Target IP address for DNS records")
     parser.add_argument("--domain", help="Base domain")
-    
+
     args = parser.parse_args()
     config = load_config()
-    
+
     domain = args.domain or config.get("BASE_DOMAIN", "vectorweight.com")
     target_ip = args.target_ip or config.get("TARGET_IP", "192.168.1.170")
-    
+
     print(f"🌐 DNS Manager for {domain}")
     print(f"📍 Target IP: {target_ip}")
     print()
-    
+
     # Initialize provider
     if args.provider == "cloudflare":
         token = config.get("CF_DNS_API_TOKEN")
         zone_id = config.get("CF_ZONE_ID")
-        
+
         if not token or not zone_id:
             print("❌ Cloudflare requires CF_DNS_API_TOKEN and CF_ZONE_ID")
             print("   Set these in .env or as environment variables")
             sys.exit(1)
-        
+
         provider = CloudflareProvider(zone_id, token)
     else:
         provider = ManualProvider(domain)
-    
+
     # Get required records
     records = get_required_records(domain, target_ip)
-    
+
     # Perform action
     if args.action == "create":
         print(f"📝 Creating {len(records)} DNS records...")
         for record in records:
             provider.create_record(record)
-    
+
     elif args.action == "delete":
         print(f"🗑️  Deleting DNS records...")
         for record in records:
             provider.delete_record(record.name, record.type)
-    
+
     elif args.action == "list":
         if isinstance(provider, ManualProvider):
             provider.records = records
@@ -283,7 +283,7 @@ def main():
             print(f"📋 Found {len(existing)} records:")
             for r in existing:
                 print(f"   {r.type:5} {r.name:40} → {r.content}")
-    
+
     elif args.action == "verify":
         print("🔍 Verifying DNS resolution...")
         import socket

@@ -56,7 +56,7 @@ These are **point-in-time status documents** that should be archived:
 ```
 docs/status/
 ├── CHANGELOG.md                    → Move to docs/ (active)
-├── ROADMAP.md                      → Move to docs/ (active)  
+├── ROADMAP.md                      → Move to docs/ (active)
 ├── AUTHENTICATION_SETUP_PROGRESS.md → Archive
 ├── COMPLETE_SUMMARY.md             → Archive
 ├── CURRENT_STATE_SUMMARY.md        → Archive
@@ -104,7 +104,7 @@ Current structure is flat with no categorization:
 scripts/
 ├── setup.sh                      # 499 bytes - minimal
 ├── first-time-setup.sh           # 11KB - comprehensive
-├── first-time-setup-complete.sh  # 9KB - comprehensive  
+├── first-time-setup-complete.sh  # 9KB - comprehensive
 ├── first-time-setup.sh.bak       # Backup file!
 ```
 

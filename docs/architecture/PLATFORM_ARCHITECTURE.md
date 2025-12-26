@@ -124,7 +124,7 @@ api.vectorweight.com      → 192.168.1.170
 class CloudflareDNSProvider(DNSProvider):
     def create_record(self, name: str, type: str, content: str) -> DNSRecord:
         ...
-    
+
     def ensure_wildcard(self, domain: str, target: str) -> None:
         """Create *.domain pointing to target"""
         ...
@@ -202,13 +202,13 @@ http:
 class PromptInjectionFilter:
     """
     Multi-stage filter for detecting and quarantining potential prompt injections.
-    
+
     Stage 1: Unicode normalization & hidden char detection
     Stage 2: Pattern matching (known injection patterns)
     Stage 3: Structural analysis (unexpected instruction blocks)
     Stage 4: ML-based classification (optional, for high-security)
     """
-    
+
     def analyze(self, text: str) -> FilterResult:
         """
         Returns:
@@ -218,7 +218,7 @@ class PromptInjectionFilter:
         - detected_patterns: List of what was found
         """
         ...
-    
+
     def quarantine(self, fragment: str, metadata: dict) -> str:
         """Store suspicious content for analysis"""
         ...
@@ -284,7 +284,7 @@ class LogEnricher:
     - Correlation IDs
     - Risk scoring
     """
-    
+
     async def enrich(self, log_entry: LogEntry) -> EnrichedLog:
         return EnrichedLog(
             original=log_entry,
@@ -304,10 +304,10 @@ class LogEnricher:
 # autogit/api/providers/base.py
 class Provider(ABC):
     """Base class for all service providers"""
-    
+
     @abstractmethod
     async def health(self) -> HealthStatus: ...
-    
+
     @abstractmethod
     async def configure(self, config: ProviderConfig) -> None: ...
 
@@ -315,10 +315,10 @@ class Provider(ABC):
 # autogit/api/providers/dns/cloudflare.py
 class CloudflareProvider(DNSProvider):
     """Cloudflare DNS provider implementation"""
-    
+
     provider_type = "dns"
     provider_name = "cloudflare"
-    
+
     async def create_record(self, record: DNSRecord) -> DNSRecord:
         ...
 
@@ -326,7 +326,7 @@ class CloudflareProvider(DNSProvider):
 # autogit/api/connectors/gitlab.py
 class GitLabConnector(Connector):
     """Connector for GitLab operations"""
-    
+
     async def mirror_repository(self, source: str, dest: str) -> MirrorResult:
         ...
 ```
@@ -349,7 +349,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceList'
-  
+
   /api/v1/services/{service}/deploy:
     post:
       summary: Deploy or update a service
@@ -364,7 +364,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DeployRequest'
-  
+
   /api/v1/dns/records:
     post:
       summary: Create DNS record
@@ -409,7 +409,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Service'
-    
+
     Service:
       type: object
       properties:
@@ -438,14 +438,14 @@ components:
 # autogit/extensions/base.py
 class Extension(ABC):
     """Base class for AutoGit extensions"""
-    
+
     name: str
     version: str
     dependencies: List[str] = []
-    
+
     @abstractmethod
     async def initialize(self, ctx: ExtensionContext) -> None: ...
-    
+
     @abstractmethod
     async def shutdown(self) -> None: ...
 
@@ -455,7 +455,7 @@ class Extension(ABC):
 class CustomDNSExtension(Extension):
     name = "custom-dns"
     version = "1.0.0"
-    
+
     async def initialize(self, ctx: ExtensionContext) -> None:
         ctx.register_provider(
             provider_type="dns",
@@ -487,7 +487,7 @@ class CustomDNSExtension(Extension):
 # autogit/iac/generator.py
 class IaCGenerator:
     """Generate Infrastructure as Code from running configuration"""
-    
+
     async def capture(self) -> PlatformState:
         """Capture current platform state"""
         return PlatformState(
@@ -496,7 +496,7 @@ class IaCGenerator:
             certificates=await self.get_certificates(),
             volumes=await self.get_volumes(),
         )
-    
+
     def generate(self, state: PlatformState, format: str) -> str:
         """Generate IaC in specified format"""
         generator = self.generators[format]

@@ -90,7 +90,7 @@ store_ghcr_token() {
         echo ""
 
         # Read token securely (no echo)
-        read -s -p "Paste your GitHub PAT (ghp_*): " token
+        read -r -s -p "Paste your GitHub PAT (ghp_*): " token
         echo ""
     fi
 
@@ -105,8 +105,11 @@ store_ghcr_token() {
     local response
     response=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer $token" \
         "https://api.github.com/user" 2>/dev/null)
-    local http_code=$(echo "$response" | tail -1)
-    local body=$(echo "$response" | head -n -1)
+    local http_code
+    local body
+    local username
+    http_code=$(echo "$response" | tail -1)
+    body=$(echo "$response" | head -n -1)
 
     if [[ $http_code != "200" ]]; then
         log_error "Token validation failed (HTTP $http_code)"
@@ -114,7 +117,7 @@ store_ghcr_token() {
         return 1
     fi
 
-    local username=$(echo "$body" | jq -r '.login')
+    username=$(echo "$body" | jq -r '.login')
     log_success "Token valid for user: $username"
 
     # Store in keyring
@@ -195,7 +198,7 @@ store_gitlab_token() {
         echo "============================================================"
         echo ""
 
-        read -s -p "Enter GitLab API token (glpat-*): " token
+        read -r -s -p "Enter GitLab API token (glpat-*): " token
         echo ""
     fi
 
@@ -238,7 +241,8 @@ update_gitlab_variable() {
         --form "protected=true" \
         --form "masked=true")
 
-    local http_code=$(echo "$response" | tail -1)
+    local http_code
+    http_code=$(echo "$response" | tail -1)
 
     if [[ $http_code == "200" ]]; then
         log_success "GHCR_TOKEN updated in GitLab"
@@ -273,7 +277,8 @@ list_credentials() {
 
     # Check GHCR token
     if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &>/dev/null; then
-        local username=$(get_ghcr_username)
+        local username
+        username=$(get_ghcr_username)
         echo "  ✅ GHCR PAT (user: $username)"
     else
         echo "  ❌ GHCR PAT (not stored)"
@@ -302,7 +307,7 @@ setup_wizard() {
     # Step 1: GHCR Token
     log_info "Step 1: GitHub Container Registry (GHCR) Token"
     if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &>/dev/null; then
-        read -p "GHCR token already exists. Replace? [y/N]: " replace
+        read -r -p "GHCR token already exists. Replace? [y/N]: " replace
         if [[ $replace =~ ^[Yy]$ ]]; then
             store_ghcr_token || return 1
         fi
@@ -321,7 +326,7 @@ setup_wizard() {
     # Step 3: GitLab Token
     log_info "Step 3: GitLab API Token"
     if ! secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" &>/dev/null; then
-        read -p "Store GitLab API token? [Y/n]: " store_gl
+        read -r -p "Store GitLab API token? [Y/n]: " store_gl
         if [[ ! $store_gl =~ ^[Nn]$ ]]; then
             store_gitlab_token
         fi
@@ -333,7 +338,7 @@ setup_wizard() {
 
     # Step 4: Update GitLab
     log_info "Step 4: Update GitLab CI/CD Variables"
-    read -p "Push GHCR token to GitLab CI/CD? [Y/n]: " push_gl
+    read -r -p "Push GHCR token to GitLab CI/CD? [Y/n]: " push_gl
     if [[ ! $push_gl =~ ^[Nn]$ ]]; then
         update_gitlab_variable || return 1
     fi
@@ -347,7 +352,7 @@ setup_wizard() {
 # Delete stored credentials
 delete_credentials() {
     log_warn "This will delete all AutoGit credentials from the keyring"
-    read -p "Are you sure? [y/N]: " confirm
+    read -r -p "Are you sure? [y/N]: " confirm
 
     if [[ $confirm =~ ^[Yy]$ ]]; then
         secret-tool clear service "$KEYRING_SERVICE" type "ghcr-pat" 2>/dev/null || true

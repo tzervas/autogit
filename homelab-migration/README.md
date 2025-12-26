@@ -1,6 +1,15 @@
 # Homelab GitLab Configuration
 
+**Docker Compose:** Use `docker-compose.homelab.yml` (optimized for homelab deployment)
+
 This directory contains scripts to configure and manage a self-hosted GitLab instance programmatically.
+
+**Key Features:**
+- PostgreSQL performance tuning (fixes DB initialization hanging)
+- HTTPS/SSL configuration with custom domains
+- Automated backup/restore tooling
+- Python-based GitLab API configuration
+- Comprehensive deployment monitoring
 
 ## Quick Start - Fresh Deployment
 

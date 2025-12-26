@@ -242,9 +242,9 @@ tests/
 ### Documentation Hierarchy
 
 1. **Root README.md** - Project overview and quick start
-2. **docs/INDEX.md** - Complete documentation map
-3. **Category READMEs** - Overview of each category
-4. **Specific docs** - Detailed documentation
+1. **docs/INDEX.md** - Complete documentation map
+1. **Category READMEs** - Overview of each category
+1. **Specific docs** - Detailed documentation
 
 ### Cross-References
 
@@ -321,23 +321,24 @@ See `.gitignore` for complete list.
 ### Adding a New Component
 
 1. Create directory in appropriate location
-2. Add `README.md` with component overview
-3. Implement component following module structure
-4. Add tests in parallel structure
-5. Update `docs/INDEX.md` with new docs
-6. Create ADR if architectural change
+1. Add `README.md` with component overview
+1. Implement component following module structure
+1. Add tests in parallel structure
+1. Update `docs/INDEX.md` with new docs
+1. Create ADR if architectural change
 
 ### Adding Documentation
 
 1. Determine category (installation, development, etc.)
-2. Create markdown file in appropriate directory
-3. Follow documentation templates
-4. Update `docs/INDEX.md`
-5. Add cross-references to related docs
+1. Create markdown file in appropriate directory
+1. Follow documentation templates
+1. Update `docs/INDEX.md`
+1. Add cross-references to related docs
 
 ### Refactoring
 
 When refactoring:
+
 - Maintain existing structure where possible
 - Update imports if moving files
 - Update documentation references

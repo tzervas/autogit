@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .parser import TaskTrackerParser
-from .models import TaskTracker, Task, Milestone, TaskStatus
 from .executor import TaskExecutor
+from .models import Milestone, Task, TaskStatus, TaskTracker
+from .parser import TaskTrackerParser
 
 
 class TaskerCLI:
@@ -132,7 +132,9 @@ class TaskerCLI:
             print(f"   Priority: {milestone.priority.value}")
             if milestone.target:
                 print(f"   Target: {milestone.target}")
-            print(f"   Progress: {progress:.0f}% ({sum(1 for t in milestone.subtasks if t.is_complete())}/{len(milestone.subtasks)} subtasks)")
+            print(
+                f"   Progress: {progress:.0f}% ({sum(1 for t in milestone.subtasks if t.is_complete())}/{len(milestone.subtasks)} subtasks)"
+            )
 
             if args.verbose and milestone.subtasks:
                 print(f"   Subtasks:")
@@ -266,7 +268,7 @@ class TaskerCLI:
             create_branch=not args.no_branch,
             generate_summary=not args.no_summary,
             base_branch=args.base_branch,
-            interactive=args.interactive
+            interactive=args.interactive,
         )
 
         return 0 if success else 1
@@ -297,71 +299,51 @@ Examples:
   %(prog)s list -v           # List with detailed subtask information
   %(prog)s status milestone-2  # Show status of a specific milestone
   %(prog)s status milestone-2-subtask-1  # Show status of a specific task
-            """
+            """,
         )
 
-        parser.add_argument(
-            "--tracker",
-            help="Path to TASK_TRACKER.md file (default: auto-detect)"
-        )
+        parser.add_argument("--tracker", help="Path to TASK_TRACKER.md file (default: auto-detect)")
 
         subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
         # next command
-        next_parser = subparsers.add_parser(
-            "next",
-            help="Show the next actionable work item"
-        )
+        next_parser = subparsers.add_parser("next", help="Show the next actionable work item")
 
         # list command
-        list_parser = subparsers.add_parser(
-            "list",
-            help="List all milestones and tasks"
-        )
+        list_parser = subparsers.add_parser("list", help="List all milestones and tasks")
         list_parser.add_argument(
-            "-v", "--verbose",
+            "-v",
+            "--verbose",
             action="store_true",
-            help="Show detailed information including subtasks"
+            help="Show detailed information including subtasks",
         )
 
         # status command
         status_parser = subparsers.add_parser(
-            "status",
-            help="Show status of a specific task or milestone"
+            "status", help="Show status of a specific task or milestone"
         )
-        status_parser.add_argument(
-            "id",
-            help="ID of the milestone or task"
-        )
+        status_parser.add_argument("id", help="ID of the milestone or task")
 
         # execute command
         execute_parser = subparsers.add_parser(
-            "execute",
-            help="Execute the workflow for a task (create branch, generate summary)"
+            "execute", help="Execute the workflow for a task (create branch, generate summary)"
         )
         execute_parser.add_argument(
-            "--task-id",
-            help="ID of the task to execute (default: next actionable task)"
+            "--task-id", help="ID of the task to execute (default: next actionable task)"
         )
         execute_parser.add_argument(
-            "--no-branch",
-            action="store_true",
-            help="Don't create a git branch"
+            "--no-branch", action="store_true", help="Don't create a git branch"
         )
         execute_parser.add_argument(
-            "--no-summary",
-            action="store_true",
-            help="Don't generate a task summary file"
+            "--no-summary", action="store_true", help="Don't generate a task summary file"
         )
         execute_parser.add_argument(
-            "--base-branch",
-            default="dev",
-            help="Base branch to branch from (default: dev)"
+            "--base-branch", default="dev", help="Base branch to branch from (default: dev)"
         )
         execute_parser.add_argument(
             "--interactive",
             action="store_true",
-            help="Enable interactive prompts (default: non-interactive)"
+            help="Enable interactive prompts (default: non-interactive)",
         )
 
         args = parser.parse_args()

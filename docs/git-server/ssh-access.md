@@ -1,12 +1,12 @@
 # SSH Access Configuration Guide
 
-**Component**: Git Server (GitLab CE) - SSH Access
-**Status**: Implementation
-**Last Updated**: 2025-12-23
+**Component**: Git Server (GitLab CE) - SSH Access **Status**: Implementation **Last Updated**:
+2025-12-23
 
 ## Overview
 
-AutoGit uses SSH for secure Git operations (clone, push, pull). To avoid conflicts with the host's SSH service, AutoGit's Git Server listens on port **2222**.
+AutoGit uses SSH for secure Git operations (clone, push, pull). To avoid conflicts with the host's
+SSH service, AutoGit's Git Server listens on port **2222**.
 
 ## 1. Generate an SSH Key
 
@@ -19,14 +19,16 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ## 2. Add SSH Key to AutoGit
 
 ### Option 1: Via Web UI (Recommended)
+
 1. Log in to AutoGit: http://localhost:3000
-2. Click on your avatar in the top-right corner and select **Settings**.
-3. In the left sidebar, select **SSH Keys**.
-4. Click **Add new key**.
-5. Paste your **public** key (usually `~/.ssh/id_ed25519.pub`) into the **Key** field.
-6. Give it a descriptive title and click **Add key**.
+1. Click on your avatar in the top-right corner and select **Settings**.
+1. In the left sidebar, select **SSH Keys**.
+1. Click **Add new key**.
+1. Paste your **public** key (usually `~/.ssh/id_ed25519.pub`) into the **Key** field.
+1. Give it a descriptive title and click **Add key**.
 
 ### Option 2: Via Management Script (Admin only)
+
 Admins can add keys for any user using the management script:
 
 ```bash
@@ -35,7 +37,8 @@ Admins can add keys for any user using the management script:
 
 ## 3. Configure Local SSH Client
 
-Since AutoGit uses port **2222**, you should configure your local SSH client to automatically use the correct port and key for the AutoGit host.
+Since AutoGit uses port **2222**, you should configure your local SSH client to automatically use
+the correct port and key for the AutoGit host.
 
 Add the following to your `~/.ssh/config` file:
 
@@ -55,8 +58,7 @@ Test your connection to the Git Server:
 ssh -T git@localhost -p 2222
 ```
 
-If successful, you should see a welcome message:
-`Welcome to GitLab, @username!`
+If successful, you should see a welcome message: `Welcome to GitLab, @username!`
 
 ## 5. Cloning Repositories
 
@@ -73,20 +75,24 @@ git clone ssh://git@localhost:2222/group/project.git
 ## Troubleshooting
 
 ### Host Key Verification Failed
-If you see an error about host key verification, it might be because the container was recreated and generated new host keys.
 
-**Solution**:
-Remove the old entry from your `known_hosts` file:
+If you see an error about host key verification, it might be because the container was recreated and
+generated new host keys.
+
+**Solution**: Remove the old entry from your `known_hosts` file:
+
 ```bash
 ssh-keygen -f "~/.ssh/known_hosts" -R "[localhost]:2222"
 ```
 
 ### Permission Denied (publickey)
+
 1. Ensure your public key is added to your GitLab profile.
-2. Ensure your private key is loaded in your SSH agent: `ssh-add ~/.ssh/id_ed25519`.
-3. Verify you are using the correct port (2222).
-4. Check that the `User` is `git`.
+1. Ensure your private key is loaded in your SSH agent: `ssh-add ~/.ssh/id_ed25519`.
+1. Verify you are using the correct port (2222).
+1. Check that the `User` is `git`.
 
 ### Connection Refused
+
 1. Ensure the `git-server` container is running: `docker compose ps`.
-2. Check if port 2222 is correctly mapped in `docker-compose.yml`.
+1. Check if port 2222 is correctly mapped in `docker-compose.yml`.

@@ -26,68 +26,68 @@ cd "$SCRIPT_DIR"
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
 case "${1:-help}" in
-dev)
-    log "Starting dev container..."
-    docker compose up -d rust-dev
-    log "Dev container ready. Run: ./build.sh shell"
-    ;;
+    dev)
+        log "Starting dev container..."
+        docker compose up -d rust-dev
+        log "Dev container ready. Run: ./build.sh shell"
+        ;;
 
-shell)
-    log "Opening shell in dev container..."
-    docker compose exec rust-dev bash
-    ;;
+    shell)
+        log "Opening shell in dev container..."
+        docker compose exec rust-dev bash
+        ;;
 
-build)
-    log "Building release binary..."
-    docker compose run --rm build
-    log "Binary at: target/release/bootstrap"
-    ;;
+    build)
+        log "Building release binary..."
+        docker compose run --rm build
+        log "Binary at: target/release/bootstrap"
+        ;;
 
-test)
-    log "Running tests..."
-    docker compose run --rm test
-    ;;
+    test)
+        log "Running tests..."
+        docker compose run --rm test
+        ;;
 
-watch)
-    log "Starting watch mode (Ctrl+C to stop)..."
-    docker compose run --rm watch
-    ;;
+    watch)
+        log "Starting watch mode (Ctrl+C to stop)..."
+        docker compose run --rm watch
+        ;;
 
-check)
-    log "Running cargo check..."
-    docker compose exec rust-dev cargo check
-    ;;
+    check)
+        log "Running cargo check..."
+        docker compose exec rust-dev cargo check
+        ;;
 
-clean)
-    log "Cleaning build artifacts..."
-    docker compose exec rust-dev cargo clean
-    ;;
+    clean)
+        log "Cleaning build artifacts..."
+        docker compose exec rust-dev cargo clean
+        ;;
 
-purge)
-    log "Purging all caches (will trigger full rebuild)..."
-    docker compose down -v
-    docker volume rm autogit-cargo-registry autogit-cargo-git autogit-cargo-target 2>/dev/null || true
-    log "Caches purged."
-    ;;
+    purge)
+        log "Purging all caches (will trigger full rebuild)..."
+        docker compose down -v
+        docker volume rm autogit-cargo-registry autogit-cargo-git autogit-cargo-target 2> /dev/null || true
+        log "Caches purged."
+        ;;
 
-status)
-    docker compose ps
-    echo ""
-    log "Cache volumes:"
-    docker volume ls | grep autogit-cargo || echo "  (none)"
-    ;;
+    status)
+        docker compose ps
+        echo ""
+        log "Cache volumes:"
+        docker volume ls | grep autogit-cargo || echo "  (none)"
+        ;;
 
-stop)
-    log "Stopping containers..."
-    docker compose down
-    ;;
+    stop)
+        log "Stopping containers..."
+        docker compose down
+        ;;
 
-logs)
-    docker compose logs -f "${2:-rust-dev}"
-    ;;
+    logs)
+        docker compose logs -f "${2:-rust-dev}"
+        ;;
 
-*)
-    cat <<'EOF'
+    *)
+        cat << 'EOF'
 autogit-core Build Script
 
 Commands:
@@ -108,5 +108,5 @@ Examples:
   ./build.sh build
   RUST_BUILD_CPUS=8 ./build.sh build
 EOF
-    ;;
+        ;;
 esac

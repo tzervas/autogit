@@ -1,15 +1,10 @@
----
-name: Release PR (Dev → Main)
-about: Merge accumulated features from dev branch into main for release
-title: 'release: v[X.Y.Z] - [Release Name]'
-labels: release
----
+______________________________________________________________________
+
+## name: Release PR (Dev → Main) about: Merge accumulated features from dev branch into main for release title: 'release: v[X.Y.Z] - [Release Name]' labels: release
 
 ## 🎯 Release Overview
 
-**Version**: v[X.Y.Z]
-**Release Name**: [Name]
-**Release Date**: [YYYY-MM-DD]
+**Version**: v[X.Y.Z] **Release Name**: [Name] **Release Date**: [YYYY-MM-DD]
 
 ## 📊 Changes Summary
 

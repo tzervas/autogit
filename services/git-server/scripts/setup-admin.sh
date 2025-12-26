@@ -55,7 +55,7 @@ print_info "This may take 3-5 minutes on first startup..."
 # Wait for GitLab to be ready
 MAX_WAIT=300 # 5 minutes
 WAITED=0
-while ! docker compose exec -T git-server gitlab-rake gitlab:check SANITIZE=true >/dev/null 2>&1; do
+while ! docker compose exec -T git-server gitlab-rake gitlab:check SANITIZE=true > /dev/null 2>&1; do
     if [ $WAITED -ge $MAX_WAIT ]; then
         print_error "GitLab did not become ready within $MAX_WAIT seconds"
         exit 1
@@ -70,7 +70,7 @@ print_info "GitLab is ready!"
 
 # Reset root password
 print_info "Setting up admin user: $ADMIN_USERNAME"
-if docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" <<EOF; then
+if docker compose exec -T git-server gitlab-rake "gitlab:password:reset[${ADMIN_USERNAME}]" << EOF; then
 ${ADMIN_PASSWORD}
 ${ADMIN_PASSWORD}
 EOF
@@ -89,7 +89,7 @@ else
 fi
 
 # Disable signup if configured
-if docker compose exec -T git-server grep -q "gitlab_signup_enabled.*false" /etc/gitlab/gitlab.rb 2>/dev/null; then
+if docker compose exec -T git-server grep -q "gitlab_signup_enabled.*false" /etc/gitlab/gitlab.rb 2> /dev/null; then
     print_info "✅ User signup is disabled (recommended for private installations)"
 else
     print_warn "User signup is currently enabled. Consider disabling it in gitlab.rb"

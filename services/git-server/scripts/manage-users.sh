@@ -59,7 +59,7 @@ create_user() {
 
     print_info "Creating user: $username ($email)"
 
-    if docker compose exec -T git-server gitlab-rails runner <<EOF; then
+    if docker compose exec -T git-server gitlab-rails runner << EOF; then
 user = User.new(
   username: '${username}',
   email: '${email}',
@@ -93,7 +93,7 @@ delete_user() {
     fi
 
     print_warn "Deleting user: $username"
-    docker compose exec -T git-server gitlab-rails runner <<EOF
+    docker compose exec -T git-server gitlab-rails runner << EOF
 user = User.find_by(username: '${username}')
 if user
   user.delete_self_and_dependent_artifacts!
@@ -115,7 +115,7 @@ block_user() {
     fi
 
     print_info "Blocking user: $username"
-    docker compose exec -T git-server gitlab-rails runner <<EOF
+    docker compose exec -T git-server gitlab-rails runner << EOF
 user = User.find_by(username: '${username}')
 if user
   user.block!
@@ -137,7 +137,7 @@ unblock_user() {
     fi
 
     print_info "Unblocking user: $username"
-    docker compose exec -T git-server gitlab-rails runner <<EOF
+    docker compose exec -T git-server gitlab-rails runner << EOF
 user = User.find_by(username: '${username}')
 if user
   user.unblock!
@@ -151,7 +151,7 @@ EOF
 
 # Show help
 show_help() {
-    cat <<EOF
+    cat << EOF
 GitLab User Management Script
 
 Usage: $0 <command> [arguments]
@@ -183,28 +183,28 @@ EOF
 check_gitlab_running
 
 case "$1" in
-list)
-    list_users
-    ;;
-create)
-    create_user "$2" "$3" "$4" "$5" "$6"
-    ;;
-delete)
-    delete_user "$2"
-    ;;
-block)
-    block_user "$2"
-    ;;
-unblock)
-    unblock_user "$2"
-    ;;
-help | --help | -h)
-    show_help
-    ;;
-*)
-    print_error "Unknown command: $1"
-    echo ""
-    show_help
-    exit 1
-    ;;
+    list)
+        list_users
+        ;;
+    create)
+        create_user "$2" "$3" "$4" "$5" "$6"
+        ;;
+    delete)
+        delete_user "$2"
+        ;;
+    block)
+        block_user "$2"
+        ;;
+    unblock)
+        unblock_user "$2"
+        ;;
+    help | --help | -h)
+        show_help
+        ;;
+    *)
+        print_error "Unknown command: $1"
+        echo ""
+        show_help
+        exit 1
+        ;;
 esac

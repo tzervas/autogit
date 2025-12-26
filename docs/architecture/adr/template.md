@@ -9,6 +9,7 @@ Short noun phrase describing the decision.
 ## Status
 
 One of:
+
 - **Proposed** - Under discussion
 - **Accepted** - Decision has been made and implemented
 - **Deprecated** - No longer applicable
@@ -19,6 +20,7 @@ One of:
 What is the issue that we're seeing that is motivating this decision or change?
 
 Include:
+
 - Technical context
 - Business context
 - Constraints
@@ -29,6 +31,7 @@ Include:
 What is the change that we're proposing and/or doing?
 
 Be specific about:
+
 - What will be done
 - Why this approach was chosen
 - How it will be implemented
@@ -65,10 +68,12 @@ For each alternative:
 **Description**: Brief description
 
 **Pros**:
+
 - Advantage 1
 - Advantage 2
 
 **Cons**:
+
 - Disadvantage 1
 - Disadvantage 2
 
@@ -84,6 +89,7 @@ For each alternative:
 ## Implementation Notes
 
 Optional section for implementation-specific details:
+
 - Migration strategy
 - Timeline
 - Dependencies
@@ -91,7 +97,7 @@ Optional section for implementation-specific details:
 
 ## Revision History
 
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | Name | Initial version |
-| YYYY-MM-DD | Name | Updated decision |
+| Date       | Author | Change           |
+| ---------- | ------ | ---------------- |
+| YYYY-MM-DD | Name   | Initial version  |
+| YYYY-MM-DD | Name   | Updated decision |

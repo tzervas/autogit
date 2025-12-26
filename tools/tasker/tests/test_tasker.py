@@ -5,8 +5,8 @@ Unit tests for the tasker tool.
 import unittest
 from pathlib import Path
 
+from tools.tasker.models import Priority, TaskStatus
 from tools.tasker.parser import TaskTrackerParser
-from tools.tasker.models import TaskStatus, Priority
 
 
 class TestTaskTrackerParser(unittest.TestCase):
@@ -131,9 +131,7 @@ class TestTaskModels(unittest.TestCase):
         from tools.tasker.models import Milestone, Task
 
         milestone = Milestone(
-            id="test-milestone",
-            title="Test Milestone",
-            status=TaskStatus.PLANNED
+            id="test-milestone", title="Test Milestone", status=TaskStatus.PLANNED
         )
 
         # Add tasks

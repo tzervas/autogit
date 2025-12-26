@@ -29,7 +29,7 @@ header() { echo -e "${BOLD}${CYAN}$1${NC}"; }
 
 clear
 
-cat <<"EOF"
+cat << "EOF"
 
 ╔════════════════════════════════════════════════════════╗
 ║                                                        ║
@@ -71,7 +71,7 @@ echo ""
 
 info "Waiting for GitLab..."
 RETRIES=0
-until curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; do
+until curl -sf "${GITLAB_URL}/" > /dev/null 2>&1; do
     RETRIES=$((RETRIES + 1))
     [ $RETRIES -ge 60 ] && {
         error "GitLab timeout"
@@ -83,7 +83,7 @@ done
 echo ""
 success "GitLab is ready"
 
-if curl -sf "${COORDINATOR_URL}/health" >/dev/null 2>&1; then
+if curl -sf "${COORDINATOR_URL}/health" > /dev/null 2>&1; then
     success "Runner Coordinator is ready"
 else
     error "Runner Coordinator not responding"
@@ -102,7 +102,7 @@ if [ -f "$PASSWORD_FILE" ]; then
     info "Using existing password from ${PASSWORD_FILE}"
 else
     # Try to get from running container
-    GITLAB_ROOT_PASSWORD=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server printenv GITLAB_ROOT_PASSWORD" 2>/dev/null || echo "")
+    GITLAB_ROOT_PASSWORD=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server printenv GITLAB_ROOT_PASSWORD" 2> /dev/null || echo "")
 
     if [ -z "$GITLAB_ROOT_PASSWORD" ] || [ "$GITLAB_ROOT_PASSWORD" = "CHANGE_ME_SECURE_PASSWORD" ]; then # pragma: allowlist secret
         # Generate new secure password
@@ -111,7 +111,7 @@ else
 
         # Save it
         mkdir -p "$(dirname "$PASSWORD_FILE")"
-        echo "$GITLAB_ROOT_PASSWORD" >"$PASSWORD_FILE"
+        echo "$GITLAB_ROOT_PASSWORD" > "$PASSWORD_FILE"
         chmod 600 "$PASSWORD_FILE"
         success "Generated and saved new password"
     else
@@ -144,7 +144,7 @@ token = user.personal_access_tokens.create(
 puts token.token if token.persisted?
 "
 
-GITLAB_TOKEN=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner \"$TOKEN_SCRIPT\"" 2>/dev/null | grep -E '^glpat-' | tail -1)
+GITLAB_TOKEN=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner \"$TOKEN_SCRIPT\"" 2> /dev/null | grep -E '^glpat-' | tail -1)
 
 [ -z "$GITLAB_TOKEN" ] && {
     error "Token creation failed"
@@ -190,8 +190,8 @@ header "Step 6: Configuring CI/CD"
 echo ""
 
 CI_CONTENT=$(cat .gitlab-ci-simple.yml | base64 -w 0)
-curl -sf --request PUT --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" --data '{"branch": "main", "content": "'"${CI_CONTENT}"'", "commit_message": "Add CI/CD", "encoding": "base64"}' "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1 ||
-    curl -sf --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" --data '{"branch": "main", "content": "'"${CI_CONTENT}"'", "commit_message": "Add CI/CD", "encoding": "base64"}' "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1
+curl -sf --request PUT --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" --data '{"branch": "main", "content": "'"${CI_CONTENT}"'", "commit_message": "Add CI/CD", "encoding": "base64"}' "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" > /dev/null 2>&1 \
+    || curl -sf --request POST --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" --header "Content-Type: application/json" --data '{"branch": "main", "content": "'"${CI_CONTENT}"'", "commit_message": "Add CI/CD", "encoding": "base64"}' "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" > /dev/null 2>&1
 
 success "CI/CD configured"
 
@@ -200,7 +200,7 @@ echo ""
 header "Step 7: Saving Configuration"
 echo ""
 
-cat >>.env <<EOF
+cat >> .env << EOF
 
 GITLAB_URL=${GITLAB_URL}
 GITLAB_TOKEN=${GITLAB_TOKEN}
@@ -211,7 +211,7 @@ RUNNER_MEM_LIMIT=6g
 EOF
 chmod 600 .env
 
-cat >"$SECRETS_FILE" <<EOF
+cat > "$SECRETS_FILE" << EOF
 GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}
 GITLAB_TOKEN=${GITLAB_TOKEN}
 GITLAB_URL=${GITLAB_URL}
@@ -224,7 +224,7 @@ success "Configuration saved"
 # Display credentials
 echo ""
 echo ""
-cat <<"EOF"
+cat << "EOF"
 ╔════════════════════════════════════════════════════════╗
 ║              🎉 Setup Complete! 🎉                     ║
 ╚════════════════════════════════════════════════════════╝

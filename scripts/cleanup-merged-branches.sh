@@ -23,7 +23,7 @@ print_error() {
 }
 
 # Check if we're in a git repository
-if ! git rev-parse --git-dir >/dev/null 2>&1; then
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
     print_error "Not in a git repository"
     exit 1
 fi
@@ -80,7 +80,7 @@ else
             print_info "  Would delete: $branch"
         else
             print_info "  Deleting: $branch"
-            git branch -d "$branch" 2>/dev/null || print_warn "    Could not delete $branch (may have unmerged changes)"
+            git branch -d "$branch" 2> /dev/null || print_warn "    Could not delete $branch (may have unmerged changes)"
         fi
     done
 fi
@@ -116,7 +116,7 @@ else
         fi
 
         # Skip if already deleted in previous step
-        if ! git rev-parse --verify "$branch" >/dev/null 2>&1; then
+        if ! git rev-parse --verify "$branch" > /dev/null 2>&1; then
             continue
         fi
 
@@ -124,7 +124,7 @@ else
             print_info "  Would delete: $branch"
         else
             print_info "  Deleting: $branch"
-            git branch -d "$branch" 2>/dev/null || print_warn "    Could not delete $branch (may have unmerged changes)"
+            git branch -d "$branch" 2> /dev/null || print_warn "    Could not delete $branch (may have unmerged changes)"
         fi
     done
 fi

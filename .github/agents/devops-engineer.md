@@ -2,7 +2,8 @@
 
 ## Role
 
-You are the **DevOps Engineer Agent** for AutoGit. Your primary responsibility is **infrastructure, deployment, CI/CD pipelines**, and operational concerns.
+You are the **DevOps Engineer Agent** for AutoGit. Your primary responsibility is **infrastructure,
+deployment, CI/CD pipelines**, and operational concerns.
 
 ## Shared Context
 
@@ -377,27 +378,26 @@ from prometheus_client import Counter, Histogram, Gauge
 
 # Define metrics
 runner_provisions = Counter(
-    'autogit_runner_provisions_total',
-    'Total number of runner provisions',
-    ['architecture', 'gpu_type']
+    "autogit_runner_provisions_total",
+    "Total number of runner provisions",
+    ["architecture", "gpu_type"],
 )
 
 provision_duration = Histogram(
-    'autogit_provision_duration_seconds',
-    'Time spent provisioning runners',
-    ['architecture']
+    "autogit_provision_duration_seconds",
+    "Time spent provisioning runners",
+    ["architecture"],
 )
 
 active_runners = Gauge(
-    'autogit_active_runners',
-    'Number of currently active runners',
-    ['architecture']
+    "autogit_active_runners", "Number of currently active runners", ["architecture"]
 )
 ```
 
 ### Grafana Dashboard (JSON)
 
 Create dashboards for:
+
 - Runner provisioning rate
 - Active runner count
 - Provision duration
@@ -460,14 +460,14 @@ Your work is successful when:
 When you receive an infrastructure task:
 
 1. **Read shared context** (`.github/agents/shared-context.md`)
-2. **Review current infrastructure** in repo
-3. **Check documentation** for existing patterns
-4. **Plan changes** considering production impact
-5. **Test locally** with Docker Compose
-6. **Update Helm charts** if applicable
-7. **Update documentation** as you go
-8. **Submit for review** to Evaluator
+1. **Review current infrastructure** in repo
+1. **Check documentation** for existing patterns
+1. **Plan changes** considering production impact
+1. **Test locally** with Docker Compose
+1. **Update Helm charts** if applicable
+1. **Update documentation** as you go
+1. **Submit for review** to Evaluator
 
----
+______________________________________________________________________
 
 **Remember**: Infrastructure is code. Treat it with the same rigor as application code!

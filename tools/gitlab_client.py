@@ -1,15 +1,19 @@
-import requests
 import os
 import urllib.parse
 
+import requests
+
+
 class GitLabApiError(Exception):
     """Raised when a GitLab API request returns an error response."""
+
     def __init__(self, status_code, message, method=None, endpoint=None):
         self.status_code = status_code
         self.message = message
         self.method = method
         self.endpoint = endpoint
         super().__init__(f"GitLab API Error ({status_code}): {message} [{method} {endpoint}]")
+
 
 class GitLabClient:
     """
@@ -23,23 +27,17 @@ class GitLabClient:
         self.timeout = timeout
 
         if not self.token:
-            raise ValueError("GitLab API token is required. Set GITLAB_TOKEN env var or pass it to the constructor.")
+            raise ValueError(
+                "GitLab API token is required. Set GITLAB_TOKEN env var or pass it to the constructor."
+            )
 
-        self.headers = {
-            "PRIVATE-TOKEN": self.token,
-            "Content-Type": "application/json"
-        }
+        self.headers = {"PRIVATE-TOKEN": self.token, "Content-Type": "application/json"}
 
     def _request(self, method, endpoint, data=None, params=None):
         url = f"{self.api_url}/{endpoint.lstrip('/')}"
         try:
             response = requests.request(
-                method,
-                url,
-                headers=self.headers,
-                json=data,
-                params=params,
-                timeout=self.timeout
+                method, url, headers=self.headers, json=data, params=params, timeout=self.timeout
             )
 
             if response.status_code >= 400:
@@ -74,7 +72,7 @@ class GitLabClient:
         data = {
             "name": name,
             "path": path or name.lower().replace(" ", "-"),
-            "visibility": visibility
+            "visibility": visibility,
         }
         if namespace_id:
             data["namespace_id"] = namespace_id
@@ -108,12 +106,12 @@ class GitLabClient:
         data = {
             "name": branch_name,
             "push_access_level": push_access_level,
-            "merge_access_level": merge_access_level
+            "merge_access_level": merge_access_level,
         }
         return self._request("POST", f"projects/{project_id}/protected_branches", data=data)
 
     def unprotect_branch(self, project_id, branch_name):
-        encoded_branch = urllib.parse.quote(branch_name, safe='')
+        encoded_branch = urllib.parse.quote(branch_name, safe="")
         return self._request("DELETE", f"projects/{project_id}/protected_branches/{encoded_branch}")
 
     # Webhook Operations
@@ -121,16 +119,14 @@ class GitLabClient:
         data = {
             "url": url,
             "push_events": push_events,
-            "merge_requests_events": merge_requests_events
+            "merge_requests_events": merge_requests_events,
         }
         return self._request("POST", f"projects/{project_id}/hooks", data=data)
 
     # Repository File Operations
     def create_file(self, project_id, file_path, branch, content, commit_message):
-        data = {
-            "branch": branch,
-            "content": content,
-            "commit_message": commit_message
-        }
-        encoded_path = urllib.parse.quote(file_path, safe='')
-        return self._request("POST", f"projects/{project_id}/repository/files/{encoded_path}", data=data)
+        data = {"branch": branch, "content": content, "commit_message": commit_message}
+        encoded_path = urllib.parse.quote(file_path, safe="")
+        return self._request(
+            "POST", f"projects/{project_id}/repository/files/{encoded_path}", data=data
+        )

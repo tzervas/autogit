@@ -32,7 +32,7 @@ echo ""
 info "Waiting for GitLab to be ready..."
 RETRIES=0
 MAX_RETRIES=60
-until curl -sf "${GITLAB_URL}/-/readiness" >/dev/null 2>&1 || curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; do
+until curl -sf "${GITLAB_URL}/-/readiness" > /dev/null 2>&1 || curl -sf "${GITLAB_URL}/" > /dev/null 2>&1; do
     RETRIES=$((RETRIES + 1))
     if [ $RETRIES -ge $MAX_RETRIES ]; then
         error "GitLab did not become ready in time"
@@ -53,7 +53,7 @@ if [ -f "$TOKEN_FILE" ]; then
     info "Found existing token in ${TOKEN_FILE}"
 
     # Verify token works
-    if curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "${GITLAB_URL}/api/v4/user" >/dev/null 2>&1; then
+    if curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "${GITLAB_URL}/api/v4/user" > /dev/null 2>&1; then
         success "Existing token is valid"
     else
         warning "Existing token is invalid, will create new one"
@@ -77,11 +77,11 @@ token = user.personal_access_tokens.create(
 puts token.token
 "
 
-    GITLAB_TOKEN=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner \"$TOKEN_SCRIPT\"" 2>/dev/null | grep -v "^Loading" | tail -1)
+    GITLAB_TOKEN=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner \"$TOKEN_SCRIPT\"" 2> /dev/null | grep -v "^Loading" | tail -1)
 
     if [ -n "$GITLAB_TOKEN" ] && [ "$GITLAB_TOKEN" != "null" ]; then
         success "Created new personal access token"
-        echo "$GITLAB_TOKEN" >"$TOKEN_FILE"
+        echo "$GITLAB_TOKEN" > "$TOKEN_FILE"
         chmod 600 "$TOKEN_FILE"
         info "Token saved to ${TOKEN_FILE}"
     else
@@ -94,8 +94,8 @@ export GITLAB_TOKEN
 
 # Step 3: Verify API access
 info "Verifying API access..."
-USER_INFO=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "${GITLAB_URL}/api/v4/user" 2>/dev/null || echo "{}")
-USERNAME=$(echo "$USER_INFO" | jq -r '.username' 2>/dev/null || echo "")
+USER_INFO=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "${GITLAB_URL}/api/v4/user" 2> /dev/null || echo "{}")
+USERNAME=$(echo "$USER_INFO" | jq -r '.username' 2> /dev/null || echo "")
 
 if [ -n "$USERNAME" ] && [ "$USERNAME" != "null" ]; then
     success "Authenticated as: ${USERNAME}"
@@ -109,8 +109,8 @@ info "Setting up project: ${PROJECT_NAME}..."
 
 # Check if project exists
 PROJECTS=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects?search=${PROJECT_NAME}" 2>/dev/null || echo "[]")
-PROJECT_ID=$(echo "$PROJECTS" | jq -r '.[0].id' 2>/dev/null)
+    "${GITLAB_URL}/api/v4/projects?search=${PROJECT_NAME}" 2> /dev/null || echo "[]")
+PROJECT_ID=$(echo "$PROJECTS" | jq -r '.[0].id' 2> /dev/null)
 
 if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "null" ]; then
     # Create new project
@@ -125,15 +125,15 @@ if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "null" ]; then
             \"initialize_with_readme\": true,
             \"description\": \"AutoGit - Self-hosted Git server with dynamic CI/CD runners\"
         }" \
-        "${GITLAB_URL}/api/v4/projects" 2>/dev/null || echo "{}")
+        "${GITLAB_URL}/api/v4/projects" 2> /dev/null || echo "{}")
 
-    PROJECT_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id' 2>/dev/null)
+    PROJECT_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id' 2> /dev/null)
 
     if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "null" ]; then
         success "Project created (ID: ${PROJECT_ID})"
     else
         error "Failed to create project"
-        echo "$CREATE_RESPONSE" | jq . 2>/dev/null || echo "$CREATE_RESPONSE"
+        echo "$CREATE_RESPONSE" | jq . 2> /dev/null || echo "$CREATE_RESPONSE"
         exit 1
     fi
 else
@@ -160,16 +160,16 @@ CI_CONFIG_DATA="{
 
 # Check if .gitlab-ci.yml already exists
 CI_CHECK=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml?ref=main" 2>/dev/null || echo "{}")
+    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml?ref=main" 2> /dev/null || echo "{}")
 
-if echo "$CI_CHECK" | jq -e '.content' >/dev/null 2>&1; then
+if echo "$CI_CHECK" | jq -e '.content' > /dev/null 2>&1; then
     info "Updating existing .gitlab-ci.yml..."
 
     if curl -sf --request PUT \
         --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
         --header "Content-Type: application/json" \
         --data "${CI_CONFIG_DATA}" \
-        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
+        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" > /dev/null 2>&1; then
         success "CI configuration updated"
     else
         warning "Failed to update CI configuration"
@@ -181,7 +181,7 @@ else
         --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
         --header "Content-Type: application/json" \
         --data "${CI_CONFIG_DATA}" \
-        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
+        "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" > /dev/null 2>&1; then
         success "CI configuration added"
     else
         warning "Failed to add CI configuration"
@@ -193,7 +193,7 @@ info "Registering GitLab runner..."
 
 # Get runner registration token from project
 RUNNER_TOKEN=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}" 2>/dev/null | jq -r '.runners_token' 2>/dev/null)
+    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}" 2> /dev/null | jq -r '.runners_token' 2> /dev/null)
 
 if [ -n "$RUNNER_TOKEN" ] && [ "$RUNNER_TOKEN" != "null" ]; then
     info "Got runner registration token"
@@ -208,7 +208,7 @@ fi
 # Step 7: Export environment configuration
 info "Creating environment configuration..."
 
-cat >>.env <<EOF
+cat >> .env << EOF
 # AutoGit GitLab Configuration
 # Generated on $(date)
 
@@ -224,7 +224,7 @@ success "Configuration saved to .env"
 # Step 8: Create helper aliases
 info "Creating helper scripts..."
 
-cat >scripts/gitlab-helpers.sh <<'EOFHELPER'
+cat > scripts/gitlab-helpers.sh << 'EOFHELPER'
 #!/bin/bash
 # GitLab Helper Functions
 

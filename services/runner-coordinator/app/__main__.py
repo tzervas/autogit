@@ -1,12 +1,13 @@
 """
 Entry point for running the runner-coordinator as a module.
 """
-import uvicorn
+
 import logging
 
+import uvicorn
+
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 if __name__ == "__main__":

@@ -5,12 +5,13 @@ This document describes the secrets and CI/CD variables required for the AutoGit
 ## Overview
 
 AutoGit uses a dual CI/CD strategy:
+
 - **GitHub Actions** for PR validation and public-facing workflows
 - **GitLab CI** (self-hosted) for container builds and internal deployments
 
 Both systems require proper secret configuration for secure operation.
 
----
+______________________________________________________________________
 
 ## GitLab CI/CD Variables
 
@@ -18,36 +19,37 @@ Configure these in **GitLab** > **Settings** > **CI/CD** > **Variables**.
 
 ### Required Variables for GHCR Publishing
 
-| Variable | Description | Type | Protected | Masked |
-|----------|-------------|------|-----------|--------|
-| `GHCR_USER` | GitHub username for GHCR authentication | Variable | ✅ Yes | ❌ No |
-| `GHCR_TOKEN` | GitHub PAT with `packages:write` scope | Variable | ✅ Yes | ✅ Yes |
+| Variable     | Description                             | Type     | Protected | Masked |
+| ------------ | --------------------------------------- | -------- | --------- | ------ |
+| `GHCR_USER`  | GitHub username for GHCR authentication | Variable | ✅ Yes    | ❌ No  |
+| `GHCR_TOKEN` | GitHub PAT with `packages:write` scope  | Variable | ✅ Yes    | ✅ Yes |
 
 ### Automatic Variables (No Configuration Needed)
 
 GitLab provides these automatically for registry authentication:
 
-| Variable | Description |
-|----------|-------------|
-| `CI_REGISTRY` | GitLab Container Registry URL |
-| `CI_REGISTRY_IMAGE` | Full path to project image |
-| `CI_JOB_TOKEN` | Scoped token for registry push/pull |
-| `CI_REGISTRY_USER` | Set to `gitlab-ci-token` |
+| Variable            | Description                         |
+| ------------------- | ----------------------------------- |
+| `CI_REGISTRY`       | GitLab Container Registry URL       |
+| `CI_REGISTRY_IMAGE` | Full path to project image          |
+| `CI_JOB_TOKEN`      | Scoped token for registry push/pull |
+| `CI_REGISTRY_USER`  | Set to `gitlab-ci-token`            |
 
 ### Setting Up GHCR Token
 
-1. Go to GitHub > **Settings** > **Developer settings** > **Personal access tokens** > **Tokens (classic)**
-2. Click **Generate new token (classic)**
-3. Give it a descriptive name like `autogit-gitlab-ci-ghcr`
-4. Set expiration (recommended: 90 days, then rotate)
-5. Select scopes:
+1. Go to GitHub > **Settings** > **Developer settings** > **Personal access tokens** > **Tokens
+   (classic)**
+1. Click **Generate new token (classic)**
+1. Give it a descriptive name like `autogit-gitlab-ci-ghcr`
+1. Set expiration (recommended: 90 days, then rotate)
+1. Select scopes:
    - ✅ `write:packages` - Push packages to GHCR
    - ✅ `read:packages` - Pull packages from GHCR
    - ✅ `delete:packages` - (Optional) Delete old package versions
-6. Click **Generate token** and copy the value
-7. Add to GitLab CI/CD Variables as `GHCR_TOKEN` (masked, protected)
+1. Click **Generate token** and copy the value
+1. Add to GitLab CI/CD Variables as `GHCR_TOKEN` (masked, protected)
 
----
+______________________________________________________________________
 
 ## GitHub Actions Secrets
 
@@ -55,38 +57,38 @@ Configure these in **GitHub** > **Settings** > **Secrets and variables** > **Act
 
 ### Repository Secrets
 
-| Secret | Description | Required For |
-|--------|-------------|--------------|
-| `GITLAB_API_TOKEN` | GitLab API token for pipeline status | Self-hosted CI status checks |
-| `GHCR_TOKEN` | GitHub PAT for container publishing | GitHub container builds (if enabled) |
+| Secret             | Description                          | Required For                         |
+| ------------------ | ------------------------------------ | ------------------------------------ |
+| `GITLAB_API_TOKEN` | GitLab API token for pipeline status | Self-hosted CI status checks         |
+| `GHCR_TOKEN`       | GitHub PAT for container publishing  | GitHub container builds (if enabled) |
 
 ### Automatic Secrets
 
 GitHub provides these automatically:
 
-| Secret | Description |
-|--------|-------------|
-| `GITHUB_TOKEN` | Auto-generated token for workflow operations |
-| `secrets.GITHUB_TOKEN` | Same as above, scoped to repository |
+| Secret                 | Description                                  |
+| ---------------------- | -------------------------------------------- |
+| `GITHUB_TOKEN`         | Auto-generated token for workflow operations |
+| `secrets.GITHUB_TOKEN` | Same as above, scoped to repository          |
 
----
+______________________________________________________________________
 
 ## Security Best Practices
 
 ### Token Scoping
 
 1. **Minimum Privilege**: Only grant required permissions
-2. **Token Rotation**: Rotate tokens every 90 days
-3. **Protected Variables**: Mark sensitive vars as "Protected" to only expose on protected branches
-4. **Masked Variables**: Mark secrets as "Masked" to prevent exposure in logs
+1. **Token Rotation**: Rotate tokens every 90 days
+1. **Protected Variables**: Mark sensitive vars as "Protected" to only expose on protected branches
+1. **Masked Variables**: Mark secrets as "Masked" to prevent exposure in logs
 
 ### Token Types Comparison
 
-| Token Type | Use Case | Lifetime | Scope |
-|------------|----------|----------|-------|
-| `CI_JOB_TOKEN` | GitLab Registry access | Job duration | Single job |
-| GitHub PAT (classic) | Cross-platform auth | Configurable | User-defined |
-| GitHub App Token | GitHub Actions | Workflow run | Repository |
+| Token Type           | Use Case               | Lifetime     | Scope        |
+| -------------------- | ---------------------- | ------------ | ------------ |
+| `CI_JOB_TOKEN`       | GitLab Registry access | Job duration | Single job   |
+| GitHub PAT (classic) | Cross-platform auth    | Configurable | User-defined |
+| GitHub App Token     | GitHub Actions         | Workflow run | Repository   |
 
 ### Environment Separation
 
@@ -102,7 +104,7 @@ Development (dev, feature/*):
 └── Still masked secrets
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -111,32 +113,35 @@ Development (dev, feature/*):
 **Error**: `UNAUTHORIZED: HTTP Basic: Access denied`
 
 **Solutions**:
+
 1. Ensure `CI_REGISTRY` is set (indicates Container Registry is enabled)
-2. Check if the project has Container Registry enabled in Settings
-3. Verify `CI_JOB_TOKEN` has push permissions
+1. Check if the project has Container Registry enabled in Settings
+1. Verify `CI_JOB_TOKEN` has push permissions
 
 ### GHCR Authentication Fails
 
 **Error**: `unauthorized: authentication required`
 
 **Solutions**:
+
 1. Verify `GHCR_USER` and `GHCR_TOKEN` are set in CI/CD Variables
-2. Check token hasn't expired
-3. Verify token has `write:packages` scope
-4. Ensure token is for the correct GitHub account
+1. Check token hasn't expired
+1. Verify token has `write:packages` scope
+1. Ensure token is for the correct GitHub account
 
 ### Masked Variable Not Working
 
 **Symptom**: Secret appears in logs
 
 **Solutions**:
+
 1. GitLab requires masked values to be:
    - At least 8 characters
    - No newlines
    - Base64-safe characters
-2. Re-add the variable with masking enabled
+1. Re-add the variable with masking enabled
 
----
+______________________________________________________________________
 
 ## Variable Quick Reference
 
@@ -153,7 +158,7 @@ GHCR_USER: <your-github-username>
 GHCR_TOKEN: <your-github-pat>
 ```
 
----
+______________________________________________________________________
 
 ## See Also
 

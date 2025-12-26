@@ -4,14 +4,17 @@ This document describes the agentic development workflow used in AutoGit.
 
 ## Overview
 
-AutoGit uses a **multiagent workflow** with specialized AI agents that work together to deliver high-quality code and documentation. Each agent has domain-specific expertise and responsibilities, coordinated by a root orchestrator agent.
+AutoGit uses a **multiagent workflow** with specialized AI agents that work together to deliver
+high-quality code and documentation. Each agent has domain-specific expertise and responsibilities,
+coordinated by a root orchestrator agent.
 
 ## Multiagent Architecture
 
 The AutoGit agent system uses a hierarchical structure:
 
 - **Root Agent** (`.github/agents/agent.md`) - Orchestrates and delegates to specialized agents
-- **Shared Context** (`.github/agents/shared-context.md`) - Common project requirements and standards
+- **Shared Context** (`.github/agents/shared-context.md`) - Common project requirements and
+  standards
 - **Specialized Agents** - Domain experts for specific areas:
   - Project Manager (`.github/agents/project-manager.md`)
   - Software Engineer (`.github/agents/software-engineer.md`)
@@ -20,7 +23,8 @@ The AutoGit agent system uses a hierarchical structure:
   - Documentation Engineer (`.github/agents/documentation-engineer.md`)
   - Evaluator (`.github/agents/evaluator.md`)
 
-This structure ensures that the right expert handles each type of task, leading to higher quality outcomes.
+This structure ensures that the right expert handles each type of task, leading to higher quality
+outcomes.
 
 ## Specialized Agents
 
@@ -31,12 +35,14 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Task coordination, dependency management, priority ordering
 
 **Responsibilities**:
+
 - Break down requirements into manageable tasks
 - Create Kanban-style task lists with dependencies
 - Coordinate with other personas
 - Report to Evaluator for quality checks
 
 **Task Format**:
+
 ```markdown
 ## Task: [Task Name]
 **Priority**: High/Medium/Low
@@ -71,6 +77,7 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Implementation, code review, testing
 
 **Responsibilities**:
+
 - Write production-quality code
 - Follow SOLID principles and project patterns
 - Write comprehensive tests (pytest)
@@ -79,6 +86,7 @@ This structure ensures that the right expert handles each type of task, leading 
 - **Update relevant documentation** in same PR
 
 **Standards**:
+
 - See [Coding Standards](standards.md)
 - See [Testing Guide](testing.md)
 
@@ -89,6 +97,7 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Infrastructure, deployment, CI/CD
 
 **Responsibilities**:
+
 - Design Docker Compose configurations
 - Create Helm charts
 - Configure CI/CD pipelines
@@ -97,6 +106,7 @@ This structure ensures that the right expert handles each type of task, leading 
 - **Update installation and operations docs**
 
 **Standards**:
+
 - See [CI/CD Guide](ci-cd.md)
 - See [Operations Guide](../operations/README.md)
 
@@ -107,6 +117,7 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Security review, hardening, compliance
 
 **Responsibilities**:
+
 - Security review of all components
 - Network policy design
 - Secrets management
@@ -115,6 +126,7 @@ This structure ensures that the right expert handles each type of task, leading 
 - **Update security documentation**
 
 **Standards**:
+
 - See [Security Guide](../security/README.md)
 
 ### 5. Documentation Engineer Agent
@@ -124,6 +136,7 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Documentation maintenance, consistency
 
 **Responsibilities**:
+
 - Review all documentation updates
 - Ensure docs are accurate and up-to-date
 - Maintain documentation index
@@ -132,6 +145,7 @@ This structure ensures that the right expert handles each type of task, leading 
 - **Track documentation debt**
 
 **Standards**:
+
 - See [Documentation Guidelines](documentation.md)
 
 ### 6. Evaluator Agent
@@ -141,6 +155,7 @@ This structure ensures that the right expert handles each type of task, leading 
 **Role**: Quality assurance, testing, feedback
 
 **Responsibilities**:
+
 - Review completed work
 - Provide critical feedback
 - Verify acceptance criteria
@@ -149,6 +164,7 @@ This structure ensures that the right expert handles each type of task, leading 
 - Ensure best practices adherence
 
 **Evaluation Criteria**:
+
 - Code quality (SOLID, DRY, KISS)
 - Test coverage (80%+)
 - Documentation completeness
@@ -161,7 +177,9 @@ The multiagent workflow follows these steps:
 
 ### 1. Task Assignment (Root Agent → Project Manager)
 
-The **Root Agent** receives a request and delegates to the **Project Manager Agent** who creates tasks with:
+The **Root Agent** receives a request and delegates to the **Project Manager Agent** who creates
+tasks with:
+
 - Clear description
 - Acceptance criteria
 - Documentation requirements
@@ -170,6 +188,7 @@ The **Root Agent** receives a request and delegates to the **Project Manager Age
 ### 2. Implementation (Specialized Agent)
 
 The **assigned specialized agent** (Software Engineer, DevOps Engineer, etc.) implements the task:
+
 - Follow coding standards
 - Write tests
 - Update documentation
@@ -178,6 +197,7 @@ The **assigned specialized agent** (Software Engineer, DevOps Engineer, etc.) im
 ### 3. Documentation Review (Documentation Engineer Agent)
 
 The **Documentation Engineer Agent** reviews:
+
 - Documentation completeness
 - Accuracy of examples
 - Link validity
@@ -186,6 +206,7 @@ The **Documentation Engineer Agent** reviews:
 ### 4. Quality Review (Evaluator Agent)
 
 The **Evaluator Agent** reviews:
+
 - Code quality
 - Test coverage
 - Documentation
@@ -197,6 +218,7 @@ The **Evaluator Agent** reviews:
 **PASS**: Task marked complete, move to next task
 
 **FAIL**: Task returned with feedback for revision, including:
+
 - Specific issues found
 - Required changes
 - Documentation gaps
@@ -268,21 +290,25 @@ Iterate until quality standards met.
 Every code change MUST include documentation updates.
 
 **Before starting**:
+
 1. Check `docs/INDEX.md` for relevant docs
-2. List affected documentation in task
+1. List affected documentation in task
 
 **During implementation**:
+
 1. Update docs alongside code
-2. Keep examples working
-3. Update API docs if interfaces changed
+1. Keep examples working
+1. Update API docs if interfaces changed
 
 **Before submitting**:
+
 1. Verify all docs updated
-2. Test all examples
-3. Update INDEX.md if needed
-4. Create/update ADR if architectural
+1. Test all examples
+1. Update INDEX.md if needed
+1. Create/update ADR if architectural
 
 **In commit message**:
+
 ```
 feat: add GPU detection [docs: gpu/nvidia.md, adr/003]
 ```
@@ -335,35 +361,35 @@ feat: add GPU detection [docs: gpu/nvidia.md, adr/003]
 ### Escalation Process
 
 1. Document the issue
-2. Notify Project Manager
-3. Schedule decision meeting if needed
-4. Document decision in ADR if architectural
+1. Notify Project Manager
+1. Schedule decision meeting if needed
+1. Document decision in ADR if architectural
 
 ## Best Practices
 
 ### For All Personas
 
 1. **Communicate clearly** - Use structured updates
-2. **Think holistically** - Consider all impacts
-3. **Document decisions** - Use ADRs for architecture
-4. **Test thoroughly** - Don't skip edge cases
-5. **Review carefully** - Provide constructive feedback
+1. **Think holistically** - Consider all impacts
+1. **Document decisions** - Use ADRs for architecture
+1. **Test thoroughly** - Don't skip edge cases
+1. **Review carefully** - Provide constructive feedback
 
 ### For Implementers
 
 1. **Start with tests** - TDD when possible
-2. **Update docs first** - Know what you're building
-3. **Commit often** - Small, focused commits
-4. **Self-review** - Check your work before submitting
-5. **Ask questions** - Better to ask than assume
+1. **Update docs first** - Know what you're building
+1. **Commit often** - Small, focused commits
+1. **Self-review** - Check your work before submitting
+1. **Ask questions** - Better to ask than assume
 
 ### For Reviewers
 
 1. **Be specific** - Point to exact issues
-2. **Be constructive** - Suggest solutions
-3. **Be thorough** - Check all aspects
-4. **Be timely** - Don't block progress
-5. **Be fair** - Apply standards consistently
+1. **Be constructive** - Suggest solutions
+1. **Be thorough** - Check all aspects
+1. **Be timely** - Don't block progress
+1. **Be fair** - Apply standards consistently
 
 ## Metrics
 

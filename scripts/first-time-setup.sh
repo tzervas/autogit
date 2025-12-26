@@ -33,7 +33,7 @@ echo ""
 echo "Waiting for GitLab to be ready (this may take a few minutes on first start)..."
 RETRIES=0
 MAX_RETRIES=60
-until curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; do
+until curl -sf "${GITLAB_URL}/" > /dev/null 2>&1; do
     RETRIES=$((RETRIES + 1))
     if [ $RETRIES -ge $MAX_RETRIES ]; then
         echo "❌ GitLab did not start in time"
@@ -51,7 +51,7 @@ echo "✓ GitLab is ready!"
 echo ""
 
 echo "Checking Runner Coordinator..."
-if curl -sf "${COORDINATOR_URL}/health" >/dev/null 2>&1; then
+if curl -sf "${COORDINATOR_URL}/health" > /dev/null 2>&1; then
     echo "✓ Runner Coordinator is ready!"
 else
     echo "❌ Runner Coordinator is not responding"
@@ -79,7 +79,7 @@ echo "💡 Save these credentials securely!"
 echo ""
 
 # Save login info to a file
-cat >.autogit_login_info <<EOF
+cat > .autogit_login_info << EOF
 AutoGit GitLab Login Information
 Generated: $(date)
 
@@ -115,13 +115,13 @@ echo ""
 echo "Getting runner registration token from GitLab..."
 
 # Get registration token via Rails console
-REGISTRATION_TOKEN=$(ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner "puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token"' 2>/dev/null | tail -1)
+REGISTRATION_TOKEN=$(ssh homelab 'DOCKER_HOST=unix:///run/user/1000/docker.sock docker exec autogit-git-server gitlab-rails runner "puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token"' 2> /dev/null | tail -1)
 
 if [ -n "$REGISTRATION_TOKEN" ] && [ "$REGISTRATION_TOKEN" != "null" ]; then
     echo "✓ Got runner registration token"
 
     # Save to environment file
-    cat >>.env <<EOF
+    cat >> .env << EOF
 
 # AutoGit Runner Coordinator Configuration
 # Generated: $(date)
@@ -152,7 +152,7 @@ fi
 # Create personal access token for automation
 echo "Creating personal access token for automation..."
 
-if bash scripts/setup-gitlab-automation.sh >/tmp/gitlab-automation.log 2>&1; then
+if bash scripts/setup-gitlab-automation.sh > /tmp/gitlab-automation.log 2>&1; then
     echo "✓ Automation configured successfully"
 
     # Load the token

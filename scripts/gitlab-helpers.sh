@@ -30,8 +30,8 @@ gitlab-pipelines() {
     local project_id=${1:-$GITLAB_PROJECT_ID}
 
     curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-        "${GITLAB_URL}/api/v4/projects/${project_id}/pipelines" |
-        jq -r '.[] | "\(.id)\t\(.status)\t\(.ref)\t\(.created_at)"'
+        "${GITLAB_URL}/api/v4/projects/${project_id}/pipelines" \
+        | jq -r '.[] | "\(.id)\t\(.status)\t\(.ref)\t\(.created_at)"'
 }
 
 # Get pipeline jobs
@@ -46,8 +46,8 @@ gitlab-jobs() {
     fi
 
     curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-        "${GITLAB_URL}/api/v4/projects/${project_id}/pipelines/${pipeline_id}/jobs" |
-        jq -r '.[] | "\(.id)\t\(.name)\t\(.status)\t\(.stage)"'
+        "${GITLAB_URL}/api/v4/projects/${project_id}/pipelines/${pipeline_id}/jobs" \
+        | jq -r '.[] | "\(.id)\t\(.name)\t\(.status)\t\(.stage)"'
 }
 
 # Watch runners
@@ -76,7 +76,7 @@ gitlab-job-log() {
 
 # Show help
 gitlab-help() {
-    cat <<'EOF'
+    cat << 'EOF'
 GitLab Helper Commands:
 
   gitlab-projects          - List all projects

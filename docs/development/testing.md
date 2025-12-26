@@ -1,20 +1,27 @@
 # Testing Guide
+
 Comprehensive testing guide for AutoGit development.
 
 **Related Documentation**:
+
 - [Development Overview](README.md)
 - [Coding Standards](standards.md)
 - [Development Setup](setup.md)
 - [CI/CD Guide](ci-cd.md)
+
 ## Testing Philosophy
+
 AutoGit follows Test-Driven Development (TDD) principles:
+
 1. **Write tests first** - Define expected behavior before implementation
-2. **Red-Green-Refactor** - Fail, pass, improve cycle
-3. **Comprehensive coverage** - Aim for 80%+ coverage
-4. **Fast feedback** - Tests should run quickly
-5. **Reliable** - Tests should not be flaky
-6. **Maintainable** - Tests should be easy to understand and modify
+1. **Red-Green-Refactor** - Fail, pass, improve cycle
+1. **Comprehensive coverage** - Aim for 80%+ coverage
+1. **Fast feedback** - Tests should run quickly
+1. **Reliable** - Tests should not be flaky
+1. **Maintainable** - Tests should be easy to understand and modify
+
 ## Test Pyramid
+
 ```
 /\
 /
@@ -36,10 +43,13 @@ Unit
 
 /--------------\
 ```
+
 - **Unit Tests** (70%): Test individual functions/classes in isolation
 - **Integration Tests** (20%): Test component interactions
 - **End-to-End Tests** (10%): Test complete user workflows
+
 ## Testing Stack
+
 - **pytest** - Test framework
 - **pytest-cov** - Coverage reporting
 - **pytest-mock** - Mocking utilities
@@ -47,7 +57,9 @@ Unit
 - **pytest-docker** - Docker integration testing
 - **factory_boy** - Test data factories
 - **faker** - Fake data generation
+
 ## Project Test Structure
+
 ```
 tests/
 ├── conftest.py
@@ -124,8 +136,11 @@ tests/
 ├── factories.py
 └── helpers.py
 ```
+
 ## Writing Unit Tests
+
 ### Basic Test Structure
+
 ```python
 """Test suite for RunnerManager.
 Documentation: docs/runners/README.md
@@ -197,15 +212,20 @@ runner_id = await manager.provision_async("amd64")
 # Assert
 assert runner_id is not None
 ```
+
 ### Testing Best Practices
+
 1. **Use descriptive test names**:
+
 ```python
 # Good
 def test_provision_fails_when_docker_unavailable(self):
 # Bad
 def test_provision_error(self):
 ```
+
 2. **Follow Arrange-Act-Assert pattern**:
+
 ```python
 def test_something(self):
 # Arrange - Set up test data
@@ -216,7 +236,9 @@ result = function_under_test(config)
 # Assert - Verify the results
 assert result == expected
 ```
+
 3. **One assertion per test** (when possible):
+
 ```python
 # Good - focused test
 def test_provision_returns_valid_id(self):
@@ -229,7 +251,9 @@ runner = manager.get_runner(runner_id)
 assert runner.architecture == "amd64"
 assert runner.status == "running"
 ```
+
 4. **Use fixtures for setup**:
+
 ```python
 @pytest.fixture
 def sample_config():
@@ -239,14 +263,18 @@ return {
 "idle_timeout": 300
 }
 ```
+
 5. **Mock external dependencies**:
+
 ```python
 @patch('autogit.runners.docker_client')
 def test_with_mock(self, mock_docker):
 mock_docker.containers.run.return_value.id = "test-id"
 # Test implementation
 ```
+
 ### Testing Exceptions
+
 ```python
 def test_provision_raises_error_on_invalid_config(self):
 """Test that invalid configuration raises ConfigError."""
@@ -260,7 +288,9 @@ manager.provision("amd64", gpu_type="nvidia")
 assert "GPU not available" in caplog.text
 
 ```
+
 ### Testing Async Code
+
 ```python
 @pytest.mark.asyncio
 async def test_async_provision(self):
@@ -281,8 +311,11 @@ assert len(set(runner_ids)) == 5
 # All unique
 
 ```
+
 ## Writing Integration Tests
+
 Integration tests verify that components work together correctly.
+
 ```python
 """Integration tests for Runner Manager with Docker.
 Documentation: docs/runners/README.md
@@ -359,6 +392,7 @@ runner_manager.cleanup_idle()
 active = runner_manager.get_active_runners()
 assert len(active) == 0
 ```
+
 ### Database Integration Tests
 
 ```python
@@ -380,8 +414,11 @@ runner_manager_new = RunnerManager.load_state(database)
 runners = runner_manager_new.get_active_runners()
 assert runner_id in [r.id for r in runners]
 ```
+
 ## Writing End-to-End Tests
+
 E2E tests verify complete user workflows.
+
 ```python
 """End-to-end tests for AutoGit platform.
 Documentation: docs/tutorials/quickstart.md
@@ -472,8 +509,11 @@ session = login_via_authelia("testuser", "testpass")
 response = session.get(f"{autogit_instance}/projects")
 assert response.status_code == 200
 ```
+
 ## Test Coverage
+
 ### Measuring Coverage
+
 ```bash
 # Run tests with coverage
 pytest --cov=src --cov-report=html --cov-report=term
@@ -482,7 +522,9 @@ open htmlcov/index.html
 # Check coverage threshold
 pytest --cov=src --cov-fail-under=80
 ```
+
 ### Coverage Configuration
+
 ```ini
 # .coveragerc
 [run]
@@ -503,12 +545,17 @@ if __name__ == .__main__.:
 if TYPE_CHECKING:
 @abstractmethod
 ```
+
 ### Coverage Goals
+
 - **Overall**: 80%+ coverage
 - **Critical paths**: 95%+ coverage (runner management, GPU detection)
 - **New code**: 90%+ coverage (enforced in CI)
+
 ## Continuous Integration
+
 ### GitHub Actions Integration
+
 ```yaml
 # .github/workflows/test.yml
 name: Tests
@@ -540,7 +587,9 @@ run: uv run pytest tests/integration/
 - name: Check coverage threshold
 run: uv run pytest --cov --cov-fail-under=80
 ```
+
 ## Test Data Management
+
 ### Using Factories
 
 ```python
@@ -575,7 +624,9 @@ job = JobFactory(architecture="amd64")
 assigned = assign_job_to_runner(job, runner)
 assert assigned is True
 ```
+
 ### Using Faker for Realistic Data
+
 ```python
 from faker import Faker
 fake = Faker()
@@ -591,7 +642,9 @@ assert project.name == config["project_name"]
 ```
 
 ## Performance Testing
+
 ### Load Testing
+
 ```python
 import pytest
 from locust import HttpUser, task, between
@@ -610,7 +663,9 @@ self.client.post("/projects/1/pipeline", json={
 
 # Run with: locust -f tests/performance/test_load.py --host=https://gitlab.test.local
 ```
+
 ### Benchmarking
+
 ```python
 def test_provision_performance(benchmark):
 """Benchmark runner provisioning speed."""
@@ -622,8 +677,11 @@ def test_gpu_detection_performance(benchmark):
 result = benchmark(gpu_detector.detect_all)
 assert len(result) > 0
 ```
+
 ## Mocking Strategies
+
 ### Mocking Docker Client
+
 ```python
 @pytest.fixture
 def mock_docker():
@@ -637,7 +695,9 @@ client.containers.list.return_value = []
 
 yield client
 ```
+
 ### Mocking Kubernetes API
+
 ```python
 @pytest.fixture
 def mock_k8s_client():
@@ -651,7 +711,9 @@ metadata=Mock(name="test-pod")
 )
 yield api
 ```
+
 ### Mocking External APIs
+
 ```python
 @pytest.fixture
 def mock_gitlab_api():
@@ -669,8 +731,11 @@ json={'id': 123, 'status': 'pending'}
 )
 yield m
 ```
+
 ## Debugging Tests
+
 ### Using pytest Debugging
+
 ```bash
 # Drop into debugger on failure
 pytest --pdb
@@ -682,7 +747,9 @@ pytest --showlocals
 
 pytest -vv tests/unit/test_runner_manager.py::TestRunnerManager::test_provision
 ```
+
 ### Logging in Tests
+
 ```python
 import logging
 def test_with_logging(caplog):
@@ -693,7 +760,9 @@ manager.provision("amd64")
 assert "Provisioning runner" in caplog.text
 assert any("amd64" in record.message for record in caplog.records)
 ```
+
 ### Test Markers
+
 ```python
 # Mark slow tests
 @pytest.mark.slow
@@ -718,8 +787,11 @@ pass
 # Only GPU tests
 
 ```
+
 ## Testing Checklist
+
 Before submitting a PR, ensure:
+
 - [ ] All tests pass locally
 - [ ] New code has tests (90%+ coverage)
 - [ ] Tests follow naming conventions
@@ -731,11 +803,14 @@ Before submitting a PR, ensure:
 - [ ] Coverage threshold met (80%+)
 - [ ] No flaky tests
 - [ ] Test documentation updated
+
 ## Common Testing Pitfalls
 
 ### 1. Flaky Tests
-**Problem**: Tests that pass/fail randomly
-**Solution**: Avoid timing dependencies, use proper mocking
+
+**Problem**: Tests that pass/fail randomly **Solution**: Avoid timing dependencies, use proper
+mocking
+
 ```python
 # Bad - timing dependent
 def test_async_operation():
@@ -751,9 +826,11 @@ start_async_task()
 wait_until(lambda: is_complete(), timeout=5)
 assert is_complete()
 ```
+
 ### 2. Test Interdependence
-**Problem**: Tests that depend on execution order
-**Solution**: Make each test independent
+
+**Problem**: Tests that depend on execution order **Solution**: Make each test independent
+
 ```python
 # Bad - depends on previous test
 def test_create_runner():
@@ -769,9 +846,12 @@ def test_create_and_delete_runner():
 runner_id = manager.provision("amd64")
 manager.deprovision(runner_id)
 ```
+
 ### 3. Over-Mocking
-**Problem**: Mocking too much defeats the purpose of testing
-**Solution**: Mock only external dependencies
+
+**Problem**: Mocking too much defeats the purpose of testing **Solution**: Mock only external
+dependencies
+
 ```python
 # Bad - mocking internal logic
 @patch('autogit.runners.RunnerManager._validate_config')
@@ -783,17 +863,19 @@ def test_provision_with_invalid_config():
 with pytest.raises(ConfigError):
 RunnerManager({"invalid": "config"})
 ```
+
 ## Resources
 
 - **pytest Documentation**: https://docs.pytest.org/
 - **Testing Best Practices**: https://testdriven.io/blog/testing-best-practices/
 - **Coverage.py**: https://coverage.readthedocs.io/
 - **Factory Boy**: https://factoryboy.readthedocs.io/
+
 ## Next Steps
+
 - Review [Coding Standards](standards.md)
 - Set up [Development Environment](setup.md)
 - Read [CI/CD Guide](ci-cd.md)
-- Check [Common Tasks](common-tasks.md)
---**Documentation Version**: 1.0.0
-**Last Updated**: YYYY-MM-DD
-**Related Docs**: [Development Overview](README.md) | [Standards](standards.md) | [CI/CD](ci-cd.md)
+- Check [Common Tasks](common-tasks.md) --**Documentation Version**: 1.0.0 **Last Updated**:
+  YYYY-MM-DD **Related Docs**: [Development Overview](README.md) | [Standards](standards.md) |
+  [CI/CD](ci-cd.md)

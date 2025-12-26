@@ -9,9 +9,9 @@ This module provides functionality to:
 """
 
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from datetime import datetime
 
 from .models import Task, TaskStatus
 
@@ -28,8 +28,9 @@ class TaskExecutor:
         """
         self.repo_path = Path(repo_path)
 
-    def create_branch_for_task(self, task: Task, base_branch: str = "dev",
-                              interactive: bool = True) -> bool:
+    def create_branch_for_task(
+        self, task: Task, base_branch: str = "dev", interactive: bool = True
+    ) -> bool:
         """
         Create a git branch for the given task.
 
@@ -55,7 +56,7 @@ class TaskExecutor:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if result.returncode != 0:
@@ -68,7 +69,7 @@ class TaskExecutor:
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if result.returncode == 0:
@@ -77,54 +78,32 @@ class TaskExecutor:
                 # Ask if user wants to checkout (only in interactive mode)
                 if interactive:
                     response = input(f"Checkout existing branch '{branch_name}'? (y/n): ")
-                    if response.lower() == 'y':
+                    if response.lower() == "y":
                         subprocess.run(
-                            ["git", "checkout", branch_name],
-                            cwd=self.repo_path,
-                            check=True
+                            ["git", "checkout", branch_name], cwd=self.repo_path, check=True
                         )
                         print(f"✅ Checked out branch: {branch_name}")
                 else:
                     # Non-interactive: just checkout the existing branch
-                    subprocess.run(
-                        ["git", "checkout", branch_name],
-                        cwd=self.repo_path,
-                        check=True
-                    )
+                    subprocess.run(["git", "checkout", branch_name], cwd=self.repo_path, check=True)
                     print(f"✅ Checked out existing branch: {branch_name}")
                 return True
 
             # Fetch latest changes
             print(f"📥 Fetching latest changes from origin...")
-            subprocess.run(
-                ["git", "fetch", "origin"],
-                cwd=self.repo_path,
-                check=True
-            )
+            subprocess.run(["git", "fetch", "origin"], cwd=self.repo_path, check=True)
 
             # Checkout base branch
             print(f"🔄 Checking out base branch: {base_branch}")
-            subprocess.run(
-                ["git", "checkout", base_branch],
-                cwd=self.repo_path,
-                check=True
-            )
+            subprocess.run(["git", "checkout", base_branch], cwd=self.repo_path, check=True)
 
             # Pull latest changes
             print(f"📥 Pulling latest changes...")
-            subprocess.run(
-                ["git", "pull", "origin", base_branch],
-                cwd=self.repo_path,
-                check=True
-            )
+            subprocess.run(["git", "pull", "origin", base_branch], cwd=self.repo_path, check=True)
 
             # Create new branch
             print(f"🌿 Creating new branch: {branch_name}")
-            subprocess.run(
-                ["git", "checkout", "-b", branch_name],
-                cwd=self.repo_path,
-                check=True
-            )
+            subprocess.run(["git", "checkout", "-b", branch_name], cwd=self.repo_path, check=True)
 
             print(f"✅ Successfully created and checked out branch: {branch_name}")
             print(f"🚀 Ready to start work on: {task.title}")
@@ -218,9 +197,14 @@ class TaskExecutor:
 
         return summary_text
 
-    def execute_task(self, task: Task, create_branch: bool = True,
-                    generate_summary: bool = True, base_branch: str = "dev",
-                    interactive: bool = True) -> bool:
+    def execute_task(
+        self,
+        task: Task,
+        create_branch: bool = True,
+        generate_summary: bool = True,
+        base_branch: str = "dev",
+        interactive: bool = True,
+    ) -> bool:
         """
         Execute the complete workflow for starting work on a task.
 

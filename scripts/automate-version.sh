@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 # Function to get the current version from git tags
 get_current_version() {
     local version
-    version=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+    version=$(git describe --tags --abbrev=0 2> /dev/null || echo "v0.0.0")
     echo "$version"
 }
 
@@ -30,18 +30,18 @@ increment_version() {
     patch=$(echo "$version" | cut -d. -f3 | cut -d- -f1)
 
     case "$type" in
-    major)
-        major=$((major + 1))
-        minor=0
-        patch=0
-        ;;
-    minor)
-        minor=$((minor + 1))
-        patch=0
-        ;;
-    patch)
-        patch=$((patch + 1))
-        ;;
+        major)
+            major=$((major + 1))
+            minor=0
+            patch=0
+            ;;
+        minor)
+            minor=$((minor + 1))
+            patch=0
+            ;;
+        patch)
+            patch=$((patch + 1))
+            ;;
     esac
 
     echo "v$major.$minor.$patch"

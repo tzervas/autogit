@@ -1,6 +1,7 @@
 # .github Directory
 
-This directory contains GitHub-specific configuration, workflows, and documentation for the AutoGit project.
+This directory contains GitHub-specific configuration, workflows, and documentation for the AutoGit
+project.
 
 ## Contents
 
@@ -29,26 +30,26 @@ This directory contains GitHub-specific configuration, workflows, and documentat
 If you're setting up this repository for the first time:
 
 1. Read [`AUTO_MERGE_SETUP.md`](AUTO_MERGE_SETUP.md) - Quick setup guide
-2. Read [`BRANCH_PROTECTION.md`](BRANCH_PROTECTION.md) - Detailed configuration
-3. Configure repository settings following the guides
-4. Test workflows with a sample PR
+1. Read [`BRANCH_PROTECTION.md`](BRANCH_PROTECTION.md) - Detailed configuration
+1. Configure repository settings following the guides
+1. Test workflows with a sample PR
 
 ### Understanding Workflows
 
 To understand the CI/CD pipeline:
 
 1. Read [`workflows/README.md`](workflows/README.md) - Workflow overview
-2. Review individual workflow files in `workflows/`
-3. Check Actions tab in repository for run history
+1. Review individual workflow files in `workflows/`
+1. Check Actions tab in repository for run history
 
 ### Contributing
 
 For contributors:
 
 1. Review [`CODEOWNERS`](CODEOWNERS) to see who reviews what
-2. Use PR templates in `PULL_REQUEST_TEMPLATE/`
-3. Follow branching strategy in [`BRANCH_PROTECTION.md`](BRANCH_PROTECTION.md)
-4. Ensure labels from [`labels.yml`](labels.yml) are applied
+1. Use PR templates in `PULL_REQUEST_TEMPLATE/`
+1. Follow branching strategy in [`BRANCH_PROTECTION.md`](BRANCH_PROTECTION.md)
+1. Ensure labels from [`labels.yml`](labels.yml) are applied
 
 ## Workflows Overview
 
@@ -82,21 +83,23 @@ main (fully protected)
 
 ### Merge Rules
 
-| From | To | Approval Required | Auto-Merge |
-|------|----|--------------------|------------|
-| Work | Subtask | Evaluator or label | ✅ Yes |
-| Subtask | Feature | Evaluator or label | ✅ Yes |
-| Feature | Dev | Owner (@tzervas) | ✅ Yes |
-| Dev | Main | Owner (manual) | ❌ No |
+| From    | To      | Approval Required  | Auto-Merge |
+| ------- | ------- | ------------------ | ---------- |
+| Work    | Subtask | Evaluator or label | ✅ Yes     |
+| Subtask | Feature | Evaluator or label | ✅ Yes     |
+| Feature | Dev     | Owner (@tzervas)   | ✅ Yes     |
+| Dev     | Main    | Owner (manual)     | ❌ No      |
 
 ## Code Ownership
 
 - **Owner**: @tzervas
+
   - Final approval for all feature→dev merges
   - Final approval for all dev→main merges
   - Owns critical infrastructure files
 
 - **Evaluator Agent**:
+
   - Reviews work→subtask merges
   - Reviews subtask→feature merges
   - Automated approval via label
@@ -147,6 +150,7 @@ See [`labels.yml`](labels.yml) for complete list.
 ## Dependabot
 
 Automated dependency updates for:
+
 - GitHub Actions (weekly)
 - Docker base images (weekly)
 
@@ -174,6 +178,7 @@ Templates are in `PULL_REQUEST_TEMPLATE/` directory.
 ### Workflow Permissions
 
 All workflows use minimal required permissions:
+
 - Read access by default
 - Write access only when needed (merge, label)
 - Token scoped to repository only
@@ -181,6 +186,7 @@ All workflows use minimal required permissions:
 ### Secrets
 
 No repository secrets currently required. All workflows use:
+
 - `GITHUB_TOKEN` - Automatically provided
 
 ## Maintenance
@@ -199,10 +205,10 @@ No repository secrets currently required. All workflows use:
 When making changes:
 
 1. Update configuration files
-2. Update relevant documentation
-3. Test changes in feature branch
-4. Get owner review before merging
-5. Communicate changes to team
+1. Update relevant documentation
+1. Test changes in feature branch
+1. Get owner review before merging
+1. Communicate changes to team
 
 ## Related Documentation
 

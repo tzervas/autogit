@@ -84,10 +84,10 @@ jobs:
         run: |
           SHOULD_RELEASE="false"
           SOURCE_BRANCH=""
-          
+
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
-          
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # Manual dispatch - use selected branch
             SOURCE_BRANCH="${{ inputs.source_branch }}"
@@ -96,7 +96,7 @@ jobs:
           elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/tags/* ]]; then
             # Tag push (from versioning workflow or manual)
             TAG_NAME="${GITHUB_REF#refs/tags/}"
-            
+
             # Determine source branch based on tag pattern
             if [[ "$TAG_NAME" == *"-dev."* ]]; then
               SOURCE_BRANCH="dev"
@@ -105,10 +105,10 @@ jobs:
               SOURCE_BRANCH="main"
               echo "✅ Production release triggered by tag push: $TAG_NAME"
             fi
-            
+
             SHOULD_RELEASE="true"
           fi
-          
+
           echo "should_release=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
           echo "source_branch=$SOURCE_BRANCH" >> $GITHUB_OUTPUT
           echo "Should release: $SHOULD_RELEASE"
@@ -149,7 +149,7 @@ jobs:
         id: determine_version
         run: |
           VERSION=""
-          
+
           # Handle different trigger scenarios
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             if [ "${{ inputs.version_mode }}" = "manual" ]; then
@@ -166,15 +166,15 @@ jobs:
                 # Get last PR merged into dev
                 PR_DATA=$(gh pr list --state merged --base dev --limit 1 --json number,title,mergedAt,headRefName --jq '.[0]')
               fi
-              
+
               if [ -n "$PR_DATA" ] && [ "$PR_DATA" != "null" ]; then
                 PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
                 PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
                 echo "📋 Last merged PR #$PR_NUMBER: $PR_TITLE"
-                
+
                 # Try to extract version from PR title (e.g., "Release v0.3.0" or "v0.3.0")
                 EXTRACTED_VERSION=$(echo "$PR_TITLE" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
-                
+
                 if [ -n "$EXTRACTED_VERSION" ]; then
                   VERSION="$EXTRACTED_VERSION"
                   echo "✅ Extracted version from PR title: $VERSION"
@@ -186,23 +186,23 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/}
             echo "✅ Using version from tag: $VERSION"
           fi
-          
+
           # If no version determined yet, auto-increment from latest tag
           if [ -z "$VERSION" ]; then
             echo "🔄 No version found, auto-incrementing from latest tag..."
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
             echo "Latest tag: $LATEST_TAG"
-            
+
             # Parse version components
             MAJOR=$(echo "$LATEST_TAG" | sed 's/v//' | cut -d. -f1)
             MINOR=$(echo "$LATEST_TAG" | sed 's/v//' | cut -d. -f2)
             PATCH=$(echo "$LATEST_TAG" | sed 's/v//' | cut -d. -f3 | cut -d- -f1)
-            
+
             # Determine increment type based on branch or commit messages
             if [ "${{ needs.validate-release.outputs.source_branch }}" = "main" ]; then
               # For main branch, check recent commits for version hints
               RECENT_COMMITS=$(git log --oneline -20)
-              
+
               if echo "$RECENT_COMMITS" | grep -qiE '\b(BREAKING CHANGE|major)\b'; then
                 MAJOR=$((MAJOR + 1))
                 MINOR=0
@@ -220,11 +220,11 @@ jobs:
               # For dev or other branches, increment patch
               PATCH=$((PATCH + 1))
             fi
-            
+
             VERSION="v$MAJOR.$MINOR.$PATCH"
             echo "✅ Auto-generated version: $VERSION"
           fi
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📦 Final version: $VERSION"
         env:
@@ -234,7 +234,7 @@ jobs:
         id: create_tag
         run: |
           VERSION="${{ steps.determine_version.outputs.version }}"
-          
+
           # Check if tag exists
           if git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
             echo "✅ Tag $VERSION already exists"
@@ -244,7 +244,7 @@ jobs:
               echo "❌ Tag $VERSION does not exist and create_tag is false"
               exit 1
             fi
-            
+
             echo "⚠️  Tag $VERSION does not exist. Creating it now..."
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -254,24 +254,24 @@ jobs:
             echo "✅ Created and pushed tag $VERSION"
             TAG_EXISTS="false"
           fi
-          
+
           echo "tag_exists=$TAG_EXISTS" >> $GITHUB_OUTPUT
 
       - name: Generate release notes
         id: generate_notes
         run: |
           VERSION="${{ steps.determine_version.outputs.version }}"
-          
+
           # Start with header
           echo "# Release $VERSION" > release_notes.md
           echo "" >> release_notes.md
-          
+
           # Add PR information if available
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "**Merged from**: PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}" >> release_notes.md
             echo "**Author**: @${{ github.event.pull_request.user.login }}" >> release_notes.md
             echo "" >> release_notes.md
-            
+
             # Add PR body if available
             PR_BODY="${{ github.event.pull_request.body }}"
             if [ -n "$PR_BODY" ]; then
@@ -286,17 +286,17 @@ jobs:
             else
               PR_DATA=$(gh pr list --state merged --base dev --limit 1 --json number,title,author,body --jq '.[0]')
             fi
-            
+
             if [ -n "$PR_DATA" ] && [ "$PR_DATA" != "null" ]; then
               PR_NUMBER=$(echo "$PR_DATA" | jq -r '.number')
               PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
               PR_AUTHOR=$(echo "$PR_DATA" | jq -r '.author.login')
               PR_BODY=$(echo "$PR_DATA" | jq -r '.body // ""')
-              
+
               echo "**Based on**: PR #$PR_NUMBER - $PR_TITLE" >> release_notes.md
               echo "**Author**: @$PR_AUTHOR" >> release_notes.md
               echo "" >> release_notes.md
-              
+
               if [ -n "$PR_BODY" ]; then
                 echo "## Changes" >> release_notes.md
                 echo "$PR_BODY" >> release_notes.md
@@ -304,7 +304,7 @@ jobs:
               fi
             fi
           fi
-          
+
           # Extract changelog for this version from CHANGELOG.md if it exists
           if [ -f "CHANGELOG.md" ]; then
             CHANGES=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d')
@@ -314,7 +314,7 @@ jobs:
               echo "$CHANGES" >> release_notes.md
             fi
           fi
-          
+
           echo "notes=release_notes.md" >> $GITHUB_OUTPUT
           echo "✅ Release notes generated"
         env:

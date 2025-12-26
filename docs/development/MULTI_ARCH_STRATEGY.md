@@ -2,14 +2,14 @@
 
 ## Overview
 
-AutoGit supports multiple CPU architectures to enable deployment on diverse hardware platforms. This document outlines the strategy for AMD64, ARM64, and RISC-V support.
+AutoGit supports multiple CPU architectures to enable deployment on diverse hardware platforms. This
+document outlines the strategy for AMD64, ARM64, and RISC-V support.
 
 ## Supported Architectures
 
 ### 1. AMD64 (x86_64) - Primary Platform
-**Status**: ✅ Full Support (MVP Focus)
-**Implementation**: Native
-**Testing**: Active
+
+**Status**: ✅ Full Support (MVP Focus) **Implementation**: Native **Testing**: Active
 
 - Primary development and testing platform
 - Most widely deployed architecture
@@ -18,11 +18,12 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 - Primary CI/CD testing target
 
 ### 2. ARM64 (aarch64) - Hybrid Support
-**Status**: 🔄 Planned (Post-MVP)
-**Implementation**: Native + QEMU Emulation
-**Testing**: Post-Deployment
+
+**Status**: 🔄 Planned (Post-MVP) **Implementation**: Native + QEMU Emulation **Testing**:
+Post-Deployment
 
 #### Native ARM64
+
 - For users with ARM64 hosts/runners
 - Full native performance
 - Ideal for ARM-based servers (AWS Graviton, Ampere, Apple Silicon, Raspberry Pi 4/5)
@@ -30,6 +31,7 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 - Optimal resource utilization
 
 #### ARM64 via QEMU Emulation
+
 - Fallback for AMD64 hosts without ARM64 hardware
 - Allows cross-platform development
 - Slower than native but fully functional
@@ -37,9 +39,8 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 - Resource overhead acceptable for testing
 
 ### 3. RISC-V - Emulation Only
-**Status**: 🔮 Future (Experimental)
-**Implementation**: QEMU Emulation
-**Testing**: Future
+
+**Status**: 🔮 Future (Experimental) **Implementation**: QEMU Emulation **Testing**: Future
 
 - Emerging architecture support
 - QEMU emulation on AMD64 or ARM64 hosts
@@ -51,21 +52,23 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 
 ### Phase 1: MVP - AMD64 Native Only (Current)
 
-**Timeline**: Now - Initial Deployment
-**Focus**: Stable AMD64 foundation
+**Timeline**: Now - Initial Deployment **Focus**: Stable AMD64 foundation
 
 #### Deliverables
+
 - ✅ AMD64 native Docker images
 - ✅ AMD64 testing infrastructure
 - ✅ AMD64 deployment documentation
 - ✅ Performance benchmarks (AMD64)
 
 #### Testing
+
 - All testing on AMD64 native
 - CI/CD on AMD64 runners
 - Production deployment on AMD64 hosts
 
 #### Rationale
+
 - Establish stable baseline
 - Ensure core functionality works
 - Get to deployment faster
@@ -73,10 +76,10 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 
 ### Phase 2: ARM64 Support (Post-Deployment)
 
-**Timeline**: After AMD64 deployment validated
-**Focus**: Native ARM64 + QEMU fallback
+**Timeline**: After AMD64 deployment validated **Focus**: Native ARM64 + QEMU fallback
 
 #### Deliverables
+
 - [ ] ARM64 native Docker images
 - [ ] ARM64 native testing (when infrastructure available)
 - [ ] QEMU ARM64 emulation setup
@@ -85,33 +88,37 @@ AutoGit supports multiple CPU architectures to enable deployment on diverse hard
 - [ ] Performance comparison (native vs QEMU)
 
 #### Testing
+
 - ARM64 native on ARM64 runners (when available)
 - QEMU ARM64 on AMD64 hosts
 - Cross-architecture compatibility
 - Performance benchmarking
 
 #### Prerequisites
+
 - AMD64 deployment stable and running
 - ARM64 infrastructure available (runners/hosts)
 - Multi-arch build pipeline configured
 
 ### Phase 3: RISC-V Emulation (Future)
 
-**Timeline**: After ARM64 validated
-**Focus**: Experimental RISC-V support
+**Timeline**: After ARM64 validated **Focus**: Experimental RISC-V support
 
 #### Deliverables
+
 - [ ] RISC-V QEMU emulation setup
 - [ ] RISC-V Docker images (emulated)
 - [ ] Basic functional testing
 - [ ] Documentation for RISC-V testing
 
 #### Testing
+
 - QEMU RISC-V emulation
 - Functional validation only
 - Performance monitoring (not critical)
 
 #### Prerequisites
+
 - ARM64 support stable
 - QEMU infrastructure mature
 - Community interest/demand
@@ -242,21 +249,24 @@ services:
 ## Performance Considerations
 
 ### Native Performance
+
 - **AMD64 Native**: Baseline performance (100%)
 - **ARM64 Native**: ~95-105% of AMD64 (architecture dependent)
 - **RISC-V Native**: TBD (future hardware)
 
 ### QEMU Emulation Performance
+
 - **ARM64 on AMD64 via QEMU**: ~30-50% of native
 - **RISC-V on AMD64 via QEMU**: ~20-40% of native
 - **Overhead**: CPU-intensive operations suffer most
 - **Acceptable**: For testing and development
 
 ### Recommendations
+
 1. **Production**: Use native architecture when possible
-2. **Development**: QEMU emulation acceptable
-3. **Testing**: QEMU useful for cross-platform validation
-4. **CI/CD**: Native runners preferred
+1. **Development**: QEMU emulation acceptable
+1. **Testing**: QEMU useful for cross-platform validation
+1. **CI/CD**: Native runners preferred
 
 ## Testing Strategy
 
@@ -268,6 +278,7 @@ services:
 ```
 
 **Coverage**:
+
 - ✅ Unit tests
 - ✅ Integration tests
 - ✅ E2E tests
@@ -284,6 +295,7 @@ services:
 ```
 
 **Coverage**:
+
 - ARM64 native functionality
 - QEMU emulation functionality
 - Cross-architecture compatibility
@@ -297,6 +309,7 @@ services:
 ```
 
 **Coverage**:
+
 - Basic functionality
 - Emulation stability
 - Future readiness
@@ -304,11 +317,13 @@ services:
 ## Documentation Requirements
 
 ### MVP Documentation (AMD64)
+
 - ✅ AMD64 installation guide
 - ✅ AMD64 deployment guide
 - ✅ AMD64 troubleshooting
 
 ### Post-MVP Documentation (ARM64)
+
 - [ ] ARM64 native installation
 - [ ] ARM64 native deployment
 - [ ] QEMU setup guide
@@ -317,6 +332,7 @@ services:
 - [ ] Troubleshooting multi-arch issues
 
 ### Future Documentation (RISC-V)
+
 - [ ] RISC-V emulation setup
 - [ ] RISC-V testing guide
 - [ ] Known limitations
@@ -324,12 +340,14 @@ services:
 ## Use Cases by Architecture
 
 ### AMD64 Use Cases
+
 - Production deployments
 - Development workstations
 - Cloud deployments (AWS, GCP, Azure)
 - Traditional data centers
 
 ### ARM64 Native Use Cases
+
 - AWS Graviton instances
 - Ampere Altra servers
 - Apple Silicon development
@@ -338,12 +356,14 @@ services:
 - Cost-effective cloud deployments
 
 ### ARM64 QEMU Use Cases
+
 - Cross-platform development on AMD64
 - Testing ARM64 images without hardware
 - CI/CD pipelines without ARM64 runners
 - Development and validation
 
 ### RISC-V Use Cases
+
 - Future-proofing
 - Academic/research environments
 - Experimental deployments
@@ -352,42 +372,52 @@ services:
 ## Migration Path
 
 ### For AMD64 Users
+
 1. Deploy on AMD64 (MVP)
-2. Stay on AMD64 (no migration needed)
-3. Optional: Test ARM64 QEMU for development
+1. Stay on AMD64 (no migration needed)
+1. Optional: Test ARM64 QEMU for development
 
 ### For ARM64 Users
+
 1. Wait for Phase 2 completion
-2. Deploy ARM64 native images
-3. Enjoy native performance
-4. Fallback to QEMU if needed
+1. Deploy ARM64 native images
+1. Enjoy native performance
+1. Fallback to QEMU if needed
 
 ### For Mixed Environments
+
 1. Deploy AMD64 for critical services
-2. Deploy ARM64 native where available
-3. Use QEMU for testing/development
+1. Deploy ARM64 native where available
+1. Use QEMU for testing/development
 
 ## FAQ
 
 ### Q: Should I use ARM64 native or QEMU?
+
 **A**: If you have ARM64 hardware, always use native. QEMU is for development/testing only.
 
 ### Q: When will ARM64 native support be available?
+
 **A**: After AMD64 MVP is deployed and validated. See Phase 2 timeline.
 
 ### Q: Can I test ARM64 images before Phase 2?
+
 **A**: Yes, using QEMU emulation on AMD64 hosts.
 
 ### Q: What about RISC-V?
+
 **A**: RISC-V is experimental for future-proofing. Not recommended for production.
 
 ### Q: Which architecture should I choose?
+
 **A**:
+
 - **Production**: AMD64 native (MVP) or ARM64 native (Phase 2+)
 - **Development**: Your native architecture
 - **Testing**: Any architecture via QEMU
 
 ### Q: Can I mix architectures in a cluster?
+
 **A**: Future feature. MVP focuses on single-architecture deployments.
 
 ## Current Status
@@ -400,14 +430,13 @@ services:
 ## Next Steps
 
 1. ✅ Complete AMD64 MVP implementation
-2. ✅ Deploy and validate AMD64 in production
-3. ⏳ Implement ARM64 native support
-4. ⏳ Add QEMU emulation support
-5. ⏳ Test ARM64 (native and QEMU)
-6. 🔮 Consider RISC-V when mature
+1. ✅ Deploy and validate AMD64 in production
+1. ⏳ Implement ARM64 native support
+1. ⏳ Add QEMU emulation support
+1. ⏳ Test ARM64 (native and QEMU)
+1. 🔮 Consider RISC-V when mature
 
----
+______________________________________________________________________
 
-**Last Updated**: 2025-12-21
-**Status**: MVP (AMD64 Native Only)
-**Next Phase**: ARM64 Support (Post-Deployment)
+**Last Updated**: 2025-12-21 **Status**: MVP (AMD64 Native Only) **Next Phase**: ARM64 Support
+(Post-Deployment)

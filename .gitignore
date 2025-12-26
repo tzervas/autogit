@@ -32,6 +32,14 @@ ENV/
 *_password
 *_secrets
 
+# Secrets and credentials (NEVER COMMIT!)
+.autogit_secrets
+.autogit_login_info
+.env*
+*.token
+*_password
+*_secrets
+
 # Logs
 *.log
 
@@ -47,3 +55,7 @@ data/
 TASK_SUMMARY_*.md
 infrastructure/homelab/.terraform/
 infrastructure/homelab/*.tfstate*
+homelab-migration/data/
+homelab-migration/ssl/
+homelab-migration/*.log
+deployment-logs/

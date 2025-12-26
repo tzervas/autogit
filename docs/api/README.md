@@ -5,6 +5,7 @@ This guide covers the AutoGit APIs for programmatic access.
 ## Overview
 
 AutoGit exposes several APIs:
+
 - **Runner Manager API** - For managing runner lifecycle
 - **GPU Detector API** - For querying GPU availability
 - **Configuration API** - For runtime configuration
@@ -65,6 +66,7 @@ Interface for implementing custom autoscaling plugins.
 ### Plugin Protocol
 
 Fleeting plugins must implement:
+
 - `Init()` - Initialize plugin
 - `Provision()` - Provision new instance
 - `Deprovision()` - Remove instance
@@ -82,6 +84,7 @@ See [REST API](rest.md) for complete reference.
 ## Client Libraries
 
 Official client libraries:
+
 - **Python** - `pip install autogit-client`
 - **Go** - `go get github.com/yourusername/autogit-go`
 - **JavaScript** - `npm install autogit-client`
@@ -91,6 +94,7 @@ See [Client Libraries](clients.md) for usage examples.
 ## Webhooks
 
 AutoGit can send webhooks for events:
+
 - Runner provisioned
 - Runner deprovisioned
 - Job started
@@ -102,6 +106,7 @@ See [Webhooks](webhooks.md) for configuration.
 ## API Versioning
 
 AutoGit uses semantic versioning for APIs:
+
 - `/v1/` - Current stable API
 - `/v2/` - Next major version (when available)
 
@@ -110,6 +115,7 @@ See [Versioning Policy](versioning.md) for details.
 ## Rate Limiting
 
 API requests are rate limited:
+
 - 100 requests per minute (authenticated)
 - 10 requests per minute (unauthenticated)
 

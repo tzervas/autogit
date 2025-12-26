@@ -5,9 +5,9 @@
 set -e
 
 # Load environment variables
-if [ -f ".env.homelab" ]; then
+if [ -f ".env" ]; then
     set -a
-    source .env.homelab
+    source .env
     set +a
 fi
 
@@ -40,11 +40,11 @@ show_status() {
     # Run health checks in parallel to avoid blocking the UI
     (
         GITLAB_HEALTH=$(ssh -i "$KEY_PATH" -o ConnectTimeout=2 "$USER@$HOST" "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/-/health || echo 'FAIL'")
-        echo "GITLAB:$GITLAB_HEALTH" >/tmp/autogit_health
+        echo "GITLAB:$GITLAB_HEALTH" > /tmp/autogit_health
     ) &
     (
         RUNNER_HEALTH=$(ssh -i "$KEY_PATH" -o ConnectTimeout=2 "$USER@$HOST" "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/health || echo 'FAIL'")
-        echo "RUNNER:$RUNNER_HEALTH" >>/tmp/autogit_health
+        echo "RUNNER:$RUNNER_HEALTH" >> /tmp/autogit_health
     ) &
 
     # Wait a moment for health checks or show "Checking..."
@@ -106,33 +106,33 @@ while true; do
     read -r -n 1 opt
     echo ""
     case $opt in
-    s)
-        sync_files
-        read -r -n 1 -p "Press any key to continue..."
-        ;;
-    d)
-        sync_files
-        deploy
-        read -r -n 1 -p "Press any key to continue..."
-        ;;
-    u)
-        sync_files
-        fast_update
-        read -r -n 1 -p "Press any key to continue..."
-        ;;
-    r)
-        restart_services
-        read -r -n 1 -p "Press any key to continue..."
-        ;;
-    t)
-        tear_down
-        read -r -n 1 -p "Press any key to continue..."
-        ;;
-    l) show_logs ;;
-    q) exit 0 ;;
-    *)
-        echo "Invalid option"
-        sleep 1
-        ;;
+        s)
+            sync_files
+            read -r -n 1 -p "Press any key to continue..."
+            ;;
+        d)
+            sync_files
+            deploy
+            read -r -n 1 -p "Press any key to continue..."
+            ;;
+        u)
+            sync_files
+            fast_update
+            read -r -n 1 -p "Press any key to continue..."
+            ;;
+        r)
+            restart_services
+            read -r -n 1 -p "Press any key to continue..."
+            ;;
+        t)
+            tear_down
+            read -r -n 1 -p "Press any key to continue..."
+            ;;
+        l) show_logs ;;
+        q) exit 0 ;;
+        *)
+            echo "Invalid option"
+            sleep 1
+            ;;
     esac
 done

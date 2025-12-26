@@ -1,13 +1,15 @@
 """
 GitLab Runner Manager - Autonomous lifecycle management for GitLab runners
 """
+
 import asyncio
 import logging
 import os
-from typing import Dict, List, Optional
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
+from typing import Dict, List, Optional
+
 import requests
+from sqlalchemy.orm import Session
 
 from .driver import DockerDriver
 from .models import Runner
@@ -40,16 +42,20 @@ class RunnerManager:
         self.gitlab_token = gitlab_token
         self.cooldown_minutes = cooldown_minutes
         self.max_idle_runners = max_idle_runners
-        self.runner_image = "gitlab/gitlab-runner:alpine"
+        self.runner_image = os.getenv("RUNNER_IMAGE", "gitlab/gitlab-runner:alpine")
 
         # Get runner registration token from env or parameter
-        self.runner_registration_token = runner_registration_token or os.getenv("GITLAB_RUNNER_REGISTRATION_TOKEN")
+        self.runner_registration_token = runner_registration_token or os.getenv(
+            "GITLAB_RUNNER_REGISTRATION_TOKEN"
+        )
 
         # Enhanced resource limits - quad core, 4-6GB RAM for faster boot
         self.default_cpu_limit = float(os.getenv("RUNNER_CPU_LIMIT", "4.0"))
-        self.default_mem_limit = os.getenv("RUNNER_MEM_LIMIT", "6g")
+        self.default_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
 
-        logger.info(f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner")
+        logger.info(
+            f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner"
+        )
         logger.info(f"Cooldown: {self.cooldown_minutes} minutes, Max idle: {self.max_idle_runners}")
         if self.runner_registration_token:
             logger.info("✓ Runner registration token configured")
@@ -67,7 +73,7 @@ class RunnerManager:
             self.monitor_gitlab_jobs(),
             self.cleanup_idle_runners(),
             self.health_check_runners(),
-            return_exceptions=True
+            return_exceptions=True,
         )
 
     async def monitor_gitlab_jobs(self):
@@ -82,13 +88,15 @@ class RunnerManager:
                 projects = self._get_gitlab_projects()
 
                 for project in projects:
-                    project_id = project['id']
+                    project_id = project["id"]
 
                     # Check for pending jobs
                     pending_jobs = self._get_pending_jobs(project_id)
 
                     if pending_jobs:
-                        logger.info(f"Found {len(pending_jobs)} pending job(s) for project {project_id}")
+                        logger.info(
+                            f"Found {len(pending_jobs)} pending job(s) for project {project_id}"
+                        )
 
                         for job in pending_jobs:
                             await self.ensure_runner_for_job(job)
@@ -103,45 +111,38 @@ class RunnerManager:
         """
         Ensure a runner exists for the given job
         """
-        job_id = job['id']
-        job_tags = job.get('tag_list', [])
+        job_id = job["id"]
+        job_tags = job.get("tag_list", [])
 
         logger.info(f"Ensuring runner for job {job_id} with tags: {job_tags}")
 
         # Check if we have an idle runner that matches
-        idle_runner = self.db.query(Runner).filter(
-            Runner.status == "idle"
-        ).first()
+        idle_runner = self.db.query(Runner).filter(Runner.status == "idle").first()
 
         if idle_runner:
             logger.info(f"Found idle runner: {idle_runner.name}")
             return
 
         # Check if a runner is already being provisioned
-        provisioning = self.db.query(Runner).filter(
-            Runner.status == "provisioning"
-        ).count()
+        provisioning = self.db.query(Runner).filter(Runner.status == "provisioning").count()
 
         if provisioning > 0:
             logger.info("Runner already being provisioned")
             return
 
         # Spawn new runner
-        await self.spawn_runner(tags=job_tags or ['docker', 'autogit'])
+        await self.spawn_runner(tags=job_tags or ["docker", "autogit"])
 
     async def spawn_runner(
-        self,
-        tags: List[str] = None,
-        architecture: str = "amd64",
-        gpu_enabled: bool = False
+        self, tags: List[str] = None, architecture: str = "amd64", gpu_enabled: bool = False
     ) -> Optional[Runner]:
         """
         Spawn a new GitLab runner and register it
         """
-        import string
         import random
+        import string
 
-        runner_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+        runner_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
         runner_name = f"autogit-runner-{runner_id}"
 
         logger.info(f"Spawning runner: {runner_name}")
@@ -155,7 +156,7 @@ class RunnerManager:
                 mem_limit=self.default_mem_limit,
                 network="autogit-network",
                 platform=f"linux/{architecture}",
-                gpu_vendor="nvidia" if gpu_enabled else None
+                gpu_vendor="nvidia" if gpu_enabled else None,
             )
 
             # Create database entry
@@ -167,7 +168,7 @@ class RunnerManager:
                 gpu_enabled=gpu_enabled,
                 container_id=container_info["id"],
                 ip_address=container_info.get("ip_address"),
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
 
             self.db.add(runner)
@@ -176,7 +177,7 @@ class RunnerManager:
             logger.info(f"Runner container created: {runner_name}")
 
             # Register with GitLab
-            await self.register_runner_with_gitlab(runner, tags or ['docker', 'autogit'])
+            await self.register_runner_with_gitlab(runner, tags or ["docker", "autogit"])
 
             return runner
 
@@ -225,7 +226,7 @@ class RunnerManager:
                 tags=",".join(tags),
                 executor="docker",
                 docker_image="python:3.11-slim",
-                clone_url=clone_url
+                clone_url=clone_url,
             )
 
             # Start the runner
@@ -250,10 +251,7 @@ class RunnerManager:
             container = self.driver.client.containers.get(container_id)
 
             # Start gitlab-runner in the background
-            container.exec_run(
-                cmd=["gitlab-runner", "run"],
-                detach=True
-            )
+            container.exec_run(cmd=["gitlab-runner", "run"], detach=True)
 
             logger.info(f"Started runner service in container {container_id}")
 
@@ -273,22 +271,23 @@ class RunnerManager:
                 cooldown_threshold = datetime.utcnow() - timedelta(minutes=self.cooldown_minutes)
 
                 # Find idle runners past cooldown
-                idle_runners = self.db.query(Runner).filter(
-                    Runner.status == "idle",
-                    Runner.last_seen < cooldown_threshold
-                ).all()
+                idle_runners = (
+                    self.db.query(Runner)
+                    .filter(Runner.status == "idle", Runner.last_seen < cooldown_threshold)
+                    .all()
+                )
 
                 for runner in idle_runners:
                     # Keep minimum number of idle runners if configured
-                    current_idle = self.db.query(Runner).filter(
-                        Runner.status == "idle"
-                    ).count()
+                    current_idle = self.db.query(Runner).filter(Runner.status == "idle").count()
 
                     if current_idle <= self.max_idle_runners:
                         logger.info(f"Keeping {current_idle} idle runner(s) as warm pool")
                         break
 
-                    logger.info(f"Cleaning up idle runner: {runner.name} (idle since {runner.last_seen})")
+                    logger.info(
+                        f"Cleaning up idle runner: {runner.name} (idle since {runner.last_seen})"
+                    )
 
                     try:
                         # Unregister from GitLab first
@@ -320,9 +319,11 @@ class RunnerManager:
 
         while True:
             try:
-                active_runners = self.db.query(Runner).filter(
-                    Runner.status.in_(["idle", "busy", "provisioning"])
-                ).all()
+                active_runners = (
+                    self.db.query(Runner)
+                    .filter(Runner.status.in_(["idle", "busy", "provisioning"]))
+                    .all()
+                )
 
                 for runner in active_runners:
                     try:
@@ -354,7 +355,7 @@ class RunnerManager:
             response = requests.get(
                 f"{self.gitlab_url}/api/v4/projects",
                 headers={"PRIVATE-TOKEN": self.gitlab_token},
-                timeout=10
+                timeout=10,
             )
             response.raise_for_status()
             return response.json()
@@ -371,7 +372,7 @@ class RunnerManager:
                 f"{self.gitlab_url}/api/v4/projects/{project_id}/jobs",
                 headers={"PRIVATE-TOKEN": self.gitlab_token},
                 params={"scope[]": "pending"},
-                timeout=10
+                timeout=10,
             )
             response.raise_for_status()
             return response.json()

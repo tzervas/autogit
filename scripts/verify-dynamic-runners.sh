@@ -40,7 +40,7 @@ check_service() {
     local url=$2
     local endpoint=${3:-/health}
 
-    if curl -sf "${url}${endpoint}" >/dev/null 2>&1; then
+    if curl -sf "${url}${endpoint}" > /dev/null 2>&1; then
         success "${name} is UP"
         return 0
     else
@@ -62,9 +62,9 @@ if [ -z "${GITLAB_TOKEN}" ]; then
         GITLAB_TOKEN=$(cat "$TOKEN_FILE")
         info "Loaded GitLab token from ${TOKEN_FILE}"
         export GITLAB_TOKEN
-    elif [ -f ".env.gitlab" ]; then
-        source .env.gitlab
-        info "Loaded configuration from .env.gitlab"
+    elif [ -f ".env" ]; then
+        source .env
+        info "Loaded configuration from .env"
     fi
 fi
 
@@ -78,8 +78,8 @@ if [ -z "${GITLAB_TOKEN}" ]; then
         if [ -f "$TOKEN_FILE" ]; then
             GITLAB_TOKEN=$(cat "$TOKEN_FILE")
             export GITLAB_TOKEN
-        elif [ -f ".env.gitlab" ]; then
-            source .env.gitlab
+        elif [ -f ".env" ]; then
+            source .env
         fi
 
         if [ -z "${GITLAB_TOKEN}" ]; then
@@ -105,8 +105,8 @@ if [ -z "${GITLAB_TOKEN}" ]; then
             bash scripts/setup-gitlab-automation.sh
 
             # Reload configuration
-            if [ -f ".env.gitlab" ]; then
-                source .env.gitlab
+            if [ -f ".env" ]; then
+                source .env
             fi
         else
             warning "Continuing with limited functionality..."
@@ -122,7 +122,7 @@ echo "────────────────────────�
 check_service "Runner Coordinator" "$COORDINATOR_URL" "/health"
 COORDINATOR_UP=$?
 
-if curl -sf "${GITLAB_URL}/" >/dev/null 2>&1; then
+if curl -sf "${GITLAB_URL}/" > /dev/null 2>&1; then
     success "GitLab is UP"
     GITLAB_UP=0
 else
@@ -142,8 +142,8 @@ echo ""
 info "Step 2: Checking active runners..."
 echo "────────────────────────────────────────────────────────────────"
 
-RUNNERS=$(curl -sf "${COORDINATOR_URL}/runners" 2>/dev/null || echo "[]")
-RUNNER_COUNT=$(echo "$RUNNERS" | jq -r '. | length' 2>/dev/null || echo "0")
+RUNNERS=$(curl -sf "${COORDINATOR_URL}/runners" 2> /dev/null || echo "[]")
+RUNNER_COUNT=$(echo "$RUNNERS" | jq -r '. | length' 2> /dev/null || echo "0")
 
 if [ "$RUNNER_COUNT" -eq 0 ]; then
     info "No active runners (expected when idle)"
@@ -157,7 +157,7 @@ echo ""
 info "Step 3: Checking containers on homelab..."
 echo "────────────────────────────────────────────────────────────────"
 
-CONTAINERS=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit' --format '{{.Names}}\t{{.Status}}'" 2>/dev/null || echo "")
+CONTAINERS=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit' --format '{{.Names}}\t{{.Status}}'" 2> /dev/null || echo "")
 
 if [ -n "$CONTAINERS" ]; then
     echo "$CONTAINERS" | while IFS=$'\t' read -r name status; do
@@ -179,9 +179,9 @@ echo "────────────────────────�
 if [ -n "${GITLAB_TOKEN}" ]; then
     # Try to find the autogit project
     PROJECTS=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-        "${GITLAB_URL}/api/v4/projects?search=${PROJECT_NAME}" 2>/dev/null || echo "[]")
+        "${GITLAB_URL}/api/v4/projects?search=${PROJECT_NAME}" 2> /dev/null || echo "[]")
 
-    PROJECT_COUNT=$(echo "$PROJECTS" | jq -r '. | length' 2>/dev/null || echo "0")
+    PROJECT_COUNT=$(echo "$PROJECTS" | jq -r '. | length' 2> /dev/null || echo "0")
 
     if [ "$PROJECT_COUNT" -eq 0 ]; then
         warning "Project '${PROJECT_NAME}' not found in GitLab"
@@ -199,9 +199,9 @@ if [ -n "${GITLAB_TOKEN}" ]; then
                     \"visibility\": \"private\",
                     \"initialize_with_readme\": true
                 }" \
-                "${GITLAB_URL}/api/v4/projects" 2>/dev/null || echo "{}")
+                "${GITLAB_URL}/api/v4/projects" 2> /dev/null || echo "{}")
 
-            PROJECT_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id' 2>/dev/null)
+            PROJECT_ID=$(echo "$CREATE_RESPONSE" | jq -r '.id' 2> /dev/null)
 
             if [ -n "$PROJECT_ID" ] && [ "$PROJECT_ID" != "null" ]; then
                 success "Project created successfully (ID: ${PROJECT_ID})"
@@ -218,7 +218,7 @@ if [ -n "${GITLAB_TOKEN}" ]; then
                         \"commit_message\": \"Add CI/CD configuration\",
                         \"encoding\": \"base64\"
                     }" \
-                    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" >/dev/null 2>&1; then
+                    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml" > /dev/null 2>&1; then
                     success "CI configuration added"
                 else
                     warning "Could not add CI configuration automatically"
@@ -235,9 +235,9 @@ if [ -n "${GITLAB_TOKEN}" ]; then
 
         # Check if CI file exists
         CI_CHECK=$(curl -sf --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-            "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml?ref=main" 2>/dev/null || echo "{}")
+            "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/repository/files/.gitlab-ci.yml?ref=main" 2> /dev/null || echo "{}")
 
-        if echo "$CI_CHECK" | jq -e '.content' >/dev/null 2>&1; then
+        if echo "$CI_CHECK" | jq -e '.content' > /dev/null 2>&1; then
             success "CI configuration found"
         else
             warning "No .gitlab-ci.yml found in project"

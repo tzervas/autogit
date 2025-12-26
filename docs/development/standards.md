@@ -17,6 +17,7 @@ black src/ tests/
 ```
 
 Configuration in `pyproject.toml`:
+
 ```toml
 [tool.black]
 line-length = 100
@@ -47,10 +48,7 @@ from autogit.utils import logger
 All public functions must have type hints:
 
 ```python
-def provision_runner(
-    architecture: str,
-    gpu_type: Optional[str] = None
-) -> str:
+def provision_runner(architecture: str, gpu_type: Optional[str] = None) -> str:
     """Provision a new runner instance.
 
     Args:
@@ -112,14 +110,13 @@ Each class/function should have one reason to change:
 class RunnerProvisioner:
     """Handles runner provisioning only."""
 
-    def provision(self, config: RunnerConfig) -> Runner:
-        ...
+    def provision(self, config: RunnerConfig) -> Runner: ...
+
 
 class RunnerMonitor:
     """Handles runner monitoring only."""
 
-    def check_health(self, runner: Runner) -> bool:
-        ...
+    def check_health(self, runner: Runner) -> bool: ...
 ```
 
 ### Open/Closed Principle
@@ -131,20 +128,18 @@ Extend behavior without modifying existing code:
 class StorageBackend(Protocol):
     """Protocol for storage backends."""
 
-    def store(self, key: str, value: bytes) -> None:
-        ...
+    def store(self, key: str, value: bytes) -> None: ...
 
-    def retrieve(self, key: str) -> bytes:
-        ...
+    def retrieve(self, key: str) -> bytes: ...
+
 
 # Implementations can be added without modifying existing code
 class S3Storage:
-    def store(self, key: str, value: bytes) -> None:
-        ...
+    def store(self, key: str, value: bytes) -> None: ...
+
 
 class LocalStorage:
-    def store(self, key: str, value: bytes) -> None:
-        ...
+    def store(self, key: str, value: bytes) -> None: ...
 ```
 
 ### Dependency Inversion Principle
@@ -169,6 +164,7 @@ class RunnerManager:
 ```python
 import pytest
 from unittest.mock import Mock
+
 
 class TestRunnerProvisioner:
     """Tests for RunnerProvisioner."""
@@ -208,14 +204,19 @@ class TestRunnerProvisioner:
 ```python
 class AutoGitError(Exception):
     """Base exception for AutoGit."""
+
     pass
+
 
 class ProvisionError(AutoGitError):
     """Raised when runner provisioning fails."""
+
     pass
+
 
 class GPUNotFoundError(AutoGitError):
     """Raised when requested GPU is not available."""
+
     pass
 ```
 
@@ -239,6 +240,7 @@ raise ProvisionError("Provisioning failed")
 ```python
 from pydantic import BaseModel, Field, validator
 
+
 class RunnerConfig(BaseModel):
     """Configuration for runner."""
 
@@ -246,9 +248,9 @@ class RunnerConfig(BaseModel):
     max_runners: int = Field(10, ge=1, le=100)
     idle_timeout: int = Field(600, ge=60)
 
-    @validator('architecture')
+    @validator("architecture")
     def validate_architecture(cls, v):
-        allowed = ['amd64', 'arm64', 'riscv']
+        allowed = ["amd64", "arm64", "riscv"]
         if v not in allowed:
             raise ValueError(f"Architecture must be one of {allowed}")
         return v
@@ -270,7 +272,7 @@ logger.info(
         "runner_id": runner.id,
         "architecture": runner.architecture,
         "gpu_type": runner.gpu_type,
-    }
+    },
 )
 
 # Bad - Unstructured
@@ -292,6 +294,7 @@ logger.info(f"Runner {runner.id} provisioned")
 ```python
 # Good - Use environment variables
 import os
+
 secret = os.getenv("API_SECRET")
 
 # Bad - Hardcoded secret
@@ -303,7 +306,7 @@ secret = "my-secret-key-123"
 ```python
 # Always validate external input
 def process_architecture(arch: str) -> str:
-    allowed = ['amd64', 'arm64', 'riscv']
+    allowed = ["amd64", "arm64", "riscv"]
     if arch not in allowed:
         raise ValueError(f"Invalid architecture: {arch}")
     return arch
@@ -331,7 +334,7 @@ See docs/runners/README.md for usage examples.
 
 # Good - Explains reasoning
 # Use exponential backoff to avoid overwhelming the API
-retry_delay = 2 ** attempt
+retry_delay = 2**attempt
 
 # Bad - States the obvious
 # Increment counter by 1
@@ -409,6 +412,7 @@ chore: update dependencies
 ```
 
 Include affected documentation:
+
 ```
 feat: add GPU detection [docs: gpu/amd.md, api/gpu-detector.md]
 ```

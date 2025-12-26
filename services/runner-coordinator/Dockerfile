@@ -1,12 +1,27 @@
 # =============================================================================
 # AutoGit Runner Coordinator - Production Dockerfile
 # =============================================================================
+# Dynamic GitLab runner lifecycle manager with auto-scaling
+# Part of the AutoGit CI/CD platform
+#
+# Image: ghcr.io/tzervas/autogit/runner-coordinator:{version}-{arch}-{variant}
+# Docs:  https://github.com/tzervas/autogit/blob/main/docs/runners/AUTONOMOUS_RUNNERS.md
+#
 # This image is designed to be:
 # - Pre-compiled with all dependencies
 # - Free of any secrets or sensitive data
 # - Configurable entirely via environment variables
 # - Optimized for size and startup time
 # =============================================================================
+
+# =============================================================================
+# Build Arguments for Dynamic Labeling
+# =============================================================================
+ARG BUILD_DATE
+ARG VERSION=0.2.0
+ARG VCS_REF
+ARG ARCH=amd64
+ARG VARIANT=release
 
 # -----------------------------------------------------------------------------
 # Stage 1: Builder - Install and compile dependencies
@@ -38,12 +53,39 @@ RUN python -m compileall -b app/
 # -----------------------------------------------------------------------------
 FROM python:3.11-slim AS runtime
 
-# Labels for container metadata
-LABEL org.opencontainers.image.title="AutoGit Runner Coordinator"
-LABEL org.opencontainers.image.description="Intelligent GitLab runner lifecycle management"
-LABEL org.opencontainers.image.vendor="AutoGit"
-LABEL org.opencontainers.image.source="https://github.com/tzervas/autogit"
-LABEL org.opencontainers.image.licenses="MIT"
+# Re-declare build args for this stage
+ARG BUILD_DATE
+ARG VERSION=0.2.0
+ARG VCS_REF
+ARG ARCH=amd64
+ARG VARIANT=release
+
+# =============================================================================
+# OCI Image Specification Labels
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md
+# =============================================================================
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.authors="tzervas <tz-dev@vectorweight.com>" \
+      org.opencontainers.image.url="https://github.com/tzervas/autogit" \
+      org.opencontainers.image.documentation="https://github.com/tzervas/autogit/blob/main/docs/runners/AUTONOMOUS_RUNNERS.md" \
+      org.opencontainers.image.source="https://github.com/tzervas/autogit" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.vendor="AutoGit" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.ref.name="${VERSION}-${ARCH}-${VARIANT}" \
+      org.opencontainers.image.title="AutoGit Runner Coordinator" \
+      org.opencontainers.image.description="Dynamic GitLab runner lifecycle manager with auto-scaling and intelligent resource allocation" \
+      org.opencontainers.image.base.name="python:3.11-slim"
+
+# =============================================================================
+# Custom AutoGit Labels
+# =============================================================================
+LABEL com.autogit.component="runner-coordinator" \
+      com.autogit.architecture="${ARCH}" \
+      com.autogit.variant="${VARIANT}" \
+      com.autogit.registry.ghcr="ghcr.io/tzervas/autogit/runner-coordinator" \
+      com.autogit.registry.gitlab="192.168.1.170:5050/root/autogit/runner-coordinator"
 
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \

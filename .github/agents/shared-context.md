@@ -4,17 +4,20 @@ This file contains shared context and requirements that all AutoGit AI agents mu
 
 ## Project Context
 
-You are an AI agent working on **AutoGit**, an MIT-licensed self-hosted GitOps platform with dynamic multi-architecture runner management. Your role is to assist with development, following the project's architecture, principles, and constraints.
+You are an AI agent working on **AutoGit**, an MIT-licensed self-hosted GitOps platform with dynamic
+multi-architecture runner management. Your role is to assist with development, following the
+project's architecture, principles, and constraints.
 
 ## 📋 Documentation Tracking Protocol
 
 **CRITICAL**: Before making ANY changes that affect project behavior, architecture, or standards:
 
 1. **Check Documentation Index** at `docs/INDEX.md` to find relevant documentation
-2. **Update ALL affected documentation** in the same commit as code changes
-3. **Update Documentation Index** if adding/removing documentation
-4. **Create/Update ADRs** for architectural decisions at `docs/architecture/adr/`
-5. **Notify in commit message** which docs were updated: `feat: add GPU detection [docs: gpu/nvidia.md, adr/003]`
+1. **Update ALL affected documentation** in the same commit as code changes
+1. **Update Documentation Index** if adding/removing documentation
+1. **Create/Update ADRs** for architectural decisions at `docs/architecture/adr/`
+1. **Notify in commit message** which docs were updated:
+   `feat: add GPU detection [docs: gpu/nvidia.md, adr/003]`
 
 ### Documentation Update Checklist
 
@@ -82,14 +85,18 @@ docs/
 ## Core Components
 
 ### 1. GitLab CE (MIT License)
+
 **Documentation**: `docs/configuration/gitlab.md`
+
 - Self-hosted Git server
 - Integrated CI/CD pipeline
 - Container registry
 - Package registry
 
 ### 2. Runner Management System
+
 **Documentation**: `docs/runners/`, `docs/architecture/adr/002-fleeting-plugin.md`
+
 - **Custom Fleeting Plugin** (to be developed)
   - Manages VM/container lifecycle
   - Implements fleeting API specification
@@ -101,21 +108,28 @@ docs/
   - Idle resource cleanup
 
 ### 3. Multi-Architecture Support
+
 **Documentation**: `docs/runners/multi-arch.md`
+
 - **Native Architectures**: amd64, arm64
 - **Emulated**: RISC-V via QEMU user-space emulation
 - **Build Strategy**: docker buildx for multi-platform images
 - **Runner Tags**: Architecture-specific job routing
 
 ### 4. GPU Detection and Allocation
-**Documentation**: `docs/gpu/README.md`, `docs/gpu/nvidia.md`, `docs/gpu/amd.md`, `docs/gpu/intel.md`
+
+**Documentation**: `docs/gpu/README.md`, `docs/gpu/nvidia.md`, `docs/gpu/amd.md`,
+`docs/gpu/intel.md`
+
 - **AMD GPUs**: ROCm driver detection (`/dev/dri/renderD*`)
 - **NVIDIA GPUs**: CUDA toolkit detection (`nvidia-smi`)
 - **Intel GPUs**: OneAPI detection (`/dev/dri/card*`)
 - **Kubernetes Integration**: Device plugins and node selectors
 
 ### 5. Ingress and Load Balancing
+
 **Documentation**: `docs/configuration/ingress.md`, `docs/architecture/adr/001-traefik-vs-nginx.md`
+
 - **Traefik** (MIT License) - Primary choice due to NGINX retirement (EOL March 2026)
   - Automatic service discovery
   - Let's Encrypt integration
@@ -123,7 +137,9 @@ docs/
   - Dashboard for monitoring
 
 ### 6. SSL/TLS Management
+
 **Documentation**: `docs/configuration/ssl.md`
+
 - **cert-manager** (Apache 2.0)
   - Automatic certificate issuance
   - Let's Encrypt ACME protocol
@@ -131,7 +147,9 @@ docs/
   - HTTP-01 and DNS-01 challenge support
 
 ### 7. SSO Authentication
+
 **Documentation**: `docs/configuration/sso.md`, `docs/architecture/adr/004-sso-solution.md`
+
 - **Authelia** (Apache 2.0) - Primary choice for lightweight deployment
   - OpenID Connect certified
   - Forward authentication with Traefik
@@ -139,11 +157,14 @@ docs/
   - Session management
 
 **Alternatives** (if Authelia doesn't meet needs):
+
 - Authentik (MIT-compatible): More features, higher resource usage
 - Keycloak (Apache 2.0): Enterprise-grade, heaviest resource usage
 
 ### 8. DNS Management
+
 **Documentation**: `docs/configuration/dns.md`
+
 - **CoreDNS** (Apache 2.0)
   - Conditional forwarding to gateway router
   - LAN-only access to AutoGit services
@@ -151,7 +172,9 @@ docs/
   - Plugin-based architecture
 
 ### 9. Storage
+
 **Documentation**: `docs/configuration/storage.md`
+
 - **GitLab Components**:
   - Gitaly: Git repositories (StatefulSet)
   - PostgreSQL: Database
@@ -184,10 +207,10 @@ All components must be MIT or compatible licenses:
 When adding dependencies:
 
 1. Verify license compatibility with MIT
-2. Document in `LICENSES.md`
-3. Include attribution in `NOTICE` file
-4. Check transitive dependencies
-5. Avoid copyleft licenses (GPL, LGPL) unless as standalone services
+1. Document in `LICENSES.md`
+1. Include attribution in `NOTICE` file
+1. Check transitive dependencies
+1. Avoid copyleft licenses (GPL, LGPL) unless as standalone services
 
 **UPDATE**: `docs/development/licensing.md` when adding new dependencies
 
@@ -204,6 +227,7 @@ This module implements [functionality].
 
 Documentation: docs/[relevant-doc].md
 """
+
 from typing import Protocol, Optional
 import logging
 
@@ -325,15 +349,16 @@ class RunnerManagerProtocol(Protocol):
 
 ## Questions to Ask When Uncertain
 
-1. **License Compatibility**: Is this component MIT-compatible? → Check `docs/development/licensing.md`
-2. **Architecture Fit**: Does this align with SOLID principles? → Review `docs/architecture/`
-3. **Security Impact**: What are the security implications? → Consult `docs/security/`
-4. **Testing Strategy**: How will this be tested? → See `docs/development/testing.md`
-5. **Documentation**: Is this change documented? → Check `docs/INDEX.md` for relevant docs
-6. **Breaking Changes**: Will this break existing deployments? → Review `CHANGELOG.md`
-7. **Resource Impact**: What's the memory/CPU footprint? → Document in component docs
-8. **Scalability**: How does this scale? → Discuss in architecture docs
-9. **Which docs need updates**: → Consult Documentation Update Checklist above
+1. **License Compatibility**: Is this component MIT-compatible? → Check
+   `docs/development/licensing.md`
+1. **Architecture Fit**: Does this align with SOLID principles? → Review `docs/architecture/`
+1. **Security Impact**: What are the security implications? → Consult `docs/security/`
+1. **Testing Strategy**: How will this be tested? → See `docs/development/testing.md`
+1. **Documentation**: Is this change documented? → Check `docs/INDEX.md` for relevant docs
+1. **Breaking Changes**: Will this break existing deployments? → Review `CHANGELOG.md`
+1. **Resource Impact**: What's the memory/CPU footprint? → Document in component docs
+1. **Scalability**: How does this scale? → Discuss in architecture docs
+1. **Which docs need updates**: → Consult Documentation Update Checklist above
 
 ## Resources
 

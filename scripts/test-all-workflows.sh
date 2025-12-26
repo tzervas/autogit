@@ -7,11 +7,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 # Load config
-[ -f ".env.gitlab" ] || {
+[ -f ".env" ] || {
     echo "Run first-time-setup first!"
     exit 1
 }
-source .env.gitlab
+source .env
 source scripts/gitlab-helpers.sh
 
 # Colors
@@ -24,7 +24,7 @@ NC='\033[0m'
 
 clear
 
-cat <<"EOF"
+cat << "EOF"
 ╔════════════════════════════════════════════════════════╗
 ║     Dynamic Runner CI/CD Complete Workflow Test       ║
 ╚════════════════════════════════════════════════════════╝
@@ -81,16 +81,16 @@ for i in {1..60}; do
     if [ "$STATUS" != "$LAST_STATUS" ]; then
         TIME=$(date +"%H:%M:%S")
         case $STATUS in
-        "pending") echo -e "${YELLOW}⏳${NC} [$TIME] Pipeline: ${STATUS}" ;;
-        "running") echo -e "${GREEN}▶${NC}  [$TIME] Pipeline: ${STATUS}" ;;
-        "success")
-            echo -e "${GREEN}✓${NC}  [$TIME] Pipeline: ${STATUS}"
-            break
-            ;;
-        "failed")
-            echo -e "${RED}✗${NC}  [$TIME] Pipeline: ${STATUS}"
-            break
-            ;;
+            "pending") echo -e "${YELLOW}⏳${NC} [$TIME] Pipeline: ${STATUS}" ;;
+            "running") echo -e "${GREEN}▶${NC}  [$TIME] Pipeline: ${STATUS}" ;;
+            "success")
+                echo -e "${GREEN}✓${NC}  [$TIME] Pipeline: ${STATUS}"
+                break
+                ;;
+            "failed")
+                echo -e "${RED}✗${NC}  [$TIME] Pipeline: ${STATUS}"
+                break
+                ;;
         esac
         LAST_STATUS=$STATUS
     fi
@@ -133,7 +133,7 @@ echo ""
 
 for i in {1..30}; do
     RUNNER_COUNT=$(curl -sf "${COORDINATOR_URL}/runners" | jq '. | length')
-    CONTAINERS=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --filter 'status=running' -q" 2>/dev/null | wc -l)
+    CONTAINERS=$(ssh homelab "DOCKER_HOST=unix:///run/user/1000/docker.sock docker ps --filter 'name=autogit-runner' --filter 'status=running' -q" 2> /dev/null | wc -l)
 
     TIME=$(date +"%H:%M:%S")
     echo -ne "\r  [$TIME] Runners: ${RUNNER_COUNT} | Containers: ${CONTAINERS} | Check: $i/30"
@@ -150,7 +150,7 @@ echo ""
 echo ""
 
 # Final summary
-cat <<"EOF"
+cat << "EOF"
 ╔════════════════════════════════════════════════════════╗
 ║                  Test Complete! 🎉                     ║
 ╚════════════════════════════════════════════════════════╝

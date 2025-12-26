@@ -2,7 +2,9 @@
 
 ## Overview
 
-AutoGit implements secure credential management with **automatic password generation** and **secure storage practices**. All sensitive data is kept out of version control and stored with appropriate file permissions.
+AutoGit implements secure credential management with **automatic password generation** and **secure
+storage practices**. All sensitive data is kept out of version control and stored with appropriate
+file permissions.
 
 ## Automatic Password Generation
 
@@ -24,6 +26,7 @@ openssl rand -base64 32 | tr -d "=+/" | cut -c1-32
 ### Password Storage
 
 The password is stored in:
+
 ```
 ~/.autogit/gitlab_root_password
 ```
@@ -48,7 +51,7 @@ Configuration files in the project root:
 
 ```
 .env                    # Environment variables (600)
-.env.gitlab             # GitLab integration config (600)
+.env                     # Environment configuration (600)
 .autogit_secrets        # Legacy secrets file (600)
 ```
 
@@ -59,8 +62,8 @@ Configuration files in the project root:
 The following are in `.gitignore`:
 
 - `.env` - Environment configuration
-- `.env.homelab` - Homelab-specific config
-- `.env.gitlab` - GitLab integration config
+- `.env` - Environment configuration
+- `.env` - Environment configuration
 - `.autogit_secrets` - Secrets file
 - `.autogit_login_info` - Login credentials
 - `*.token` - Any token files
@@ -70,6 +73,7 @@ The following are in `.gitignore`:
 ### ✅ Secure File Permissions
 
 All credential files are created with mode `600`:
+
 - Readable only by the file owner
 - Not readable by group or others
 - Not writable by anyone except owner
@@ -85,12 +89,12 @@ bash scripts/first-time-setup-complete.sh
 ### 2. What Happens
 
 1. **GitLab becomes ready** - Waits for service startup
-2. **Password generated** - 32-character random password
-3. **Password stored** - Saved to `~/.autogit/gitlab_root_password`
-4. **API token created** - Via GitLab Rails console
-5. **Token stored** - Saved to `~/.autogit_secrets` and `.env.gitlab`
-6. **Project created** - AutoGit project with CI/CD
-7. **Credentials displayed** - Shown securely in terminal
+1. **Password generated** - 32-character random password
+1. **Password stored** - Saved to `~/.autogit/gitlab_root_password`
+1. **API token created** - Via GitLab Rails console
+1. **Token stored** - Saved to `~/.autogit_secrets` and `.env`
+1. **Project created** - AutoGit project with CI/CD
+1. **Credentials displayed** - Shown securely in terminal
 
 ### 3. Access Your Credentials
 
@@ -102,7 +106,7 @@ cat ~/.autogit/gitlab_root_password
 cat ~/.autogit_secrets
 
 # View environment config
-cat .env.gitlab
+cat .env
 ```
 
 ## GitLab Access
@@ -119,7 +123,7 @@ Password: [from ~/.autogit/gitlab_root_password]
 
 ```bash
 # Load configuration
-source .env.gitlab
+source .env
 
 # Use API token
 curl --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
@@ -155,10 +159,11 @@ bash scripts/generate-gitlab-password.sh
 ```
 
 This will:
+
 1. Generate a secure 32-character password
-2. Store it in `~/.autogit/gitlab_root_password`
-3. Update `.env` with the password
-4. Set appropriate file permissions
+1. Store it in `~/.autogit/gitlab_root_password`
+1. Update `.env` with the password
+1. Set appropriate file permissions
 
 ## Token Rotation
 
@@ -170,11 +175,12 @@ bash scripts/first-time-setup-complete.sh
 ```
 
 Or manually via GitLab UI:
+
 1. Login to GitLab
-2. Go to: User Settings → Access Tokens
-3. Revoke old token
-4. Create new token
-5. Update `.env.gitlab` with new token
+1. Go to: User Settings → Access Tokens
+1. Revoke old token
+1. Create new token
+1. Update `.env` with new token
 
 ## Backup & Recovery
 
@@ -182,7 +188,7 @@ Or manually via GitLab UI:
 
 ```bash
 # Create encrypted backup
-tar czf autogit-secrets-backup.tar.gz ~/.autogit .env.gitlab
+tar czf autogit-secrets-backup.tar.gz ~/.autogit .env
 gpg -c autogit-secrets-backup.tar.gz
 rm autogit-secrets-backup.tar.gz
 
@@ -243,7 +249,7 @@ If you get permission errors:
 ```bash
 # Fix permissions
 chmod 600 ~/.autogit/*
-chmod 600 .env.gitlab
+chmod 600 .env
 chmod 600 .autogit_secrets
 ```
 
@@ -265,6 +271,6 @@ Before deployment, verify:
 - [Docker Secrets Management](https://docs.docker.com/engine/swarm/secrets/)
 - [OpenSSL Random](https://www.openssl.org/docs/man1.1.1/man1/rand.html)
 
----
+______________________________________________________________________
 
 **Remember**: Security is a continuous process. Regularly review and update your security practices.

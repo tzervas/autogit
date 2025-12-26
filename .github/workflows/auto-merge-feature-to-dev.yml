@@ -11,6 +11,7 @@ permissions:
   contents: write
   pull-requests: write
   checks: read
+  actions: write  # Required to trigger workflows when merging PRs
 
 jobs:
   auto-merge-feature-to-dev:

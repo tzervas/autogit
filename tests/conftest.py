@@ -89,11 +89,10 @@ def mock_gitlab_url() -> str:
 @pytest.fixture(scope="function")
 def test_client(in_memory_db):
     """Create a FastAPI test client with in-memory database."""
-    from fastapi.testclient import TestClient
-
     # Import here to avoid circular imports
     from app.main import app, get_db
     from app.models import Base
+    from fastapi.testclient import TestClient
 
     # Create tables
     Base.metadata.create_all(bind=in_memory_db["engine"])

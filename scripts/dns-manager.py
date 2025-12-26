@@ -13,14 +13,14 @@ Usage:
     python dns-manager.py --provider manual --action list
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
 from pathlib import Path
+from typing import List, Optional
 
 try:
     import requests
@@ -33,6 +33,7 @@ except ImportError:
 @dataclass
 class DNSRecord:
     """DNS record definition"""
+
     name: str
     type: str
     content: str
@@ -63,10 +64,7 @@ class CloudflareProvider(DNSProvider):
         self.zone_id = zone_id
         self.api_token = api_token
         self.base_url = f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records"
-        self.headers = {
-            "Authorization": f"Bearer {api_token}",
-            "Content-Type": "application/json"
-        }
+        self.headers = {"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"}
 
     def create_record(self, record: DNSRecord) -> bool:
         data = {
@@ -74,7 +72,7 @@ class CloudflareProvider(DNSProvider):
             "name": record.name,
             "content": record.content,
             "ttl": record.ttl,
-            "proxied": record.proxied
+            "proxied": record.proxied,
         }
 
         response = requests.post(self.base_url, headers=self.headers, json=data)
@@ -116,13 +114,15 @@ class CloudflareProvider(DNSProvider):
 
         records = []
         for r in result.get("result", []):
-            records.append(DNSRecord(
-                name=r["name"],
-                type=r["type"],
-                content=r["content"],
-                ttl=r["ttl"],
-                proxied=r.get("proxied", False)
-            ))
+            records.append(
+                DNSRecord(
+                    name=r["name"],
+                    type=r["type"],
+                    content=r["content"],
+                    ttl=r["ttl"],
+                    proxied=r.get("proxied", False),
+                )
+            )
         return records
 
 
@@ -179,7 +179,7 @@ def load_config() -> dict:
         "TARGET_IP": "192.168.1.170",
         "CF_DNS_API_TOKEN": "",
         "CF_ZONE_ID": "",
-        "DNS_PROVIDER": "manual"
+        "DNS_PROVIDER": "manual",
     }
 
     # Load from .env if exists
@@ -191,7 +191,7 @@ def load_config() -> dict:
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
                         key, value = line.split("=", 1)
-                        config[key.strip()] = value.strip().strip('"\'')
+                        config[key.strip()] = value.strip().strip("\"'")
 
     # Override from environment
     for key in config:
@@ -204,35 +204,39 @@ def load_config() -> dict:
 def get_required_records(domain: str, target_ip: str) -> List[DNSRecord]:
     """Get list of required DNS records for the platform"""
     subdomains = [
-        "gitlab",      # Git server
-        "grafana",     # Dashboards
-        "traefik",     # Ingress dashboard
-        "api",         # AutoGit API
-        "loki",        # Log aggregation
+        "gitlab",  # Git server
+        "grafana",  # Dashboards
+        "traefik",  # Ingress dashboard
+        "api",  # AutoGit API
+        "loki",  # Log aggregation
         "prometheus",  # Metrics
-        "search",      # Meilisearch
-        "tempo",       # Tracing
+        "search",  # Meilisearch
+        "tempo",  # Tracing
     ]
 
     records = []
     for sub in subdomains:
-        records.append(DNSRecord(
-            name=f"{sub}.{domain}",
-            type="A",
-            content=target_ip,
-            ttl=300,
-            proxied=False
-        ))
+        records.append(
+            DNSRecord(name=f"{sub}.{domain}", type="A", content=target_ip, ttl=300, proxied=False)
+        )
 
     return records
 
 
 def main():
     parser = argparse.ArgumentParser(description="DNS Record Manager for AutoGit Platform")
-    parser.add_argument("--provider", choices=["cloudflare", "route53", "manual"],
-                       default="manual", help="DNS provider")
-    parser.add_argument("--action", choices=["create", "delete", "list", "verify"],
-                       default="list", help="Action to perform")
+    parser.add_argument(
+        "--provider",
+        choices=["cloudflare", "route53", "manual"],
+        default="manual",
+        help="DNS provider",
+    )
+    parser.add_argument(
+        "--action",
+        choices=["create", "delete", "list", "verify"],
+        default="list",
+        help="Action to perform",
+    )
     parser.add_argument("--target-ip", help="Target IP address for DNS records")
     parser.add_argument("--domain", help="Base domain")
 
@@ -287,6 +291,7 @@ def main():
     elif args.action == "verify":
         print("🔍 Verifying DNS resolution...")
         import socket
+
         for record in records:
             try:
                 resolved = socket.gethostbyname(record.name)

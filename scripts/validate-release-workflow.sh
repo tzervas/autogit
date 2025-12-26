@@ -18,7 +18,7 @@ fi
 echo "✅ Workflow file exists"
 
 # Check 2: YAML syntax
-if ! python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW_FILE'))" 2>/dev/null; then
+if ! python3 -c "import yaml; yaml.safe_load(open('$WORKFLOW_FILE'))" 2> /dev/null; then
     echo "❌ Invalid YAML syntax"
     ERRORS=$((ERRORS + 1))
 else

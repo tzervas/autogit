@@ -5,6 +5,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.0 - MVP (Target: Q1 2025)
 
 ### Core Features
+
 - [x] Basic project structure
 - [x] Documentation framework
 - [ ] Git server implementation (GitLab CE integration)
@@ -18,6 +19,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Basic authentication
 
 ### Documentation
+
 - [x] Complete documentation structure
 - [x] Development guides
 - [x] Architecture documentation
@@ -27,6 +29,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.1 - Multi-Architecture (Target: Q2 2025) 🚧 BACKLOG
 
 ### Features
+
 - [ ] ARM64 native support (for ARM64 hosts/runners)
 - [ ] ARM64 QEMU emulation (on AMD64 hosts)
 - [ ] RISC-V emulation via QEMU (experimental)
@@ -37,12 +40,14 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Platform-specific optimizations
 
 ### Architecture Strategy
+
 - **Native Support**: AMD64 (MVP) and ARM64 (Phase 2)
 - **QEMU Emulation**: ARM64 fallback and RISC-V
 - **Testing**: AMD64 native (MVP), ARM64 and RISC-V post-deployment
 - **Documentation**: Multi-arch deployment guides
 
 ### Testing
+
 - [ ] Multi-architecture integration tests (post AMD64 MVP)
 - [ ] Performance benchmarks per architecture
 - [ ] Emulation overhead testing
@@ -52,6 +57,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.2 - GPU Support (Target: Q2 2025)
 
 ### Features
+
 - [ ] GPU detection service
 - [ ] NVIDIA GPU support
 - [ ] AMD GPU support
@@ -60,6 +66,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] GPU resource pooling
 
 ### Documentation
+
 - [ ] GPU configuration guides
 - [ ] Vendor-specific setup
 - [ ] Performance optimization guides
@@ -67,6 +74,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.3 - Kubernetes (Target: Q3 2025)
 
 ### Features
+
 - [ ] Helm chart for deployment
 - [ ] Kubernetes operator
 - [ ] Horizontal pod autoscaling
@@ -75,6 +83,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Service mesh integration (optional)
 
 ### Operations
+
 - [ ] Kubernetes deployment guide
 - [ ] Monitoring and observability
 - [ ] Backup and recovery
@@ -83,6 +92,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.4 - SSO & Security (Target: Q3 2025)
 
 ### Features
+
 - [ ] Authelia integration
 - [ ] LDAP/AD support
 - [ ] OAuth2/OIDC support
@@ -91,6 +101,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Audit logging
 
 ### Security
+
 - [ ] TLS everywhere
 - [ ] Secrets management
 - [ ] Security hardening guide
@@ -99,6 +110,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 1.5 - Advanced Features (Target: Q4 2025)
 
 ### Features
+
 - [ ] Dynamic runner autoscaling
 - [ ] Custom fleeting plugin
 - [ ] Resource optimization
@@ -107,6 +119,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Job prioritization
 
 ### Monitoring
+
 - [ ] Prometheus integration
 - [ ] Grafana dashboards
 - [ ] Alerting rules
@@ -116,6 +129,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Version 2.0 - Enterprise Features (Target: Q1 2026)
 
 ### Features
+
 - [ ] Multi-tenancy support
 - [ ] Advanced networking (service mesh)
 - [ ] Disaster recovery
@@ -124,6 +138,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Spot instance support
 
 ### Integration
+
 - [ ] Cloud provider integrations (AWS, GCP, Azure)
 - [ ] Terraform provider
 - [ ] Ansible modules
@@ -132,6 +147,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Future Considerations
 
 ### Performance
+
 - [ ] Zero-downtime deployments
 - [ ] Blue-green deployments
 - [ ] Canary deployments
@@ -139,6 +155,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] CDN integration for artifacts
 
 ### Developer Experience
+
 - [ ] CLI tool enhancements
 - [ ] Web UI improvements
 - [ ] IDE plugins
@@ -146,6 +163,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Template library
 
 ### Ecosystem
+
 - [ ] Plugin system
 - [ ] Marketplace for extensions
 - [ ] Community runners
@@ -155,6 +173,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Community Features
 
 ### Documentation
+
 - [ ] Video tutorials
 - [ ] Interactive guides
 - [ ] API playground
@@ -162,6 +181,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Use case gallery
 
 ### Community
+
 - [ ] Forum/Discord
 - [ ] Regular community calls
 - [ ] Contributor recognition
@@ -171,6 +191,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Research & Innovation
 
 ### Experimental Features
+
 - [ ] AI-powered resource optimization
 - [ ] Predictive autoscaling
 - [ ] Automated performance tuning
@@ -178,6 +199,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Cost prediction models
 
 ### Emerging Technologies
+
 - [ ] WebAssembly runner support
 - [ ] Edge computing integration
 - [ ] Confidential computing
@@ -186,6 +208,7 @@ This document outlines the planned features and improvements for AutoGit.
 ## Maintenance
 
 ### Ongoing
+
 - [ ] Security updates
 - [ ] Dependency updates
 - [ ] Performance optimization
@@ -194,6 +217,7 @@ This document outlines the planned features and improvements for AutoGit.
 - [ ] Community support
 
 ### Quality Improvements
+
 - [ ] Increased test coverage (target: 90%+)
 - [ ] Performance benchmarks
 - [ ] Security audits
@@ -205,9 +229,9 @@ This document outlines the planned features and improvements for AutoGit.
 Want to help with any of these features?
 
 1. Check [GitHub Issues](https://github.com/tzervas/autogit/issues) for open tasks
-2. Join discussions in [GitHub Discussions](https://github.com/tzervas/autogit/discussions)
-3. Read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines
-4. Submit PRs with your improvements!
+1. Join discussions in [GitHub Discussions](https://github.com/tzervas/autogit/discussions)
+1. Read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines
+1. Submit PRs with your improvements!
 
 ## Feedback
 
@@ -222,8 +246,9 @@ Have suggestions for the roadmap? We'd love to hear from you!
 - **2025-12-21**: Initial roadmap created
 - **YYYY-MM-DD**: [Future updates]
 
----
+______________________________________________________________________
 
-*This roadmap is subject to change based on community feedback, technical constraints, and project priorities. Dates are estimates and may shift.*
+*This roadmap is subject to change based on community feedback, technical constraints, and project
+priorities. Dates are estimates and may shift.*
 
 *Last updated: 2025-12-21*

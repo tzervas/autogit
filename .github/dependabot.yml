@@ -1,37 +1,36 @@
----
 version: 2
 updates:
   # GitHub Actions dependencies
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  labels:
+  - "dependencies"
+  - "github-actions"
+  commit-message:
+    prefix: "chore"
+    include: "scope"
 
   # Docker dependencies
-  - package-ecosystem: "docker"
-    directory: "/services/git-server"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "docker"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+- package-ecosystem: "docker"
+  directory: "/services/git-server"
+  schedule:
+    interval: "weekly"
+  labels:
+  - "dependencies"
+  - "docker"
+  commit-message:
+    prefix: "chore"
+    include: "scope"
 
-  - package-ecosystem: "docker"
-    directory: "/services/runner-coordinator"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "docker"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+- package-ecosystem: "docker"
+  directory: "/services/runner-coordinator"
+  schedule:
+    interval: "weekly"
+  labels:
+  - "dependencies"
+  - "docker"
+  commit-message:
+    prefix: "chore"
+    include: "scope"

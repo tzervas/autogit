@@ -3,8 +3,9 @@
 ## Overview
 
 The release system consists of two workflows working together:
+
 1. **Versioning Workflow** - Automatically creates version tags on PR merges
-2. **Release Workflow** - Creates GitHub releases and publishes Docker images when tags are pushed
+1. **Release Workflow** - Creates GitHub releases and publishes Docker images when tags are pushed
 
 ### Versioning Workflow (Automatic Tagging)
 
@@ -40,15 +41,17 @@ Release Workflow (triggered by tag push)
 ### 1. Automatic Release (Recommended)
 
 **For Production Releases:**
+
 1. Merge feature PR into `dev` for testing
-2. Create PR from `dev` to `main` with code changes
-3. Merge PR - versioning workflow creates production tag
-4. Release workflow automatically creates release and publishes images
+1. Create PR from `dev` to `main` with code changes
+1. Merge PR - versioning workflow creates production tag
+1. Release workflow automatically creates release and publishes images
 
 **For Development Releases:**
+
 1. Merge feature PR into `dev` with code changes
-2. Versioning workflow creates dev tag
-3. Release workflow creates pre-release
+1. Versioning workflow creates dev tag
+1. Release workflow creates pre-release
 
 **Note**: Documentation-only PRs won't trigger versioning or releases.
 
@@ -57,6 +60,7 @@ Release Workflow (triggered by tag push)
 Trigger manually from GitHub Actions UI with:
 
 #### Inputs:
+
 - **source_branch**: Choose `dev` or `main` (default: dev)
 - **version_mode**: Choose `auto` or `manual` (default: auto)
   - `auto`: Automatically detect version from last merged PR or auto-increment
@@ -66,9 +70,11 @@ Trigger manually from GitHub Actions UI with:
 
 ## Code Change Detection
 
-The versioning workflow only triggers on PRs with actual code changes. The following file patterns are excluded:
+The versioning workflow only triggers on PRs with actual code changes. The following file patterns
+are excluded:
 
 **Excluded (Won't Trigger Versioning):**
+
 - `*.md` - Markdown documentation
 - `docs/` - Documentation directory
 - `.github/workflows/` - Workflow files
@@ -76,6 +82,7 @@ The versioning workflow only triggers on PRs with actual code changes. The follo
 - `*.txt` - Text files
 
 **Included (Will Trigger Versioning):**
+
 - Source code files (`*.py`, `*.js`, `*.go`, etc.)
 - Service files in `services/`
 - Scripts in `scripts/`
@@ -87,28 +94,33 @@ The versioning workflow only triggers on PRs with actual code changes. The follo
 ### Versioning Workflow (Automatic Tags)
 
 For production releases (main branch):
+
 - Creates semantic version tags: `v0.3.0`, `v1.0.0`, etc.
 - Version based on automate-version.sh script
 
 For development releases (dev branch):
+
 - Creates pre-release tags: `v0.3.1-dev.20241224130354`
 - Includes timestamp for uniqueness
 
 ### Release Workflow (From Tags)
 
 When triggered by tag push:
+
 - Uses the tag version directly (no recalculation needed)
 - Determines release type from tag pattern:
   - Production: `v0.3.0` (no suffix)
   - Development: `v0.3.1-dev.*` (has -dev suffix)
 
 When triggered manually:
+
 1. **Auto Mode**: Extracts version from last merged PR title
-2. **Manual Mode**: Uses provided version directly
+1. **Manual Mode**: Uses provided version directly
 
 ## Release Notes Generation
 
 The workflow automatically generates release notes from:
+
 - PR title and description (for PR-triggered releases)
 - PR author attribution
 - CHANGELOG.md sections (if available)
@@ -117,12 +129,15 @@ The workflow automatically generates release notes from:
 ## Docker Image Publishing
 
 ### Parallel Builds
+
 - Uses matrix strategy to build multiple services in parallel
 - Services: `git-server`, `runner-coordinator`
 - `fail-fast: false` ensures all builds complete even if one fails
 
 ### Image Tags
+
 For version `v0.3.0`, creates:
+
 - `v0.3.0` (full version)
 - `v0.3` (major.minor)
 - `v0` (major only)
@@ -130,7 +145,9 @@ For version `v0.3.0`, creates:
 - `sha-<commit>` (commit hash)
 
 ### Layer Caching
+
 Multi-source cache strategy for optimal build performance:
+
 - Registry cache (previous builds)
 - Dev images
 - Latest release images
@@ -139,6 +156,7 @@ Multi-source cache strategy for optimal build performance:
 ## Self-Hosted Runner Configuration
 
 All jobs run on self-hosted runners with ample resources for:
+
 - Fast checkout and builds
 - Parallel Docker builds
 - Large-scale image layer caching
@@ -152,6 +170,7 @@ Run the validation script to verify workflow configuration:
 ```
 
 This checks for:
+
 - YAML syntax validity
 - Required triggers and inputs
 - PR merge validation (merged == true)
@@ -163,6 +182,7 @@ This checks for:
 ## Example Usage
 
 ### Scenario 1: Automatic Production Release
+
 ```
 1. Develop features on feature branches
 2. Merge features into dev for testing
@@ -178,6 +198,7 @@ This checks for:
 ```
 
 ### Scenario 2: Automatic Development Release
+
 ```
 1. Create feature PR to dev (with code changes)
 2. Merge PR into dev
@@ -191,6 +212,7 @@ This checks for:
 ```
 
 ### Scenario 3: Documentation Update (No Release)
+
 ```
 1. Update documentation files only
 2. Create PR to main or dev
@@ -203,6 +225,7 @@ This checks for:
 ```
 
 ### Scenario 4: Manual Release
+
 ```
 1. Go to Actions → Release workflow → Run workflow
 2. Select:
@@ -215,6 +238,7 @@ This checks for:
 ## Permissions Required
 
 The workflow needs:
+
 - `contents: write` - Create releases and tags
 - `packages: write` - Publish Docker images to GHCR
 - `pull-requests: read` - Read PR data for version detection
@@ -222,26 +246,30 @@ The workflow needs:
 ## Branch Strategy
 
 Recommended workflow:
+
 1. Develop on feature branches
-2. Merge features into `dev` for testing
-3. When ready for release, create PR: dev → main
-4. Title PR with version (e.g., "Release v0.3.0")
-5. Merge PR - automatic release triggered
-6. Docker images published to GHCR
+1. Merge features into `dev` for testing
+1. When ready for release, create PR: dev → main
+1. Title PR with version (e.g., "Release v0.3.0")
+1. Merge PR - automatic release triggered
+1. Docker images published to GHCR
 
 ## Troubleshooting
 
 ### Workflow doesn't trigger on PR merge
+
 - Ensure PR was merged (not closed without merge)
 - Check that PR is from `dev` to `main`
 - Verify workflow file syntax with validation script
 
 ### Version not detected from PR
+
 - PR title must contain version in format: `vX.Y.Z`
 - Check workflow logs for version extraction step
 - Falls back to auto-increment if not found
 
 ### Docker build fails
+
 - Check self-hosted runner has Docker installed
 - Verify GHCR credentials are valid
 - Check service Dockerfiles exist in `services/` directory
@@ -249,6 +277,7 @@ Recommended workflow:
 ## Future Enhancements
 
 Potential improvements:
+
 - Support for pre-release versions (alpha, beta, rc)
 - Changelog generation from commit messages
 - Release approval workflow

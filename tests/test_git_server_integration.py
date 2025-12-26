@@ -1,13 +1,14 @@
-import unittest
 import os
 import sys
 import time
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add tools directory to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../tools")))
 
-from gitlab_client import GitLabClient, GitLabApiError
+from gitlab_client import GitLabApiError, GitLabClient
+
 
 class TestGitServerIntegration(unittest.TestCase):
     """
@@ -23,7 +24,7 @@ class TestGitServerIntegration(unittest.TestCase):
         self.client = GitLabClient(base_url=self.base_url, token=self.token)
         self.project_name = f"test-project-{int(time.time())}"
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_repository_lifecycle(self, mock_request):
         """Test the full lifecycle: Create -> Protect -> Add Webhook -> Delete"""
 
@@ -48,7 +49,7 @@ class TestGitServerIntegration(unittest.TestCase):
         # 4. Mock Delete Project
         mock_delete_resp = MagicMock()
         mock_delete_resp.status_code = 204
-        mock_delete_resp.content = b''
+        mock_delete_resp.content = b""
         mock_delete_resp.json.return_value = None
 
         # Set side effects for sequential calls
@@ -56,7 +57,7 @@ class TestGitServerIntegration(unittest.TestCase):
             mock_create_resp,
             mock_protect_resp,
             mock_webhook_resp,
-            mock_delete_resp
+            mock_delete_resp,
         ]
 
         # Execute Workflow
@@ -80,26 +81,26 @@ class TestGitServerIntegration(unittest.TestCase):
 
         # Verify specific call details
         calls = mock_request.call_args_list
-        self.assertEqual(calls[0][0][0], "POST") # Create
+        self.assertEqual(calls[0][0][0], "POST")  # Create
         self.assertIn("projects", calls[0][0][1])
 
-        self.assertEqual(calls[1][0][0], "POST") # Protect
+        self.assertEqual(calls[1][0][0], "POST")  # Protect
         self.assertIn("protected_branches", calls[1][0][1])
 
-        self.assertEqual(calls[2][0][0], "POST") # Webhook
+        self.assertEqual(calls[2][0][0], "POST")  # Webhook
         self.assertIn("hooks", calls[2][0][1])
 
-        self.assertEqual(calls[3][0][0], "DELETE") # Delete
+        self.assertEqual(calls[3][0][0], "DELETE")  # Delete
         self.assertIn("projects/101", calls[3][0][1])
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_user_ssh_workflow(self, mock_request):
         """Test User SSH key management workflow"""
 
         # 1. Mock Get Keys
         mock_get_keys = MagicMock()
         mock_get_keys.status_code = 200
-        mock_get_keys.content = b'[]'
+        mock_get_keys.content = b"[]"
         mock_get_keys.json.return_value = []
 
         # 2. Mock Add Key
@@ -118,5 +119,6 @@ class TestGitServerIntegration(unittest.TestCase):
         new_key = self.client.add_ssh_key("work-laptop", "ssh-ed25519 AAAAC3Nza...")
         self.assertEqual(new_key["title"], "work-laptop")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

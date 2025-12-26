@@ -6,10 +6,10 @@ and convert it into structured data models.
 """
 
 import re
-from typing import List, Optional, Tuple
 from pathlib import Path
+from typing import List, Optional, Tuple
 
-from .models import Task, Milestone, TaskTracker, TaskStatus, Priority
+from .models import Milestone, Priority, Task, TaskStatus, TaskTracker
 
 
 class TaskTrackerParser:
@@ -102,14 +102,10 @@ class TaskTrackerParser:
         start_idx: int,
         milestone_num: str,
         milestone_title: str,
-        status: TaskStatus
+        status: TaskStatus,
     ) -> Tuple[Milestone, int]:
         """Parse details of a milestone including subtasks."""
-        milestone = Milestone(
-            id=f"milestone-{milestone_num}",
-            title=milestone_title,
-            status=status
-        )
+        milestone = Milestone(id=f"milestone-{milestone_num}", title=milestone_title, status=status)
 
         i = start_idx
         current_section = None
@@ -149,10 +145,7 @@ class TaskTrackerParser:
         return milestone, i
 
     def _parse_subtask(
-        self,
-        lines: List[str],
-        start_idx: int,
-        parent_milestone: str
+        self, lines: List[str], start_idx: int, parent_milestone: str
     ) -> Tuple[Task, int]:
         """Parse a subtask section."""
         line = lines[start_idx]
@@ -170,7 +163,7 @@ class TaskTrackerParser:
             id=f"{parent_milestone}-subtask-{subtask_num}",
             title=subtask_title,
             status=status,
-            parent_milestone=parent_milestone
+            parent_milestone=parent_milestone,
         )
 
         i = start_idx + 1

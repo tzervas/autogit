@@ -1,23 +1,22 @@
 # Docker Setup and Configuration - Git Server
 
-**Component**: Git Server (GitLab CE)
-**Version**: 16.11.0-ce.0
-**Status**: Production Ready (MVP - AMD64), Supported (ARM64), Experimental (RISC-V)
-**Last Updated**: 2025-12-22
+**Component**: Git Server (GitLab CE) **Version**: 16.11.0-ce.0 **Status**: Production Ready (MVP -
+AMD64), Supported (ARM64), Experimental (RISC-V) **Last Updated**: 2025-12-22
 
 ## Overview
 
-This document describes the Docker setup and configuration for the AutoGit Git Server, which uses GitLab Community Edition (CE) as the underlying Git server platform.
+This document describes the Docker setup and configuration for the AutoGit Git Server, which uses
+GitLab Community Edition (CE) as the underlying Git server platform.
 
 ## Architecture Support
 
 AutoGit Git Server supports multiple architectures with different maturity levels:
 
-| Architecture | Support Level | Native/Emulated | Status | Use Case |
-|--------------|---------------|-----------------|--------|----------|
-| **AMD64** (x86_64) | Production | Native | ✅ Ready | Primary deployment, MVP |
-| **ARM64** (aarch64) | Supported | Native | ✅ Ready | ARM-based hosts, future |
-| **RISC-V** (riscv64) | Experimental | QEMU Emulation | ⚠️ Testing | Future compatibility |
+| Architecture         | Support Level | Native/Emulated | Status     | Use Case                |
+| -------------------- | ------------- | --------------- | ---------- | ----------------------- |
+| **AMD64** (x86_64)   | Production    | Native          | ✅ Ready   | Primary deployment, MVP |
+| **ARM64** (aarch64)  | Supported     | Native          | ✅ Ready   | ARM-based hosts, future |
+| **RISC-V** (riscv64) | Experimental  | QEMU Emulation  | ⚠️ Testing | Future compatibility    |
 
 ### Architecture Detection
 
@@ -39,6 +38,7 @@ The setup includes automatic architecture detection:
 ### System Requirements
 
 **Minimum** (Development/Testing):
+
 - **CPU**: 2 cores
 - **Memory**: 4 GB RAM
 - **Storage**: 60 GB
@@ -46,6 +46,7 @@ The setup includes automatic architecture detection:
 - **Docker**: 20.10+ or Docker Compose V2
 
 **Recommended** (Production):
+
 - **CPU**: 4+ cores
 - **Memory**: 8+ GB RAM
 - **Storage**: 120+ GB
@@ -55,16 +56,19 @@ The setup includes automatic architecture detection:
 ### Architecture-Specific Requirements
 
 #### AMD64 (x86_64)
+
 - Standard x86_64 processor (Intel/AMD)
 - No special requirements
 - Best performance
 
 #### ARM64 (aarch64)
+
 - ARM64 processor (e.g., Apple M1/M2, AWS Graviton, Raspberry Pi 4)
 - Docker with ARM64 support
 - Comparable performance to AMD64
 
 #### RISC-V (riscv64)
+
 - QEMU installed for emulation
 - Significantly slower (10-20x) than native
 - For testing/development only
@@ -87,6 +91,7 @@ services/git-server/
 ### Dockerfile.amd64 (Production - MVP)
 
 Primary production Dockerfile for AMD64 hosts:
+
 - Based on `gitlab/gitlab-ce:16.11.0-ce.0`
 - Includes management utilities (curl, jq, vim, htop)
 - Health checks configured
@@ -95,6 +100,7 @@ Primary production Dockerfile for AMD64 hosts:
 ### Dockerfile.arm64 (Supported)
 
 ARM64 native support for ARM-based hosts:
+
 - Same base image as AMD64
 - Native ARM64 execution (no emulation)
 - Comparable performance to AMD64
@@ -103,6 +109,7 @@ ARM64 native support for ARM-based hosts:
 ### Dockerfile.riscv (Experimental)
 
 RISC-V support via QEMU emulation:
+
 - Uses Debian base (GitLab doesn't support RISC-V yet)
 - QEMU emulation layer
 - Placeholder for future compatibility
@@ -143,13 +150,14 @@ GITLAB_HTTPS_PORT=3443    # HTTPS access
 
 Three persistent volumes store GitLab data:
 
-| Volume | Purpose | Size | Contents |
-|--------|---------|------|----------|
-| `git-config` | Configuration | 1 GB | gitlab.rb, SSL certs, secrets |
-| `git-logs` | Logs | 5 GB | Application, access, error logs |
-| `git-data` | Primary data | 50+ GB | Repositories, artifacts, DB, registry |
+| Volume       | Purpose       | Size   | Contents                              |
+| ------------ | ------------- | ------ | ------------------------------------- |
+| `git-config` | Configuration | 1 GB   | gitlab.rb, SSL certs, secrets         |
+| `git-logs`   | Logs          | 5 GB   | Application, access, error logs       |
+| `git-data`   | Primary data  | 50+ GB | Repositories, artifacts, DB, registry |
 
 **Storage Planning**:
+
 - **Development**: 60 GB total (minimum)
 - **Small team**: 120 GB total
 - **Production**: 500+ GB total (with growth planning)
@@ -222,10 +230,11 @@ docker-compose ps git-server
 ### First Startup
 
 First startup takes 3-5 minutes to:
+
 1. Initialize PostgreSQL database
-2. Configure GitLab services
-3. Generate secrets and keys
-4. Start web server
+1. Configure GitLab services
+1. Generate secrets and keys
+1. Start web server
 
 Monitor startup:
 
@@ -237,6 +246,7 @@ docker-compose logs -f git-server
 ### Access GitLab
 
 Once started:
+
 - **Web UI**: http://localhost:3000
 - **SSH**: `ssh://git@localhost:2222`
 - **Username**: `root`
@@ -258,6 +268,7 @@ curl http://localhost:3000/-/liveness
 ```
 
 Docker health check runs automatically every 30 seconds:
+
 - **Interval**: 30s
 - **Timeout**: 10s
 - **Start Period**: 180s (3 minutes)
@@ -320,6 +331,7 @@ docker inspect autogit-git-server | jq '.[0].Config.Labels.architecture'
 **Symptoms**: Container exits immediately or restarts continuously
 
 **Diagnosis**:
+
 ```bash
 # Check logs
 docker-compose logs git-server
@@ -329,12 +341,14 @@ docker inspect autogit-git-server
 ```
 
 **Common Causes**:
+
 - Insufficient memory (needs 4GB+)
 - Port conflicts (3000, 2222, 3443 already in use)
 - Volume permission issues
 - Incorrect environment variables
 
 **Solutions**:
+
 ```bash
 # Check port availability
 netstat -tlnp | grep -E '3000|2222|3443'
@@ -350,6 +364,7 @@ sudo chown -R 998:998 ./data/gitlab  # If using bind mounts
 **Symptoms**: Takes >10 minutes to start
 
 **Diagnosis**:
+
 ```bash
 # Monitor CPU and memory
 docker stats autogit-git-server
@@ -359,11 +374,13 @@ docker-compose logs -f git-server | grep -i "reconfigured"
 ```
 
 **Common Causes**:
+
 - Insufficient resources
 - Disk I/O bottleneck
 - QEMU emulation (RISC-V)
 
 **Solutions**:
+
 - Allocate more CPU/memory
 - Use SSD storage
 - For AMD64/ARM64, ensure native execution (no emulation)
@@ -373,6 +390,7 @@ docker-compose logs -f git-server | grep -i "reconfigured"
 **Symptoms**: Container shows "unhealthy" status
 
 **Diagnosis**:
+
 ```bash
 # Manual health check
 docker exec autogit-git-server curl -f http://localhost/-/health
@@ -382,6 +400,7 @@ docker exec autogit-git-server gitlab-ctl status
 ```
 
 **Solutions**:
+
 ```bash
 # Restart GitLab services
 docker exec autogit-git-server gitlab-ctl restart
@@ -395,6 +414,7 @@ docker exec autogit-git-server gitlab-ctl reconfigure
 **Symptoms**: Container fails with "exec format error"
 
 **Diagnosis**:
+
 ```bash
 # Check host architecture
 uname -m
@@ -403,8 +423,8 @@ uname -m
 docker inspect autogit-git-server | jq '.[0].Architecture'
 ```
 
-**Solution**:
-Rebuild with correct architecture-specific Dockerfile:
+**Solution**: Rebuild with correct architecture-specific Dockerfile:
+
 ```bash
 # Detect and use correct architecture
 ./services/git-server/detect-arch.sh
@@ -416,22 +436,26 @@ docker-compose build git-server
 ### Version Update Process
 
 1. **Stop current container**:
+
    ```bash
    docker-compose stop git-server
    ```
 
-2. **Update Dockerfile version**:
+1. **Update Dockerfile version**:
+
    ```dockerfile
    # In services/git-server/Dockerfile.amd64 (or appropriate arch)
    FROM gitlab/gitlab-ce:16.12.0-ce.0  # Update version
    ```
 
-3. **Rebuild and restart**:
+1. **Rebuild and restart**:
+
    ```bash
    docker-compose up -d --build git-server
    ```
 
-4. **Verify upgrade**:
+1. **Verify upgrade**:
+
    ```bash
    docker exec autogit-git-server gitlab-rake gitlab:env:info
    ```
@@ -453,6 +477,7 @@ docker exec autogit-git-server gitlab-backup create
 ### AMD64 Optimization
 
 Already optimized for production use. Consider:
+
 - SSD storage for volumes
 - Dedicated CPU cores
 - 8GB+ RAM for active use
@@ -463,7 +488,9 @@ Same as AMD64. ARM64 performance is comparable to AMD64 when running natively.
 
 ### RISC-V Performance
 
-**Not recommended for production**. QEMU emulation is 10-20x slower than native execution. Use only for:
+**Not recommended for production**. QEMU emulation is 10-20x slower than native execution. Use only
+for:
+
 - Compatibility testing
 - Future planning
 - Development experiments
@@ -473,22 +500,20 @@ Same as AMD64. ARM64 performance is comparable to AMD64 when running natively.
 ### Required Security Steps
 
 1. **Change default password**:
+
    ```bash
    # Set in .env before first start
    GITLAB_ROOT_PASSWORD=your_very_secure_password
    ```
 
-2. **Enable HTTPS** (production):
-   Configure SSL certificates in GitLab
+1. **Enable HTTPS** (production): Configure SSL certificates in GitLab
 
-3. **Disable signup** (optional):
-   Set in GitLab admin settings to prevent unauthorized registrations
+1. **Disable signup** (optional): Set in GitLab admin settings to prevent unauthorized registrations
 
-4. **Regular updates**:
-   Keep GitLab CE updated with security patches
+1. **Regular updates**: Keep GitLab CE updated with security patches
 
-5. **Network isolation**:
-   Use Docker networks to isolate services (already configured in docker-compose.yml)
+1. **Network isolation**: Use Docker networks to isolate services (already configured in
+   docker-compose.yml)
 
 ### Security Checklist
 
@@ -559,16 +584,19 @@ chmod +x test-docker-setup.sh
 After Docker setup is complete:
 
 1. **Configure Authentication** (Subtask 2):
+
    - Setup admin user
    - Configure user registration
    - Setup authentication policies
 
-2. **Configure SSH Access** (Subtask 3):
+1. **Configure SSH Access** (Subtask 3):
+
    - Test SSH key management
    - Configure SSH settings
    - Document SSH usage
 
-3. **Configure HTTP/HTTPS Access** (Subtask 4):
+1. **Configure HTTP/HTTPS Access** (Subtask 4):
+
    - Setup SSL certificates
    - Configure reverse proxy
    - Test HTTPS access
@@ -576,19 +604,19 @@ After Docker setup is complete:
 ## References
 
 ### Internal Documentation
+
 - [Git Server README](../../services/git-server/README.md) - Service overview
 - [TASK_ALLOCATION.md](../../TASK_ALLOCATION.md) - Task details
 - [GIT_SERVER_FEATURE_PLAN.md](../../GIT_SERVER_FEATURE_PLAN.md) - Feature plan
 
 ### External Documentation
+
 - [GitLab CE Documentation](https://docs.gitlab.com/ce/)
 - [GitLab Installation](https://docs.gitlab.com/ce/install/)
 - [GitLab Docker Installation](https://docs.gitlab.com/ce/install/docker.html)
 - [GitLab Configuration](https://docs.gitlab.com/omnibus/settings/)
 
----
+______________________________________________________________________
 
-**Status**: ✅ Complete
-**Last Updated**: 2025-12-22
-**Maintained By**: DevOps Engineer Agent
+**Status**: ✅ Complete **Last Updated**: 2025-12-22 **Maintained By**: DevOps Engineer Agent
 **Review Status**: Pending Evaluator review

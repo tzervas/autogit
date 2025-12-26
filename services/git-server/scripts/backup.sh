@@ -58,7 +58,7 @@ backup_config() {
     docker compose -f "$COMPOSE_FILE" cp git-server:/etc/gitlab "$BACKUP_DIR"
 
     # Ensure restrictive permissions on sensitive secret file
-    chmod 600 "$BACKUP_DIR/gitlab/gitlab-secrets.json" 2>/dev/null || true
+    chmod 600 "$BACKUP_DIR/gitlab/gitlab-secrets.json" 2> /dev/null || true
 
     print_info "✅ Configuration backed up to $BACKUP_DIR"
     print_warn "Ensure $BACKUP_DIR is stored securely as it contains sensitive secrets."

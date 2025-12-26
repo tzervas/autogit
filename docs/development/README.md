@@ -7,9 +7,9 @@ Welcome to AutoGit development!
 New to the project? Start here:
 
 1. [Development Setup](setup.md) - Set up your local environment
-2. [Project Structure](project-structure.md) - Understand the codebase
-3. [Coding Standards](standards.md) - Follow our conventions
-4. [Testing Guide](testing.md) - Write and run tests
+1. [Project Structure](project-structure.md) - Understand the codebase
+1. [Coding Standards](standards.md) - Follow our conventions
+1. [Testing Guide](testing.md) - Write and run tests
 
 ## Development Workflow
 
@@ -32,6 +32,7 @@ See [Development Setup](setup.md) for detailed instructions.
 ### 2. Make Changes
 
 Follow our [Coding Standards](standards.md):
+
 - Write clean, SOLID-compliant code
 - Follow PEP 8 and Black formatting
 - Add docstrings to all public functions
@@ -40,6 +41,7 @@ Follow our [Coding Standards](standards.md):
 ### 3. Write Tests
 
 All changes must include tests:
+
 - Unit tests for business logic
 - Integration tests for component interactions
 - E2E tests for critical user flows
@@ -84,6 +86,7 @@ See [Documentation Guide](documentation.md) for standards.
 ## Development Tools
 
 ### Required Tools
+
 - **Python 3.11+** - Primary language
 - **UV** - Python dependency management
 - **Docker** - Container runtime
@@ -91,6 +94,7 @@ See [Documentation Guide](documentation.md) for standards.
 - **Git** - Version control
 
 ### Recommended Tools
+
 - **VS Code** or **PyCharm** - IDEs with Python support
 - **Pre-commit** - Git hooks for quality checks
 - **k9s** - Kubernetes cluster management
@@ -158,10 +162,10 @@ See [Testing Guide](testing.md) for details.
 All changes go through automated CI/CD:
 
 1. **Linting** - Black, flake8, mypy
-2. **Testing** - Full test suite with coverage
-3. **Building** - Multi-arch Docker images
-4. **Security** - Vulnerability scanning
-5. **Documentation** - Link validation
+1. **Testing** - Full test suite with coverage
+1. **Building** - Multi-arch Docker images
+1. **Security** - Vulnerability scanning
+1. **Documentation** - Link validation
 
 See [CI/CD Guide](ci-cd.md) for pipeline details.
 
@@ -181,6 +185,7 @@ See [Agentic Workflow](agentic-workflow.md) for details.
 ## Code Review
 
 All PRs require:
+
 - [ ] Code follows standards
 - [ ] Tests pass with good coverage
 - [ ] Documentation updated
@@ -192,6 +197,7 @@ See [Code Review Guidelines](code-review.md) for criteria.
 ## Release Process
 
 Releases follow semantic versioning:
+
 - **Major** - Breaking changes
 - **Minor** - New features (backward compatible)
 - **Patch** - Bug fixes

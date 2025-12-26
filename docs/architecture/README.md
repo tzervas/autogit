@@ -4,14 +4,15 @@ This document provides a high-level overview of AutoGit's architecture.
 
 ## System Architecture
 
-AutoGit is a self-hosted GitOps platform built on a modular architecture with the following key components:
+AutoGit is a self-hosted GitOps platform built on a modular architecture with the following key
+components:
 
 ### Multi-Architecture Support
 
-**Current Status (MVP)**: AMD64 Native Only
-**Planned**: ARM64 Native + QEMU, RISC-V QEMU
+**Current Status (MVP)**: AMD64 Native Only **Planned**: ARM64 Native + QEMU, RISC-V QEMU
 
 AutoGit supports multiple CPU architectures:
+
 - **AMD64 (x86_64)**: Native support (MVP focus, testing active)
 - **ARM64 (aarch64)**: Native support (Phase 2) + QEMU emulation fallback
 - **RISC-V**: QEMU emulation only (future/experimental)
@@ -21,22 +22,22 @@ See [Multi-Architecture Strategy](../../MULTI_ARCH_STRATEGY.md) for complete det
 ### Core Components
 
 1. **Git Server** - Version control and repository management
-2. **Runner Coordinator** - Dynamic runner lifecycle management
-3. **GPU Detector** - GPU discovery and allocation
-4. **Fleeting Plugin** - Custom autoscaling implementation
+1. **Runner Coordinator** - Dynamic runner lifecycle management
+1. **GPU Detector** - GPU discovery and allocation
+1. **Fleeting Plugin** - Custom autoscaling implementation
 
 ### Infrastructure Components
 
 1. **Traefik** - Ingress controller and reverse proxy
-2. **Authelia** - Centralized SSO and authentication
-3. **CoreDNS** - Internal DNS management
-4. **cert-manager** - Automated TLS certificate management
+1. **Authelia** - Centralized SSO and authentication
+1. **CoreDNS** - Internal DNS management
+1. **cert-manager** - Automated TLS certificate management
 
 ### Data Layer
 
 1. **PostgreSQL** - Primary relational database
-2. **Redis** - Caching and session storage
-3. **MinIO** - Object storage for artifacts
+1. **Redis** - Caching and session storage
+1. **MinIO** - Object storage for artifacts
 
 ## Architectural Principles
 
@@ -71,11 +72,13 @@ See [Component Diagram](components.md) for detailed interactions.
 ## Deployment Architecture
 
 ### Docker Compose (Development)
+
 - Single-host deployment
 - All services in one compose file
 - Easy local development
 
 ### Kubernetes (Production)
+
 - Multi-node cluster
 - High availability
 - Horizontal scaling
@@ -86,6 +89,7 @@ See [Deployment Models](deployment-models.md) for details.
 ## Multi-Architecture Support
 
 AutoGit runs on:
+
 - **amd64** - x86_64 (Intel/AMD)
 - **arm64** - ARM 64-bit (Apple Silicon, AWS Graviton)
 - **RISC-V** - Via QEMU emulation
@@ -95,11 +99,13 @@ See [Multi-Architecture Strategy](multi-architecture.md) for implementation.
 ## Scaling Strategy
 
 ### Horizontal Scaling
+
 - Multiple runner instances
 - Database read replicas
 - Redis clustering
 
 ### Vertical Scaling
+
 - Resource limits per component
 - GPU allocation optimization
 
@@ -108,6 +114,7 @@ See [Scaling Guide](scaling.md) for details.
 ## High Availability
 
 For production deployments:
+
 - Multiple replicas per service
 - Load balancing
 - Health checks and auto-recovery
@@ -118,6 +125,7 @@ See [High Availability](high-availability.md) for configuration.
 ## Security Architecture
 
 Security is built into every layer:
+
 - TLS everywhere (internal and external)
 - Network policies (pod-to-pod isolation)
 - RBAC (least privilege access)

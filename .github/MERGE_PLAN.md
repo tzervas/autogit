@@ -5,19 +5,23 @@
 ## Phase 1: Agent Documentation (MERGE FIRST)
 
 ### Why First?
-The agent workflow documentation provides context for reviewing all other PRs. Reviewers need to understand HOW this code was created to properly evaluate it.
+
+The agent workflow documentation provides context for reviewing all other PRs. Reviewers need to
+understand HOW this code was created to properly evaluate it.
 
 ### PR #1: Agentic Workflow Documentation
+
 - **Branch**: `dev` (already merged)
 - **Files**: `.github/AGENTIC_WORKFLOW.md`
 - **Status**: ✅ Already in dev
 - **Action**: None needed - propagate to other branches
 
----
+______________________________________________________________________
 
 ## Phase 2: Core CLI Implementation (HIGHEST PRIORITY)
 
 ### PR #2: autogit-core v0.1.0
+
 - **Branch**: `feature/autogit-core-cli-v0.1.0` → `dev`
 - **Files**: 32 files in `autogit-core/`
 - **LOC**: ~5,300 lines
@@ -25,12 +29,14 @@ The agent workflow documentation provides context for reviewing all other PRs. R
 - **Session Summary**: `autogit-core/SESSION_SUMMARY.md`
 
 **Why This Is Critical**:
+
 - All other work depends on having a working GitLab API client
 - Runner automation needs `autogit runner` commands
 - Mirror sync needs `autogit mirror` commands
 - This is the foundation for all future automation
 
 **Review Checklist**:
+
 - [ ] Rust builds cleanly
 - [ ] All commands work with live GitLab
 - [ ] Shell completions generate for all 6 shells
@@ -39,6 +45,7 @@ The agent workflow documentation provides context for reviewing all other PRs. R
 - [ ] No security issues (secrets handled with secrecy crate)
 
 **Merge Command**:
+
 ```bash
 # On GitHub, create PR: feature/autogit-core-cli-v0.1.0 → dev
 # Title: "feat(autogit-core): Complete CLI v0.1.0 with GitLab API integration"
@@ -49,44 +56,49 @@ git merge --no-ff feature/autogit-core-cli-v0.1.0
 git push origin dev
 ```
 
----
+______________________________________________________________________
 
 ## Phase 3: Infrastructure Support (PARALLEL - After Core)
 
 These can be reviewed in parallel after autogit-core merges.
 
 ### PR #3: Homelab GitLab Deployment
+
 - **Branch**: `feature/homelab-gitlab-deployment` → `dev`
 - **Files**: 14 files (compose, scripts, docs)
 - **Status**: ✅ Ready for review
 - **Depends**: None (deployment scripts)
 
 ### PR #4: Observability Stack
+
 - **Branch**: `feature/observability-stack` → `dev`
 - **Files**: 9 files (Prometheus, Grafana, Loki, Tempo)
 - **Status**: ✅ Ready for review
 - **Depends**: None (config files)
 
 ### PR #5: Architecture Documentation
+
 - **Branch**: `feature/docs-architecture` → `dev`
 - **Files**: 4 docs files
 - **Status**: ✅ Ready for review
 - **Depends**: None (docs only)
 
 ### PR #6: Development Tooling
+
 - **Branch**: `feature/dev-tooling` → `dev`
 - **Files**: 7 files (Makefile, .editorconfig, scripts)
 - **Status**: ✅ Ready for review
 - **Depends**: None (tooling)
 
 ### PR #7: GitHub Workflows Organization
+
 - **Branch**: `feature/github-workflows` → `dev`
 - **Files**: 2 files (chat mode, archived workflows)
 - **Status**: ✅ Ready for review
 - **Depends**: None (CI organization)
 - **Note**: Contains autogit-specialist.chatmode.md!
 
----
+______________________________________________________________________
 
 ## Phase 4: Propagate to Feature Branches
 
@@ -105,7 +117,7 @@ for branch in \
 done
 ```
 
----
+______________________________________________________________________
 
 ## Phase 5: Cleanup Stale Branches
 
@@ -141,23 +153,23 @@ git push origin --delete \
   work/homelab-deployment-terraform-config-init
 ```
 
----
+______________________________________________________________________
 
 ## Timeline
 
-| Phase | Action | Duration | Blocker |
-|-------|--------|----------|---------|
-| 1 | Agent docs | ✅ Done | None |
-| 2 | Review autogit-core | 1-2 days | Code review |
-| 2 | Merge autogit-core | 5 min | Approval |
-| 3 | Review infra PRs (parallel) | 1 day | Code review |
-| 3 | Merge infra PRs | 15 min | Approvals |
-| 4 | Propagate to branches | 30 min | Phase 3 complete |
-| 5 | Cleanup stale | 15 min | Phase 4 complete |
+| Phase | Action                      | Duration | Blocker          |
+| ----- | --------------------------- | -------- | ---------------- |
+| 1     | Agent docs                  | ✅ Done  | None             |
+| 2     | Review autogit-core         | 1-2 days | Code review      |
+| 2     | Merge autogit-core          | 5 min    | Approval         |
+| 3     | Review infra PRs (parallel) | 1 day    | Code review      |
+| 3     | Merge infra PRs             | 15 min   | Approvals        |
+| 4     | Propagate to branches       | 30 min   | Phase 3 complete |
+| 5     | Cleanup stale               | 15 min   | Phase 4 complete |
 
 **Total**: 2-3 days if reviews happen promptly
 
----
+______________________________________________________________________
 
 ## Critical Path
 
@@ -179,27 +191,28 @@ Cleanup stale branches
 ✅ Clean, organized repository ready for next 10 work items
 ```
 
----
+______________________________________________________________________
 
 ## Next Work Items (After Merges)
 
 From NEXT_10_ITEMS.md:
 
 1. ✅ autogit-core PR (this phase)
-2. ✅ Infrastructure PRs (this phase)
-3. Integration tests for CLI (new branch)
-4. CLI release pipeline (new branch)
-5. Runner automation using autogit CLI
-6. Mirror sync automation
-7. Terraform review and updates
+1. ✅ Infrastructure PRs (this phase)
+1. Integration tests for CLI (new branch)
+1. CLI release pipeline (new branch)
+1. Runner automation using autogit CLI
+1. Mirror sync automation
+1. Terraform review and updates
 
----
+______________________________________________________________________
 
 ## Communication
 
 When creating PRs on GitHub:
 
 **PR Template**:
+
 ```markdown
 ## Summary
 [One-line description]
@@ -228,6 +241,6 @@ This work was completed by AI agent in autonomous mode.
 See `.github/AGENTIC_WORKFLOW.md` for context on development process.
 ```
 
----
+______________________________________________________________________
 
 **Execute Phase 2 (autogit-core PR) immediately after reading this document.**

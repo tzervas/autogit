@@ -15,6 +15,7 @@ AutoGit automatically detects and schedules jobs to runners with appropriate GPU
 ## GPU Detection
 
 AutoGit includes a GPU detection service that:
+
 - Automatically discovers available GPUs
 - Reports GPU capabilities (compute, memory, etc.)
 - Tracks GPU utilization
@@ -25,6 +26,7 @@ See [GPU Detection](detection.md) for technical details.
 ## GPU Scheduling
 
 The runner coordinator schedules jobs based on:
+
 - Required GPU vendor
 - Required compute capability
 - Memory requirements
@@ -89,6 +91,7 @@ See [GPU Workloads Tutorial](../tutorials/gpu-workloads.md) for examples.
 ## Troubleshooting
 
 Common GPU issues:
+
 - [GPU not detected](../troubleshooting/gpu.md#detection)
 - [Insufficient GPU memory](../troubleshooting/gpu.md#memory)
 - [Driver version mismatches](../troubleshooting/gpu.md#drivers)

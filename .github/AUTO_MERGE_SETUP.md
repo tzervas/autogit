@@ -1,6 +1,7 @@
 # Auto-Merge Setup Guide
 
-This guide will help you configure GitHub repository settings to enable the automated merge workflows.
+This guide will help you configure GitHub repository settings to enable the automated merge
+workflows.
 
 ## Prerequisites
 
@@ -12,19 +13,19 @@ This guide will help you configure GitHub repository settings to enable the auto
 ### Step 1: Enable Auto-Merge Feature
 
 1. Go to your repository on GitHub
-2. Click **Settings**
-3. Scroll down to **Pull Requests** section
-4. Check ✅ **Allow auto-merge**
-5. Check ✅ **Automatically delete head branches**
-6. Click **Save changes**
+1. Click **Settings**
+1. Scroll down to **Pull Requests** section
+1. Check ✅ **Allow auto-merge**
+1. Check ✅ **Automatically delete head branches**
+1. Click **Save changes**
 
 ### Step 2: Configure GitHub Actions Permissions
 
 1. In Settings, click **Actions** → **General**
-2. Under **Workflow permissions**, select:
+1. Under **Workflow permissions**, select:
    - ✅ **Read and write permissions**
    - ✅ **Allow GitHub Actions to create and approve pull requests**
-3. Click **Save**
+1. Click **Save**
 
 ### Step 3: Create Labels
 
@@ -165,9 +166,9 @@ If you prefer to use the GitHub web interface:
 ### Main Branch Protection
 
 1. Go to Settings → Branches
-2. Click **Add branch protection rule**
-3. Branch name pattern: `main`
-4. Configure:
+1. Click **Add branch protection rule**
+1. Branch name pattern: `main`
+1. Configure:
    - ✅ Require a pull request before merging
      - Required approvals: 1
      - ✅ Dismiss stale pull request approvals
@@ -182,14 +183,14 @@ If you prefer to use the GitHub web interface:
    - ✅ Do not allow bypassing the above settings
    - ✅ Restrict who can push to matching branches
      - Add: `tzervas` (your username)
-5. Click **Create**
+1. Click **Create**
 
 ### Dev Branch Protection
 
 1. Go to Settings → Branches
-2. Click **Add branch protection rule**
-3. Branch name pattern: `dev`
-4. Configure:
+1. Click **Add branch protection rule**
+1. Branch name pattern: `dev`
+1. Configure:
    - ✅ Require a pull request before merging
      - Required approvals: 1
      - ✅ Dismiss stale pull request approvals
@@ -199,21 +200,22 @@ If you prefer to use the GitHub web interface:
      - Add status checks (same as main)
    - ✅ Require conversation resolution
    - ✅ Require linear history
-   - ❌ Do not allow bypassing the above settings (must remain unchecked so github-actions bot can auto-merge)
-5. Click **Create**
+   - ❌ Do not allow bypassing the above settings (must remain unchecked so github-actions bot can
+     auto-merge)
+1. Click **Create**
 
 ### Feature Branch Protection
 
 1. Go to Settings → Branches
-2. Click **Add branch protection rule**
-3. Branch name pattern: `feature/*`
-4. Configure:
+1. Click **Add branch protection rule**
+1. Branch name pattern: `feature/*`
+1. Configure:
    - ✅ Require a pull request before merging
      - Required approvals: 1
    - ✅ Require status checks to pass
      - Add: `CI / Lint Shell Scripts`
    - ✅ Require linear history
-5. Click **Create**
+1. Click **Create**
 
 ## Testing the Setup
 
@@ -286,52 +288,57 @@ gh pr view --web
 **Problem**: PR is approved and checks pass, but auto-merge doesn't happen
 
 **Solutions**:
+
 1. Check Actions permissions: Settings → Actions → General
-2. Verify `enforce_admins` is disabled for dev/feature branches
-3. Ensure PR doesn't have `no-auto-merge` label
-4. Check workflow logs in Actions tab
+1. Verify `enforce_admins` is disabled for dev/feature branches
+1. Ensure PR doesn't have `no-auto-merge` label
+1. Check workflow logs in Actions tab
 
 ### Permission errors
 
 **Problem**: Workflow fails with "Resource not accessible by integration"
 
 **Solutions**:
+
 1. Enable "Read and write permissions" in Actions settings
-2. Enable "Allow GitHub Actions to create and approve pull requests"
-3. Check workflow has `contents: write` and `pull-requests: write` permissions
+1. Enable "Allow GitHub Actions to create and approve pull requests"
+1. Check workflow has `contents: write` and `pull-requests: write` permissions
 
 ### Branch protection conflicts
 
 **Problem**: Auto-merge blocked by branch protection
 
 **Solutions**:
+
 1. Ensure `enforce_admins` is false for branches that need auto-merge
-2. Verify required checks are specified correctly in workflow
-3. Add github-actions bot to allowed users for pushing
+1. Verify required checks are specified correctly in workflow
+1. Add github-actions bot to allowed users for pushing
 
 ### Status checks not recognized
 
 **Problem**: Required status checks never marked as passing
 
 **Solutions**:
+
 1. Verify exact name of check in workflow file
-2. Check Actions tab for failed runs
-3. Ensure check runs before merge attempt
-4. Remove "Require branches to be up to date" temporarily for testing
+1. Check Actions tab for failed runs
+1. Ensure check runs before merge attempt
+1. Remove "Require branches to be up to date" temporarily for testing
 
 ## Next Steps
 
 After setup is complete:
 
 1. **Document for team**: Share this guide with contributors
-2. **Create templates**: Use PR templates for consistency
-3. **Monitor workflows**: Watch first few auto-merges closely
-4. **Adjust as needed**: Fine-tune based on team feedback
-5. **Regular reviews**: Audit permissions and rules monthly
+1. **Create templates**: Use PR templates for consistency
+1. **Monitor workflows**: Watch first few auto-merges closely
+1. **Adjust as needed**: Fine-tune based on team feedback
+1. **Regular reviews**: Audit permissions and rules monthly
 
 ## Support
 
 For issues or questions:
+
 - Check [Branch Protection Documentation](.github/BRANCH_PROTECTION.md)
 - Review [Workflows README](.github/workflows/README.md)
 - Open an issue in the repository

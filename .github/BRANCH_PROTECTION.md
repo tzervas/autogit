@@ -1,10 +1,12 @@
 # Branch Protection Rules Configuration
 
-This document describes the branch protection rules that should be configured in GitHub repository settings.
+This document describes the branch protection rules that should be configured in GitHub repository
+settings.
 
 ## Overview
 
-AutoGit uses automated merge workflows with different approval requirements based on the branch hierarchy:
+AutoGit uses automated merge workflows with different approval requirements based on the branch
+hierarchy:
 
 - **Work → Subtask**: Auto-merge with evaluator approval or `auto-merge` label
 - **Subtask → Feature**: Auto-merge with evaluator approval or `auto-merge` label
@@ -18,6 +20,7 @@ AutoGit uses automated merge workflows with different approval requirements base
 **Branch name pattern**: `main`
 
 **Protection rules**:
+
 - ✅ Require pull request reviews before merging
   - Required approving reviews: 1
   - Dismiss stale pull request approvals when new commits are pushed: Yes
@@ -44,6 +47,7 @@ AutoGit uses automated merge workflows with different approval requirements base
 **Branch name pattern**: `dev`
 
 **Protection rules**:
+
 - ✅ Require pull request reviews before merging
   - Required approving reviews: 1
   - Dismiss stale pull request approvals when new commits are pushed: Yes
@@ -72,6 +76,7 @@ AutoGit uses automated merge workflows with different approval requirements base
 **Branch name pattern**: `feature/*`
 
 **Protection rules**:
+
 - ✅ Require pull request reviews before merging
   - Required approving reviews: 1
   - Dismiss stale pull request approvals when new commits are pushed: No
@@ -95,6 +100,7 @@ AutoGit uses automated merge workflows with different approval requirements base
 **Branch name pattern**: `feature/*/*`
 
 **Protection rules**:
+
 - ✅ Require pull request reviews before merging
   - Required approving reviews: 1
   - Dismiss stale pull request approvals when new commits are pushed: No
@@ -118,6 +124,7 @@ AutoGit uses automated merge workflows with different approval requirements base
 **Branch name pattern**: `feature/*/*/*`
 
 **Protection rules**:
+
 - ❌ No protection rules required
 - Work branches are ephemeral and deleted after merge
 
@@ -126,15 +133,17 @@ AutoGit uses automated merge workflows with different approval requirements base
 ### Prerequisites for Auto-Merge
 
 All auto-merge workflows require:
+
 1. All required CI checks must pass
-2. Branch must be mergeable (no conflicts)
-3. PR must not have `no-auto-merge` label
+1. Branch must be mergeable (no conflicts)
+1. PR must not have `no-auto-merge` label
 
 ### Work → Subtask Auto-Merge
 
 **Workflow**: `.github/workflows/auto-merge-subtasks.yml`
 
 **Trigger conditions**:
+
 - PR from `feature/x/y/z` to `feature/x/y`
 - Approved by evaluator OR has `auto-merge` label
 - All CI checks pass
@@ -142,6 +151,7 @@ All auto-merge workflows require:
 **Merge method**: Squash
 
 **Permissions needed**:
+
 - `contents: write`
 - `pull-requests: write`
 
@@ -150,6 +160,7 @@ All auto-merge workflows require:
 **Workflow**: `.github/workflows/auto-merge-subtasks.yml`
 
 **Trigger conditions**:
+
 - PR from `feature/x/y` to `feature/x`
 - Approved by evaluator OR has `auto-merge` label
 - All CI checks pass
@@ -157,6 +168,7 @@ All auto-merge workflows require:
 **Merge method**: Squash
 
 **Permissions needed**:
+
 - `contents: write`
 - `pull-requests: write`
 
@@ -165,6 +177,7 @@ All auto-merge workflows require:
 **Workflow**: `.github/workflows/auto-merge-feature-to-dev.yml`
 
 **Trigger conditions**:
+
 - PR from `feature/x` to `dev`
 - Approved by @tzervas (owner) OR has `owner-approved` label
 - All CI checks pass
@@ -172,6 +185,7 @@ All auto-merge workflows require:
 **Merge method**: Squash
 
 **Permissions needed**:
+
 - `contents: write`
 - `pull-requests: write`
 
@@ -220,26 +234,26 @@ The following labels must exist in the repository (defined in `.github/labels.ym
 For each branch pattern above:
 
 1. Go to Settings → Branches
-2. Click "Add branch protection rule"
-3. Enter the branch name pattern
-4. Configure the protection rules as specified
-5. Save changes
+1. Click "Add branch protection rule"
+1. Enter the branch name pattern
+1. Configure the protection rules as specified
+1. Save changes
 
 ### 2. Enable Auto-Merge
 
 1. Go to Settings → General
-2. Scroll to "Pull Requests"
-3. Check "Allow auto-merge"
-4. Check "Automatically delete head branches"
-5. Save changes
+1. Scroll to "Pull Requests"
+1. Check "Allow auto-merge"
+1. Check "Automatically delete head branches"
+1. Save changes
 
 ### 3. Configure Actions Permissions
 
 1. Go to Settings → Actions → General
-2. Under "Actions permissions", select "Allow all actions and reusable workflows"
-3. Under "Workflow permissions", select "Read and write permissions"
-4. Check "Allow GitHub Actions to create and approve pull requests"
-5. Save changes
+1. Under "Actions permissions", select "Allow all actions and reusable workflows"
+1. Under "Workflow permissions", select "Read and write permissions"
+1. Check "Allow GitHub Actions to create and approve pull requests"
+1. Save changes
 
 ### 4. Create Required Labels
 
@@ -284,29 +298,30 @@ git push -u origin feature/test-feature/test-subtask/test-work
 ### Auto-merge not working
 
 1. Check Actions permissions are set correctly
-2. Verify branch protection rules don't include administrators
-3. Ensure PR doesn't have `no-auto-merge` label
-4. Check all required status checks are passing
-5. Verify workflow has `contents: write` permission
+1. Verify branch protection rules don't include administrators
+1. Ensure PR doesn't have `no-auto-merge` label
+1. Check all required status checks are passing
+1. Verify workflow has `contents: write` permission
 
 ### Permission denied errors
 
 1. Go to Settings → Actions → General
-2. Ensure "Read and write permissions" is selected
-3. Ensure "Allow GitHub Actions to create and approve pull requests" is checked
+1. Ensure "Read and write permissions" is selected
+1. Ensure "Allow GitHub Actions to create and approve pull requests" is checked
 
 ### Workflow not triggering
 
 1. Check workflow file syntax
-2. Verify trigger conditions match your PR
-3. Check Actions tab for error messages
-4. Ensure workflows are enabled in repository settings
+1. Verify trigger conditions match your PR
+1. Check Actions tab for error messages
+1. Ensure workflows are enabled in repository settings
 
 ## Security Considerations
 
 ### Protected Main Branch
 
 Main branch is fully protected and requires:
+
 - Owner approval only
 - All CI checks pass
 - Manual review of changes
@@ -315,6 +330,7 @@ Main branch is fully protected and requires:
 ### Dev Branch Protection
 
 Dev branch allows automated merges from feature branches but:
+
 - Still requires owner approval for feature merges
 - All CI checks must pass
 - Automated actors have limited permissions
@@ -322,6 +338,7 @@ Dev branch allows automated merges from feature branches but:
 ### Feature Branch Flexibility
 
 Feature and subtask branches have looser protection to enable:
+
 - Fast iteration cycles
 - Automated evaluator approvals
 - Quick subtask merges

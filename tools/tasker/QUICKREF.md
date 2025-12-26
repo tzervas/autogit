@@ -1,7 +1,9 @@
 # Tasker Quick Reference
 
 ## Installation
+
 No installation needed - run directly from repository:
+
 ```bash
 cd /path/to/autogit
 python3 -m tools.tasker --help
@@ -10,12 +12,15 @@ python3 -m tools.tasker --help
 ## Commands
 
 ### Show Next Task
+
 ```bash
 python3 -m tools.tasker next
 ```
+
 Displays the next actionable work item with full details.
 
 ### Execute Task Workflow
+
 ```bash
 # Execute next task
 python3 -m tools.tasker execute
@@ -29,9 +34,11 @@ python3 -m tools.tasker execute --no-branch
 # Use different base branch
 python3 -m tools.tasker execute --base-branch main
 ```
+
 Creates branch and generates task summary.
 
 ### List Tasks
+
 ```bash
 # Basic list
 python3 -m tools.tasker list
@@ -39,9 +46,11 @@ python3 -m tools.tasker list
 # Detailed with subtasks
 python3 -m tools.tasker list -v
 ```
+
 Shows all milestones and tasks with status.
 
 ### Show Status
+
 ```bash
 # Milestone status
 python3 -m tools.tasker status milestone-2
@@ -49,11 +58,13 @@ python3 -m tools.tasker status milestone-2
 # Task status
 python3 -m tools.tasker status milestone-2-subtask-1
 ```
+
 Detailed view of specific task or milestone.
 
 ## Common Workflows
 
 ### Daily Workflow
+
 ```bash
 # 1. Check next task
 python3 -m tools.tasker next
@@ -66,6 +77,7 @@ python3 -m tools.tasker execute
 ```
 
 ### Project Status Check
+
 ```bash
 # Overview of all milestones
 python3 -m tools.tasker list -v
@@ -75,6 +87,7 @@ python3 -m tools.tasker status milestone-2
 ```
 
 ### Task Details
+
 ```bash
 # Get full task details
 python3 -m tools.tasker status milestone-2-subtask-1
@@ -90,16 +103,19 @@ python3 -m tools.tasker status milestone-2-subtask-1
 ## Key Features
 
 ✅ **Intelligent Task Identification**
+
 - Priority-based selection
 - Status filtering (READY/QUEUED)
 - Dependency awareness
 
 ✅ **Workflow Automation**
+
 - Branch creation
 - Summary generation
 - Next steps guidance
 
 ✅ **Project Visibility**
+
 - Progress tracking
 - Status overview
 - Milestone management
@@ -116,9 +132,9 @@ python3 -m tools.tasker status milestone-2-subtask-1
 ## Task Identification Logic
 
 1. Filter by status (READY or QUEUED only)
-2. Sort by priority (HIGH > MEDIUM > LOW)
-3. Select first READY task from highest priority milestone
-4. If no READY tasks, select first QUEUED task
+1. Sort by priority (HIGH > MEDIUM > LOW)
+1. Select first READY task from highest priority milestone
+1. If no READY tasks, select first QUEUED task
 
 ## Files Generated
 
@@ -129,11 +145,9 @@ python3 -m tools.tasker status milestone-2-subtask-1
 
 ## Tips
 
-💡 **Start of day**: Run `next` to see what's coming up
-💡 **Before starting work**: Run `execute` to set up properly
-💡 **During sprint**: Use `list -v` to track progress
-💡 **In standup**: Reference task IDs from `list` output
-💡 **CI/CD**: Use `execute --no-branch` to generate summaries
+💡 **Start of day**: Run `next` to see what's coming up 💡 **Before starting work**: Run `execute` to
+set up properly 💡 **During sprint**: Use `list -v` to track progress 💡 **In standup**: Reference
+task IDs from `list` output 💡 **CI/CD**: Use `execute --no-branch` to generate summaries
 
 ## Help
 

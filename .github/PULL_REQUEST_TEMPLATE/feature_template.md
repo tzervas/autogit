@@ -1,15 +1,10 @@
----
-name: Feature PR (Feature → Dev)
-about: Merge a completed feature into the dev branch
-title: 'feat: [Feature Name]'
-labels: feature
----
+______________________________________________________________________
+
+## name: Feature PR (Feature → Dev) about: Merge a completed feature into the dev branch title: 'feat: [Feature Name]' labels: feature
 
 ## 🎯 Feature Overview
 
-**Feature Name**: [Name]
-**Related Issue**: #[issue]
-**Epic/Task**: [Link to project board or epic]
+**Feature Name**: [Name] **Related Issue**: #[issue] **Epic/Task**: [Link to project board or epic]
 
 ## 📝 Description
 
@@ -32,17 +27,20 @@ Why is this feature needed?
 ## 🧪 Testing
 
 ### Test Coverage
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] E2E tests added/updated (if applicable)
 - [ ] Test coverage: [XX]%
 
 ### Manual Testing
+
 - [ ] Feature tested locally
 - [ ] Edge cases verified
 - [ ] Error handling tested
 
 ### Test Results
+
 ```
 [Paste test results]
 ```
@@ -57,6 +55,7 @@ Why is this feature needed?
 - [ ] README updated (if needed)
 
 ### Documentation Links
+
 - [Link to updated docs]
 - [Link to ADR if created]
 
@@ -75,23 +74,24 @@ Why is this feature needed?
 - [ ] No performance regressions
 
 ### Performance Metrics
+
 [If applicable, include before/after metrics]
 
 ## 💥 Breaking Changes
 
 **Are there breaking changes?** [Yes/No]
 
-If yes, describe them:
-[Description of breaking changes and migration path]
+If yes, describe them: [Description of breaking changes and migration path]
 
 ## 📦 Dependencies
 
 ### New Dependencies
+
 - [ ] No new dependencies, OR
 - [ ] New dependencies listed below:
 
 | Dependency | Version | License | Purpose |
-|------------|---------|---------|---------|
+| ---------- | ------- | ------- | ------- |
 | [name]     | [ver]   | [lic]   | [why]   |
 
 - [ ] All dependencies license-checked
@@ -100,6 +100,7 @@ If yes, describe them:
 ## 🔄 Merge Status
 
 All sub-features and work branches merged:
+
 - [ ] Sub-feature 1 merged
 - [ ] Sub-feature 2 merged
 - [ ] Sub-feature 3 merged
@@ -107,6 +108,7 @@ All sub-features and work branches merged:
 ## 📋 Checklist
 
 ### Code Quality
+
 - [ ] Code follows project style guide
 - [ ] No linting errors
 - [ ] No compiler warnings
@@ -114,17 +116,20 @@ All sub-features and work branches merged:
 - [ ] Code is self-documenting or well-commented
 
 ### Testing
+
 - [ ] All tests pass
 - [ ] Test coverage meets requirements (80%+)
 - [ ] Manual testing completed
 - [ ] Regression testing done
 
 ### Documentation
+
 - [ ] All documentation updated
 - [ ] Examples added where helpful
 - [ ] CHANGELOG entry added
 
 ### Review
+
 - [ ] Self-review completed
 - [ ] Ready for peer review
 - [ ] All review comments addressed
@@ -132,9 +137,11 @@ All sub-features and work branches merged:
 ## 🔗 Related
 
 Related PRs:
+
 - [Link to related PRs]
 
 Related Issues:
+
 - Closes #[issue]
 - Relates to #[issue]
 
@@ -155,13 +162,15 @@ Related Issues:
 @[reviewer1] @[reviewer2]
 
 Focus areas for review:
+
 - [Area 1]
 - [Area 2]
 
----
+______________________________________________________________________
 
 **Note to Reviewers**: This feature PR includes multiple sub-features. Please verify:
+
 1. All sub-features are integrated correctly
-2. No integration issues between sub-features
-3. Overall feature works as expected
-4. Documentation is complete
+1. No integration issues between sub-features
+1. Overall feature works as expected
+1. Documentation is complete

@@ -12,16 +12,19 @@ Get up and running with the AutoGit Git Server in 5 minutes.
 ## Step 1: Configure Environment
 
 1. Navigate to the git-server service directory:
+
    ```bash
    cd services/git-server
    ```
 
-2. Copy the example environment file:
+1. Copy the example environment file:
+
    ```bash
    cp .env.example .env
    ```
 
-3. Edit the `.env` file and set a secure root password:
+1. Edit the `.env` file and set a secure root password:
+
    ```bash
    # Open .env in your editor
    vim .env
@@ -33,22 +36,26 @@ Get up and running with the AutoGit Git Server in 5 minutes.
 ## Step 2: Start GitLab
 
 1. Start the Git Server:
+
    ```bash
    # From the repository root
    docker-compose up -d git-server
    ```
 
-2. Monitor the startup process (first start takes 3-5 minutes):
+1. Monitor the startup process (first start takes 3-5 minutes):
+
    ```bash
    docker-compose logs -f git-server
    ```
 
    Wait until you see:
+
    ```
    gitlab Reconfigured!
    ```
 
-3. Verify the service is healthy:
+1. Verify the service is healthy:
+
    ```bash
    docker-compose ps git-server
    ```
@@ -58,11 +65,13 @@ Get up and running with the AutoGit Git Server in 5 minutes.
 ## Step 3: Access GitLab
 
 1. Open your browser and navigate to:
+
    ```
    http://localhost:3000
    ```
 
-2. Login with:
+1. Login with:
+
    - **Username**: `root`
    - **Password**: The value you set in `GITLAB_ROOT_PASSWORD`
 
@@ -71,11 +80,11 @@ Get up and running with the AutoGit Git Server in 5 minutes.
 ### Via Web UI
 
 1. Click "New project" or "Create a project"
-2. Choose "Create blank project"
-3. Fill in:
+1. Choose "Create blank project"
+1. Fill in:
    - **Project name**: `my-first-project`
    - **Visibility**: Private
-4. Click "Create project"
+1. Click "Create project"
 
 ### Via API
 
@@ -104,28 +113,33 @@ cd my-first-project
 ```
 
 When prompted for credentials:
+
 - **Username**: `root`
 - **Password**: Your GitLab password
 
 ### Via SSH
 
 1. Generate SSH key (if you don't have one):
+
    ```bash
    ssh-keygen -t ed25519 -C "your_email@example.com"
    ```
 
-2. Copy your public key:
+1. Copy your public key:
+
    ```bash
    cat ~/.ssh/id_ed25519.pub
    ```
 
-3. Add SSH key to GitLab:
+1. Add SSH key to GitLab:
+
    - Login to GitLab
    - Go to User Settings > SSH Keys
    - Paste your public key
    - Click "Add key"
 
-4. Clone via SSH:
+1. Clone via SSH:
+
    ```bash
    git clone ssh://git@localhost:2222/root/my-first-project.git
    cd my-first-project
@@ -148,12 +162,12 @@ git push origin main
 ## Verify Everything Works
 
 1. **Check web UI**: Refresh your browser and verify the README appears
-2. **Check API**:
+1. **Check API**:
    ```bash
    curl --header "PRIVATE-TOKEN: your_token" \
      "http://localhost:3000/api/v4/projects/1"
    ```
-3. **Check health**:
+1. **Check health**:
    ```bash
    curl http://localhost:3000/-/health
    ```
@@ -163,22 +177,22 @@ git push origin main
 ### Create a Personal Access Token
 
 1. Login to GitLab
-2. Go to User Settings > Access Tokens
-3. Enter:
+1. Go to User Settings > Access Tokens
+1. Enter:
    - **Token name**: `api-access`
    - **Expiration**: Choose a date
    - **Scopes**: Select `api`
-4. Click "Create personal access token"
-5. Copy the token (you won't see it again!)
+1. Click "Create personal access token"
+1. Copy the token (you won't see it again!)
 
 ### Create a New User
 
 1. Login as root
-2. Go to Admin Area > Users
-3. Click "New user"
-4. Fill in user details
-5. Click "Create user"
-6. Set password for the user
+1. Go to Admin Area > Users
+1. Click "New user"
+1. Fill in user details
+1. Click "Create user"
+1. Set password for the user
 
 ### Setup CI/CD Runner
 
@@ -235,4 +249,5 @@ docker-compose down -v
 
 ## Success! 🎉
 
-You now have a fully functional Git server running. Start creating repositories, setting up CI/CD pipelines, and integrating with your AutoGit runners!
+You now have a fully functional Git server running. Start creating repositories, setting up CI/CD
+pipelines, and integrating with your AutoGit runners!

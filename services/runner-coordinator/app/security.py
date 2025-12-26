@@ -1,9 +1,10 @@
+import logging
 import os
 import secrets
-import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
+
 
 class SecurityManager:
     """
@@ -22,7 +23,7 @@ class SecurityManager:
         """
         Sanitize environment variables to prevent sensitive data leakage.
         """
-        sensitive_keys = ['GITLAB_TOKEN', 'AWS_SECRET_ACCESS_KEY', 'DATABASE_URL']
+        sensitive_keys = ["GITLAB_TOKEN", "AWS_SECRET_ACCESS_KEY", "DATABASE_URL"]
         sanitized = env.copy()
         for key in sensitive_keys:
             if key in sanitized:
@@ -38,5 +39,5 @@ class SecurityManager:
         return {
             "Name": f"net-{runner_name}",
             "Internal": True,
-            "Labels": {"autogit-managed": "true"}
+            "Labels": {"autogit-managed": "true"},
         }

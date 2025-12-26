@@ -48,7 +48,7 @@ setup_ssh_key() {
 
 # Check if SSH key is already authorized
 # We specify the identity file to ensure we're testing the right key
-if ! ssh -i "$KEY_PATH" -o BatchMode=yes -o ConnectTimeout=5 "$USER@$HOST" exit 2>/dev/null; then
+if ! ssh -i "$KEY_PATH" -o BatchMode=yes -o ConnectTimeout=5 "$USER@$HOST" exit 2> /dev/null; then
     echo "SSH key-based auth not working with $KEY_PATH. Attempting to set up..."
     setup_ssh_key "$USER" "$HOST" "$PUB_KEY"
 else

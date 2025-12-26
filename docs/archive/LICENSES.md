@@ -7,6 +7,7 @@ This document tracks all dependencies and their licenses to ensure MIT compatibi
 AutoGit is licensed under the MIT License. All dependencies must have compatible licenses:
 
 ✅ **Compatible Licenses**:
+
 - MIT
 - BSD (2-Clause, 3-Clause)
 - Apache 2.0
@@ -14,6 +15,7 @@ AutoGit is licensed under the MIT License. All dependencies must have compatible
 - Python Software Foundation License
 
 ❌ **Incompatible Licenses**:
+
 - GPL (any version) - copyleft
 - AGPL - copyleft
 - Proprietary/Commercial licenses
@@ -24,75 +26,79 @@ AutoGit is licensed under the MIT License. All dependencies must have compatible
 
 #### Python Packages
 
-| Package | Version | License | Use |
-|---------|---------|---------|-----|
-| To be added | - | - | - |
+| Package     | Version | License | Use |
+| ----------- | ------- | ------- | --- |
+| To be added | -       | -       | -   |
 
 #### Container Images
 
-| Image | Version | License | Use |
-|-------|---------|---------|-----|
-| Docker | 24.0+ | Apache 2.0 | Container runtime |
-| Python | 3.11+ | PSF | Runtime environment |
+| Image  | Version | License    | Use                 |
+| ------ | ------- | ---------- | ------------------- |
+| Docker | 24.0+   | Apache 2.0 | Container runtime   |
+| Python | 3.11+   | PSF        | Runtime environment |
 
 ### Build Dependencies
 
-| Package | Version | License | Use |
-|---------|---------|---------|-----|
-| To be added | - | - | - |
+| Package     | Version | License | Use |
+| ----------- | ------- | ------- | --- |
+| To be added | -       | -       | -   |
 
 ### Development Dependencies
 
-| Package | Version | License | Use |
-|---------|---------|---------|-----|
-| pytest | Latest | MIT | Testing framework |
-| black | Latest | MIT | Code formatter |
-| flake8 | Latest | MIT | Linter |
-| mypy | Latest | MIT | Type checker |
+| Package | Version | License | Use               |
+| ------- | ------- | ------- | ----------------- |
+| pytest  | Latest  | MIT     | Testing framework |
+| black   | Latest  | MIT     | Code formatter    |
+| flake8  | Latest  | MIT     | Linter            |
+| mypy    | Latest  | MIT     | Type checker      |
 
 ## Infrastructure Components
 
 ### Kubernetes Components
 
-| Component | License | Use |
-|-----------|---------|-----|
-| Traefik | MIT | Ingress controller |
-| Authelia | Apache 2.0 | SSO authentication |
-| CoreDNS | Apache 2.0 | DNS management |
+| Component    | License    | Use                        |
+| ------------ | ---------- | -------------------------- |
+| Traefik      | MIT        | Ingress controller         |
+| Authelia     | Apache 2.0 | SSO authentication         |
+| CoreDNS      | Apache 2.0 | DNS management             |
 | cert-manager | Apache 2.0 | TLS certificate management |
 
 ### GitLab Components
 
-| Component | License | Use |
-|-----------|---------|-----|
-| GitLab CE | MIT | Git server |
-| GitLab Runner | MIT | CI/CD runner |
-| PostgreSQL | PostgreSQL License | Database |
-| Redis | BSD 3-Clause | Cache |
-| MinIO | AGPLv3* | Object storage |
+| Component     | License            | Use            |
+| ------------- | ------------------ | -------------- |
+| GitLab CE     | MIT                | Git server     |
+| GitLab Runner | MIT                | CI/CD runner   |
+| PostgreSQL    | PostgreSQL License | Database       |
+| Redis         | BSD 3-Clause       | Cache          |
+| MinIO         | AGPLv3\*           | Object storage |
 
-*Note: MinIO changed to AGPLv3 after certain versions. Use AGPL-compatible version or alternative.
+\*Note: MinIO changed to AGPLv3 after certain versions. Use AGPL-compatible version or alternative.
 
 ## License Verification Process
 
 When adding new dependencies:
 
 1. **Check License**
+
    ```bash
    pip-licenses --from=mixed --format=markdown
    ```
 
-2. **Verify Compatibility**
+1. **Verify Compatibility**
+
    - Ensure license is in compatible list
    - Check for any license changes in recent versions
    - Document any special considerations
 
-3. **Update This Document**
+1. **Update This Document**
+
    - Add to appropriate section
    - Include version, license, and use
    - Note any license caveats
 
-4. **Review in PR**
+1. **Review in PR**
+
    - All dependency additions must update this file
    - Maintainers will verify license compatibility
 
@@ -130,15 +136,17 @@ Copies of third-party licenses can be found in the `licenses/` directory.
 
 ## Compliance
 
-This project maintains MIT license compatibility for all dependencies. Any dependency with an incompatible license must be:
+This project maintains MIT license compatibility for all dependencies. Any dependency with an
+incompatible license must be:
 
 1. Replaced with a compatible alternative
-2. Isolated as an optional component
-3. Documented with clear usage restrictions
+1. Isolated as an optional component
+1. Documented with clear usage restrictions
 
 ## Updates
 
 This document should be updated whenever:
+
 - New dependencies are added
 - Dependencies are updated to new major versions
 - License terms change for existing dependencies

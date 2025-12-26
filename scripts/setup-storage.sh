@@ -27,7 +27,7 @@ ssh homelab "df -h /home | tail -1"
 # Update environment configuration
 echo ""
 echo "🔧 Creating environment configuration..."
-cat >.env.homelab.local <<EOF
+cat > .env.homelab.local << EOF
 # AutoGit Homelab Storage Configuration
 GITLAB_DATA_PATH=${STORAGE_PATH}
 

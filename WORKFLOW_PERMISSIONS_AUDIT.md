@@ -1,7 +1,7 @@
 # GitHub Actions Workflow Permissions Audit
 
-**Date**: 2024-12-25  
-**Issue**: CI failures due to missing workflow permissions  
+**Date**: 2024-12-25
+**Issue**: CI failures due to missing workflow permissions
 **Resolution**: Added `actions: write` permission to all workflows that trigger other workflows
 
 ## Problem Statement
@@ -21,8 +21,8 @@ Added `actions: write` permission to all workflows that need to trigger other wo
 
 #### 1. versioning.yml - Automated Versioning Workflow
 
-**Purpose**: Creates version tags on PR merge  
-**Triggers**: Release workflow via tag push  
+**Purpose**: Creates version tags on PR merge
+**Triggers**: Release workflow via tag push
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -38,8 +38,8 @@ tag-version:
 
 #### 2. release.yml - Release Creation Workflow
 
-**Purpose**: Creates GitHub releases and publishes Docker images  
-**Triggers**: None (terminal workflow)  
+**Purpose**: Creates GitHub releases and publishes Docker images
+**Triggers**: None (terminal workflow)
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -56,8 +56,8 @@ create-release:
 
 #### 3. auto-fix-ci.yml - Automatic Fix PR Creation
 
-**Purpose**: Creates fix branches and PRs when CI fails  
-**Triggers**: PR validation workflows  
+**Purpose**: Creates fix branches and PRs when CI fails
+**Triggers**: PR validation workflows
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -74,8 +74,8 @@ permissions:
 
 #### 4. pr-validation.yml - PR Validation and Auto-fix
 
-**Purpose**: Validates PRs and applies automatic fixes  
-**Triggers**: PR workflows on the same PR  
+**Purpose**: Validates PRs and applies automatic fixes
+**Triggers**: PR workflows on the same PR
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -91,8 +91,8 @@ permissions:
 
 #### 5. sync-dev-to-features.yml - Branch Synchronization
 
-**Purpose**: Syncs dev changes to feature branches  
-**Triggers**: Branch protection and CI workflows  
+**Purpose**: Syncs dev changes to feature branches
+**Triggers**: Branch protection and CI workflows
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -108,8 +108,8 @@ permissions:
 
 #### 6. auto-merge-feature-to-dev.yml - Automatic Feature Merging
 
-**Purpose**: Auto-merges approved feature PRs to dev  
-**Triggers**: Dev branch workflows (including versioning)  
+**Purpose**: Auto-merges approved feature PRs to dev
+**Triggers**: Dev branch workflows (including versioning)
 **Permission Added**: `actions: write`
 
 ```yaml
@@ -126,8 +126,8 @@ permissions:
 
 #### 7. auto-merge-subtasks.yml - Automatic Subtask Merging
 
-**Purpose**: Auto-merges subtask PRs to parent branches  
-**Triggers**: Branch workflows  
+**Purpose**: Auto-merges subtask PRs to parent branches
+**Triggers**: Branch workflows
 **Permission Added**: `actions: write`
 
 ```yaml

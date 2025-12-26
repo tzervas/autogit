@@ -9,7 +9,7 @@ repos:
   - id: end-of-file-fixer
     exclude: '.github/workflows/'
   - id: check-yaml
-    args: ['--unsafe']      # Allow custom YAML tags
+    args: ['--unsafe']          # Allow custom YAML tags
     exclude: '.github/workflows/'
   - id: check-json
   - id: check-toml

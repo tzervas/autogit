@@ -16,8 +16,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
-  workflows: write
 
 jobs:
   auto-fix:
@@ -26,7 +24,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -47,9 +45,9 @@ jobs:
         id: pre_commit
         continue-on-error: true
         run: |
-          # Run pre-commit on all files except workflow files (to avoid permission issues)
-          # Use find to get all files except those in .github/workflows/
-          find . -type f -not -path './.github/workflows/*' -not -path './.git/*' | xargs pre-commit run --files || true
+          # Run pre-commit on all files
+          # The .pre-commit-config.yaml already excludes .github/workflows/ via exclude patterns
+          pre-commit run --all-files
 
           # Check if there are any changes
           if git diff --quiet; then

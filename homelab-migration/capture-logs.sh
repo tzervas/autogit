@@ -38,7 +38,7 @@ echo "" | tee -a "$LOG_FILE"
 echo "✅ Logs saved to: $LOG_FILE"
 echo "📦 File size: $(du -h "$LOG_FILE" | cut -f1)"
 
-if [[ "$NON_INTERACTIVE" != "true" ]]; then
+if [[ $NON_INTERACTIVE != "true" ]]; then
     echo ""
     echo "To download to your local machine:"
     echo "scp ${HOMELAB_USER}@${HOMELAB_HOST}:$(pwd)/$LOG_FILE ."

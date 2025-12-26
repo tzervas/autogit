@@ -39,9 +39,11 @@ if [ -f "${ENV_FILE}" ]; then
         echo "✓ Updated GITLAB_ROOT_PASSWORD in ${ENV_FILE}"
     else
         # Add new entry
-        echo "" >>"${ENV_FILE}"
-        echo "# GitLab root user password (auto-generated)" >>"${ENV_FILE}"
-        echo "GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}" >>"${ENV_FILE}"
+        {
+            echo ""
+            echo "# GitLab root user password (auto-generated)"
+            echo "GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}"
+        } >>"${ENV_FILE}"
         echo "✓ Added GITLAB_ROOT_PASSWORD to ${ENV_FILE}"
     fi
 else

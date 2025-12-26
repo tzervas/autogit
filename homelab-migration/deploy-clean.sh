@@ -62,23 +62,23 @@ echo ""
 # Stream logs with SMART filtering
 ssh ${HOMELAB_USER}@${HOMELAB_HOST} "cd ${HOMELAB_DIR} && export DOCKER_HOST=${DOCKER_SOCK} && docker logs -f --tail=100 ${CONTAINER_NAME} 2>&1" | while IFS= read -r line; do
     TIMESTAMP=$(show_elapsed)
-    ELAPSED_SECONDS=$(( $(date +%s) - START_TIME ))
-    
+    ELAPSED_SECONDS=$(($(date +%s) - START_TIME))
+
     # Skip Chef cookbook caching messages (not useful for monitoring)
     if echo "$line" | grep -qi "storing updated cookbooks"; then
         continue
     fi
-    
+
     # Skip generic warning message (not a real error)
     if echo "$line" | grep -qi "if this container fails to start due to permission"; then
         continue
     fi
-    
+
     # Skip "connection refused" errors in first 90 seconds (normal during startup)
     if [ $ELAPSED_SECONDS -lt 90 ] && echo "$line" | grep -qi "connection refused\|badgateway"; then
         continue
     fi
-    
+
     # Highlight PostgreSQL readiness
     if echo "$line" | grep -qi "database system is ready to accept connections"; then
         if [ "$POSTGRES_READY" = false ]; then
@@ -87,23 +87,23 @@ ssh ${HOMELAB_USER}@${HOMELAB_HOST} "cd ${HOMELAB_DIR} && export DOCKER_HOST=${D
         fi
         continue
     fi
-    
+
     # Show PostgreSQL config (one time only)
     if echo "$line" | grep -qiE "shared_buffers.*=.*[0-9]"; then
         echo "$TIMESTAMP 🎯 PostgreSQL: $line"
         continue
     fi
-    
+
     if echo "$line" | grep -qiE "maintenance_work_mem.*=.*[0-9]"; then
         echo "$TIMESTAMP 🎯 PostgreSQL: $line"
         continue
     fi
-    
+
     if echo "$line" | grep -qiE "max_parallel.*=.*[0-9]"; then
         echo "$TIMESTAMP 🎯 PostgreSQL: $line"
         continue
     fi
-    
+
     # Track migrations (show summary, not every file)
     if echo "$line" | grep -qiE "== [0-9]+ .* migrating"; then
         if [ "$MIGRATIONS_STARTED" = false ]; then
@@ -113,7 +113,7 @@ ssh ${HOMELAB_USER}@${HOMELAB_HOST} "cd ${HOMELAB_DIR} && export DOCKER_HOST=${D
         echo "$TIMESTAMP 🔄 Migration: $(echo "$line" | grep -oE '== [0-9]+ .*')"
         continue
     fi
-    
+
     # Track Puma startup
     if echo "$line" | grep -qi "puma starting in cluster mode"; then
         if [ "$PUMA_STARTING" = false ]; then
@@ -122,24 +122,24 @@ ssh ${HOMELAB_USER}@${HOMELAB_HOST} "cd ${HOMELAB_DIR} && export DOCKER_HOST=${D
         fi
         continue
     fi
-    
+
     if echo "$line" | grep -qiE "workers.*:.*[0-9]" && echo "$line" | grep -qi "puma"; then
         echo "$TIMESTAMP 👷 Puma: $(echo "$line" | grep -oE 'Workers.*')"
         continue
     fi
-    
+
     # Track Workhorse
     if echo "$line" | grep -qi "workhorse.*listening"; then
         echo "$TIMESTAMP 🌐 Workhorse: Ready"
         continue
     fi
-    
+
     # Track Sidekiq
     if echo "$line" | grep -qiE "sidekiq.*starting|sidekiq.*ready"; then
         echo "$TIMESTAMP 🔧 Sidekiq: Background workers ready"
         continue
     fi
-    
+
     # Track health check passing
     if echo "$line" | grep -qi "health check.*passed\|health.*ok"; then
         if [ "$HEALTH_PASSED" = false ]; then
@@ -151,7 +151,7 @@ ssh ${HOMELAB_USER}@${HOMELAB_HOST} "cd ${HOMELAB_DIR} && export DOCKER_HOST=${D
         fi
         continue
     fi
-    
+
     # Show REAL errors (not filenames, not during initial startup)
     if [ $ELAPSED_SECONDS -gt 90 ]; then
         if echo "$line" | grep -qiE "fatal|exception|backtrace|errno"; then

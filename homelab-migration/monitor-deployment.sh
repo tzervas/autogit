@@ -13,8 +13,8 @@ METRICS_FILE="$LOG_DIR/deployment_metrics_$TIMESTAMP.csv"
 mkdir -p "$LOG_DIR"
 
 echo "📊 GitLab Deployment Monitor Started at $(date)"
-echo "📊 GitLab Deployment Monitor Started at $(date)" >"$LOG_FILE"
-echo "timestamp,cpu_percent,mem_used_mb,mem_total_mb,mem_percent,disk_read_ops,disk_write_ops,disk_read_mb,disk_write_mb,network_interfaces,container_count,container_cpu_percent,container_mem_percent,container_status,gitlab_health,gitlab_response_time,load_average,process_count" >"$METRICS_FILE"
+echo "📊 GitLab Deployment Monitor Started at $(date)" > "$LOG_FILE"
+echo "timestamp,cpu_percent,mem_used_mb,mem_total_mb,mem_percent,disk_read_ops,disk_write_ops,disk_read_mb,disk_write_mb,network_interfaces,container_count,container_cpu_percent,container_mem_percent,container_status,gitlab_health,gitlab_response_time,load_average,process_count" > "$METRICS_FILE"
 
 # Function to sanitize sensitive data from logs
 sanitize_output() {
@@ -50,11 +50,11 @@ collect_detailed_metrics() {
 
     local mem_info
     mem_info=$(free | grep Mem | awk '{printf "%.2f,%.2f,%.2f", $3/1024, $2/1024, ($3/$2)*100}')
-    IFS=',' read -r mem_used mem_total mem_percent <<<"$mem_info"
+    IFS=',' read -r mem_used mem_total mem_percent <<< "$mem_info"
 
     # Disk I/O with more detail
     local disk_stats
-    disk_stats=$(iostat -d 1 1 2>/dev/null | tail -1 | awk '{print $2,$3,$4,$5,$6}')
+    disk_stats=$(iostat -d 1 1 2> /dev/null | tail -1 | awk '{print $2,$3,$4,$5,$6}')
     local disk_read=${disk_stats%% *}
     disk_stats=${disk_stats#* }
     local disk_write=${disk_stats%% *}
@@ -97,9 +97,9 @@ collect_detailed_metrics() {
     local gitlab_response_time="0"
     local gitlab_db_status="unknown"
 
-    if curl -k -s -w "%{time_total}" -o /dev/null "https://gitlab.vectorweight.com/-/health" 2>/dev/null; then
+    if curl -k -s -w "%{time_total}" -o /dev/null "https://gitlab.vectorweight.com/-/health" 2> /dev/null; then
         gitlab_health="healthy"
-        gitlab_response_time=$(curl -k -s -w "%{time_total}" -o /dev/null "https://gitlab.vectorweight.com/-/health" 2>/dev/null)
+        gitlab_response_time=$(curl -k -s -w "%{time_total}" -o /dev/null "https://gitlab.vectorweight.com/-/health" 2> /dev/null)
     elif sudo docker ps | grep -q autogit-git-server; then
         gitlab_health="starting"
     else
@@ -115,7 +115,7 @@ collect_detailed_metrics() {
     process_count=$(ps aux | wc -l)
 
     # Write detailed CSV
-    echo "$timestamp,$cpu_percent,$mem_used,$mem_total,$mem_percent,$disk_read,$disk_write,$disk_read_mb,$disk_write_mb,$net_stats,$container_count,$container_cpu,$container_mem,$container_status,$gitlab_health,$gitlab_response_time,$load_avg,$process_count" >>"$METRICS_FILE"
+    echo "$timestamp,$cpu_percent,$mem_used,$mem_total,$mem_percent,$disk_read,$disk_write,$disk_read_mb,$disk_write_mb,$net_stats,$container_count,$container_cpu,$container_mem,$container_status,$gitlab_health,$gitlab_response_time,$load_avg,$process_count" >> "$METRICS_FILE"
 }
 
 # Function to monitor network connectivity and external dependencies
@@ -127,20 +127,20 @@ monitor_network_dependencies() {
 
         # Test connectivity to key services
         local docker_hub
-        docker_hub=$(curl -s -w "%{time_total}" -o /dev/null https://registry-1.docker.io 2>/dev/null || echo "0")
+        docker_hub=$(curl -s -w "%{time_total}" -o /dev/null https://registry-1.docker.io 2> /dev/null || echo "0")
 
         local github_api
-        github_api=$(curl -s -w "%{time_total}" -o /dev/null https://api.github.com 2>/dev/null || echo "0")
+        github_api=$(curl -s -w "%{time_total}" -o /dev/null https://api.github.com 2> /dev/null || echo "0")
 
         local gitlab_com
-        gitlab_com=$(curl -s -w "%{time_total}" -o /dev/null https://gitlab.com 2>/dev/null || echo "0")
+        gitlab_com=$(curl -s -w "%{time_total}" -o /dev/null https://gitlab.com 2> /dev/null || echo "0")
 
         # DNS resolution time
         local dns_time
-        dns_time=$( (time nslookup gitlab.vectorweight.com >/dev/null 2>&1) 2>&1 | grep real | awk '{print $2}' | sed 's/0m//' | sed 's/s//' || echo "0")
+        dns_time=$( (time nslookup gitlab.vectorweight.com > /dev/null 2>&1) 2>&1 | grep real | awk '{print $2}' | sed 's/0m//' | sed 's/s//' || echo "0")
 
         # Log network status
-        echo "$timestamp,NETWORK,$docker_hub,$github_api,$gitlab_com,$dns_time" >>"$LOG_DIR/network_monitor.log"
+        echo "$timestamp,NETWORK,$docker_hub,$github_api,$gitlab_com,$dns_time" >> "$LOG_DIR/network_monitor.log"
 
         sleep 10
     done &
@@ -183,21 +183,21 @@ monitor_deployment_phases() {
             local elapsed=$((current_time - phase_start))
 
             case $phase_check in
-            "./data/gitlab/ssl/gitlab.vectorweight.com.crt")
-                [[ -f $phase_check ]] && break
-                ;;
-            "autogit-git-server")
-                sudo docker ps | grep -q "$phase_check" && break
-                ;;
-            "gitlab-health-db")
-                sudo docker compose exec -T gitlab gitlab-psql -c "SELECT 1;" >/dev/null 2>&1 && break
-                ;;
-            "gitlab-health-app")
-                curl -k -s "https://gitlab.vectorweight.com/-/readiness" | grep -q "ok" && break
-                ;;
-            "gitlab-health-full")
-                curl -k -s -f "https://gitlab.vectorweight.com/-/health" >/dev/null 2>&1 && break
-                ;;
+                "./data/gitlab/ssl/gitlab.vectorweight.com.crt")
+                    [[ -f $phase_check ]] && break
+                    ;;
+                "autogit-git-server")
+                    sudo docker ps | grep -q "$phase_check" && break
+                    ;;
+                "gitlab-health-db")
+                    sudo docker compose exec -T gitlab gitlab-psql -c "SELECT 1;" > /dev/null 2>&1 && break
+                    ;;
+                "gitlab-health-app")
+                    curl -k -s "https://gitlab.vectorweight.com/-/readiness" | grep -q "ok" && break
+                    ;;
+                "gitlab-health-full")
+                    curl -k -s -f "https://gitlab.vectorweight.com/-/health" > /dev/null 2>&1 && break
+                    ;;
             esac
 
             # Log progress every 30 seconds
@@ -224,7 +224,7 @@ generate_report() {
     total_time=$(($(date +%s) - START_TIME))
 
     local final_metrics
-    final_metrics=$(tail -1 "$METRICS_FILE" 2>/dev/null || echo "No metrics collected")
+    final_metrics=$(tail -1 "$METRICS_FILE" 2> /dev/null || echo "No metrics collected")
 
     {
         echo "========================================"
@@ -235,7 +235,7 @@ generate_report() {
         echo "Total Duration: ${total_time}s ($((total_time / 60))m $((total_time % 60))s)"
         echo ""
         echo "📋 Key Events:"
-        grep -E "(SSL certificates generated|GitLab container started|GitLab is healthy)" "$LOG_FILE" 2>/dev/null || echo "No key events captured"
+        grep -E "(SSL certificates generated|GitLab container started|GitLab is healthy)" "$LOG_FILE" 2> /dev/null || echo "No key events captured"
         echo ""
         echo "📊 Final System State:"
         echo "$final_metrics"

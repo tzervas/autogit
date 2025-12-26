@@ -32,7 +32,7 @@ openssl genrsa -out "$KEY_FILE" 2048
 
 # Generate certificate signing request
 echo "📋 Generating certificate signing request..."
-cat >/tmp/cert.conf <<EOF
+cat > /tmp/cert.conf << EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions = v3_req

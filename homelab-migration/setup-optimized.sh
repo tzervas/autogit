@@ -39,7 +39,7 @@ show_complete() {
 # Function to install packages with nala
 install_package() {
     local package=$1
-    if ! command -v "$package" >/dev/null 2>&1; then
+    if ! command -v "$package" > /dev/null 2>&1; then
         show_progress "Installing $package"
         sudo nala install -y "$package"
         show_complete
@@ -50,7 +50,7 @@ install_package() {
 echo "🔍 Checking and installing prerequisites..."
 
 # Check if we have sudo access
-if sudo -n true 2>/dev/null; then
+if sudo -n true 2> /dev/null; then
     echo "✅ Sudo access available"
 else
     echo "⚠️  Sudo access may require password - please enter when prompted"
@@ -62,7 +62,7 @@ install_package jq
 install_package openssl
 
 # Docker and related tools
-if ! command -v docker >/dev/null 2>&1; then
+if ! command -v docker > /dev/null 2>&1; then
     show_progress "Installing Docker"
     sudo nala install -y docker.io
     sudo systemctl start docker
@@ -70,13 +70,13 @@ if ! command -v docker >/dev/null 2>&1; then
     show_complete
 fi
 
-if ! docker compose version >/dev/null 2>&1; then
+if ! docker compose version > /dev/null 2>&1; then
     show_progress "Installing Docker Compose v2"
     sudo nala install -y docker-compose-v2
     show_complete
 fi
 
-if ! command -v uv >/dev/null 2>&1; then
+if ! command -v uv > /dev/null 2>&1; then
     show_progress "Installing uv"
     curl -LsSf https://astral.sh/uv/install.sh | sh
     show_complete
@@ -96,13 +96,13 @@ show_complete
 
 # Pre-pull Docker images in background
 show_progress "Pre-pulling GitLab Docker image"
-docker pull gitlab/gitlab-ce:latest >/dev/null 2>&1 &
+docker pull gitlab/gitlab-ce:latest > /dev/null 2>&1 &
 PULL_PID=$!
 show_complete
 
 # Pre-generate SSL certificates
 show_progress "Pre-generating SSL certificates"
-./generate-ssl-cert.sh >/dev/null 2>&1
+./generate-ssl-cert.sh > /dev/null 2>&1
 show_complete
 
 # Pre-configure GitLab settings
@@ -119,20 +119,20 @@ mkdir -p data/gitlab/logs data/gitlab/data
 sudo mkdir -p data/gitlab/data/gitlab-rails/shared
 sudo mkdir -p data/gitlab/data/gitlab-ci/builds
 sudo mkdir -p data/gitlab/data/gitlab-ci/cache
-sudo chown -R 1000:1000 data/gitlab/ 2>/dev/null || true
+sudo chown -R 1000:1000 data/gitlab/ 2> /dev/null || true
 show_complete
 
 # Pre-resolve DNS for faster startup
 show_progress "Pre-resolving DNS"
-nslookup gitlab.vectorweight.com >/dev/null 2>&1 || echo "DNS resolution may be slow"
+nslookup gitlab.vectorweight.com > /dev/null 2>&1 || echo "DNS resolution may be slow"
 show_complete
 
 # Initialize configuration cache
 show_progress "Initializing configuration cache"
 mkdir -p data/gitlab/config-cache
-echo "[]" >data/gitlab/config-cache/users.json
-echo "[]" >data/gitlab/config-cache/groups.json
-echo "[]" >data/gitlab/config-cache/mirrors.json
+echo "[]" > data/gitlab/config-cache/users.json
+echo "[]" > data/gitlab/config-cache/groups.json
+echo "[]" > data/gitlab/config-cache/mirrors.json
 show_complete
 
 # Wait for image pull to complete
@@ -157,19 +157,19 @@ check_gitlab_health_parallel() {
     local total=0
 
     # Check main health endpoint
-    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/health" >/dev/null 2>&1; then
+    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/health" > /dev/null 2>&1; then
         ((healthy++))
     fi
     ((total++))
 
     # Check readiness endpoint
-    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/readiness" >/dev/null 2>&1; then
+    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/readiness" > /dev/null 2>&1; then
         ((healthy++))
     fi
     ((total++))
 
     # Check liveness endpoint
-    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/liveness" >/dev/null 2>&1; then
+    if curl -k -s -f --max-time 10 "$GITLAB_URL/-/liveness" > /dev/null 2>&1; then
         ((healthy++))
     fi
     ((total++))
@@ -187,7 +187,7 @@ if ! check_gitlab_health_parallel; then
         if [ $ELAPSED -ge $TIMEOUT ]; then
             echo "❌ GitLab failed to become healthy within ${TIMEOUT} seconds"
             echo "🔍 Recent GitLab logs:"
-            docker compose logs --tail=20 gitlab 2>/dev/null || echo "No logs available"
+            docker compose logs --tail=20 gitlab 2> /dev/null || echo "No logs available"
             exit 1
         fi
 
@@ -222,7 +222,7 @@ show_complete
 echo ""
 show_progress "Configuring users and tokens"
 echo "👤 Step 3: Configuring GitLab Users & Tokens"
-uv run python configure-gitlab-fresh.py >/dev/null 2>&1 &
+uv run python configure-gitlab-fresh.py > /dev/null 2>&1 &
 CONFIG_PID=$!
 show_complete
 
@@ -230,7 +230,7 @@ show_complete
 echo ""
 show_progress "Setting up repository mirroring"
 echo "🔄 Step 4: Setting up Repository Mirroring"
-uv run python setup-mirroring.py >/dev/null 2>&1 &
+uv run python setup-mirroring.py > /dev/null 2>&1 &
 MIRROR_PID=$!
 show_complete
 
@@ -246,13 +246,13 @@ echo "✅ Repository mirroring complete"
 echo ""
 show_progress "Configuring CLI authentication"
 echo "🖥️  Step 5: Configuring CLI Authentication"
-./setup-cli-auth.sh >/dev/null 2>&1
+./setup-cli-auth.sh > /dev/null 2>&1
 show_complete
 
 # Final verification
 echo ""
 show_progress "Running final health checks"
-if curl -k -s -f "$GITLAB_URL/-/health" >/dev/null 2>&1; then
+if curl -k -s -f "$GITLAB_URL/-/health" > /dev/null 2>&1; then
     echo "✅ GitLab is healthy"
 else
     echo "⚠️  GitLab health check failed - check logs"

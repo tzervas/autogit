@@ -26,7 +26,7 @@ Threat model:
 import json
 import os
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
 
 import requests
 
@@ -35,9 +35,11 @@ class GitLabExporter:
     def __init__(self, base_url: str, token: str):
         self.base_url = base_url.rstrip("/")
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"Bearer {token}",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": f"Bearer {token}",
+            }
+        )
 
     def _api_call(self, method: str, endpoint: str, **kwargs) -> requests.Response:
         url = f"{self.base_url}/api/v4{endpoint}"

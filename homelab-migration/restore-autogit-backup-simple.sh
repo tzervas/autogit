@@ -45,8 +45,8 @@ if [[ -f $GITLAB_RB_ENCRYPTED && -f $GITLAB_SECRETS_ENCRYPTED ]]; then
 
     # Decrypt sensitive files
     echo "Decrypting sensitive files..."
-    echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --decrypt "$GITLAB_RB_ENCRYPTED" >"/var/lib/autogit/config/gitlab.rb"
-    echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --decrypt "$GITLAB_SECRETS_ENCRYPTED" >"/var/lib/autogit/config/gitlab-secrets.json"
+    echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --decrypt "$GITLAB_RB_ENCRYPTED" > "/var/lib/autogit/config/gitlab.rb"
+    echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --decrypt "$GITLAB_SECRETS_ENCRYPTED" > "/var/lib/autogit/config/gitlab-secrets.json"
 
     echo "Reconfigured GitLab with decrypted settings"
 fi

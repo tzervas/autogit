@@ -5,8 +5,8 @@
 set -euo pipefail
 
 LOG_DIR="./deployment-logs"
-LATEST_LOG=$(ls -t "$LOG_DIR"/deployment_monitor_*.log 2>/dev/null | head -1)
-LATEST_METRICS=$(ls -t "$LOG_DIR"/deployment_metrics_*.csv 2>/dev/null | head -1)
+LATEST_LOG=$(ls -t "$LOG_DIR"/deployment_monitor_*.log 2> /dev/null | head -1)
+LATEST_METRICS=$(ls -t "$LOG_DIR"/deployment_metrics_*.csv 2> /dev/null | head -1)
 
 if [[ ! -f $LATEST_LOG ]]; then
     echo "❌ No deployment logs found in $LOG_DIR"
@@ -93,17 +93,17 @@ if [[ -f $LATEST_METRICS ]]; then
     echo "🌐 Network Interfaces: $NETWORK_INTERFACES"
 
     # Performance recommendations
-    if (($(echo "$PEAK_CPU > 80" | bc -l 2>/dev/null || echo "0"))); then
+    if (($(echo "$PEAK_CPU > 80" | bc -l 2> /dev/null || echo "0"))); then
         echo "⚠️  CRITICAL: CPU usage exceeded 80% - deployment may be CPU-bound"
         echo "   💡 Consider increasing CPU cores or optimizing GitLab configuration"
     fi
 
-    if (($(echo "$PEAK_MEM_USED > $MEM_TOTAL * 0.9" | bc -l 2>/dev/null || echo "0"))); then
+    if (($(echo "$PEAK_MEM_USED > $MEM_TOTAL * 0.9" | bc -l 2> /dev/null || echo "0"))); then
         echo "⚠️  CRITICAL: Memory usage near capacity - risk of OOM kills"
         echo "   💡 Increase RAM or reduce GitLab worker processes"
     fi
 
-    if (($(echo "$CONTAINER_PEAK_CPU > 50" | bc -l 2>/dev/null || echo "0"))); then
+    if (($(echo "$CONTAINER_PEAK_CPU > 50" | bc -l 2> /dev/null || echo "0"))); then
         echo "⚠️  WARNING: Container CPU usage high - check GitLab configuration"
     fi
 fi
@@ -133,11 +133,11 @@ if [[ -f $NETWORK_LOG ]]; then
     echo "🔍 DNS Resolution Time: ${DNS_AVG_TIME}s average"
 
     # Network bottleneck detection
-    if [[ $DOCKER_HUB_LATENCY != "N/A" && $(echo "$DOCKER_HUB_LATENCY > 2.0" | bc -l 2>/dev/null) ]]; then
+    if [[ $DOCKER_HUB_LATENCY != "N/A" && $(echo "$DOCKER_HUB_LATENCY > 2.0" | bc -l 2> /dev/null) ]]; then
         echo "⚠️  WARNING: Slow Docker Hub connectivity - consider local registry mirror"
     fi
 
-    if [[ $GITHUB_API_LATENCY != "N/A" && $(echo "$GITHUB_API_LATENCY > 1.0" | bc -l 2>/dev/null) ]]; then
+    if [[ $GITHUB_API_LATENCY != "N/A" && $(echo "$GITHUB_API_LATENCY > 1.0" | bc -l 2> /dev/null) ]]; then
         echo "⚠️  WARNING: Slow GitHub API - may impact repository mirroring"
     fi
 fi

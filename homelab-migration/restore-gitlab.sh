@@ -77,7 +77,7 @@ sudo gitlab-ctl start
 echo "Waiting for GitLab to be ready..."
 timeout=300
 while [[ $timeout -gt 0 ]]; do
-    if curl -s -f http://localhost/-/health >/dev/null 2>&1; then
+    if curl -s -f http://localhost/-/health > /dev/null 2>&1; then
         break
     fi
     sleep 5

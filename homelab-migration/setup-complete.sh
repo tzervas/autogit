@@ -27,26 +27,26 @@ echo ""
 # Function to install packages with nala
 install_package() {
     local package=$1
-    if ! command -v "$package" >/dev/null 2>&1; then
+    if ! command -v "$package" > /dev/null 2>&1; then
         echo "📦 Installing $package..."
         sudo nala install -y "$package"
     fi
 }
 
 # Check and install Docker
-if ! command -v docker >/dev/null 2>&1; then
+if ! command -v docker > /dev/null 2>&1; then
     echo "❌ Docker is required but not installed"
     install_package docker.io
 fi
 
 # Check and install Docker Compose v2
-if ! docker compose version >/dev/null 2>&1; then
+if ! docker compose version > /dev/null 2>&1; then
     echo "❌ Docker Compose v2 is required but not available"
     install_package docker-compose-v2
 fi
 
 # Check and install uv
-if ! command -v uv >/dev/null 2>&1; then
+if ! command -v uv > /dev/null 2>&1; then
     echo "❌ uv is required but not installed"
     install_package uv
 fi
@@ -109,7 +109,7 @@ echo "🎉 Setup Complete!"
 echo "=================="
 
 if [[ -f gitlab-fresh-config.json ]]; then
-    CI_TOKEN=$(jq -r '.tokens.ci_token.token' gitlab-fresh-config.json 2>/dev/null || echo "N/A")
+    CI_TOKEN=$(jq -r '.tokens.ci_token.token' gitlab-fresh-config.json 2> /dev/null || echo "N/A")
     echo "GitLab URL: ${GITLAB_URL}"
     echo "CI Token: ${CI_TOKEN}"
     echo ""

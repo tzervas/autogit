@@ -40,14 +40,14 @@ fi
 
 # Ensure directories exist
 sudo mkdir -p "$CONFIG_DIR"
-sudo chown -R kang:kang "$BACKUP_DIR" 2>/dev/null || true
+sudo chown -R kang:kang "$BACKUP_DIR" 2> /dev/null || true
 
 echo "Starting GitLab backup: $BACKUP_NAME"
 
 # Export configuration via API
 echo "Exporting GitLab configuration..."
 export GITLAB_URL GITLAB_TOKEN CONFIG_DIR BACKUP_NAME GPG_PASSPHRASE
-python3 - <<'EOF'
+python3 - << 'EOF'
 import json
 import os
 import sys
@@ -138,7 +138,7 @@ echo "Creating GitLab data backup..."
 DOCKER_HOST="$DOCKER_SOCKET" docker exec "$GITLAB_CONTAINER" gitlab-backup create BACKUP="$BACKUP_NAME"
 
 # Find the created backup file
-BACKUP_FILE=$(ls -t *_${BACKUP_NAME}_*.tar 2>/dev/null | head -1)
+BACKUP_FILE=$(ls -t *_${BACKUP_NAME}_*.tar 2> /dev/null | head -1)
 if [[ -z $BACKUP_FILE ]]; then
     echo "Error: Backup file not found" >&2
     exit 1
@@ -151,13 +151,13 @@ COMPRESSED_FILE="${BACKUP_FILE}.gz"
 
 # Update backups registry
 BACKUP_INFO=$(
-    cat <<EOF
+    cat << EOF
 {
     "name": "$BACKUP_NAME",
     "timestamp": "$TIMESTAMP",
     "config_dir": "$CONFIG_DIR",
     "backup_file": "$COMPRESSED_FILE",
-    "size_bytes": $(stat -c%s "$COMPRESSED_FILE" 2>/dev/null || echo 0)
+    "size_bytes": $(stat -c%s "$COMPRESSED_FILE" 2> /dev/null || echo 0)
 }
 EOF
 )
@@ -165,11 +165,11 @@ EOF
 # Append to backups.json
 BACKUPS_JSON="$BACKUP_DIR/backups.json"
 if [[ ! -f $BACKUPS_JSON ]]; then
-    echo "[]" >"$BACKUPS_JSON"
+    echo "[]" > "$BACKUPS_JSON"
 fi
 
 # Add new backup to array
-jq ". += [$BACKUP_INFO]" "$BACKUPS_JSON" >"${BACKUPS_JSON}.tmp"
+jq ". += [$BACKUP_INFO]" "$BACKUPS_JSON" > "${BACKUPS_JSON}.tmp"
 sudo mv "${BACKUPS_JSON}.tmp" "$BACKUPS_JSON"
 
 echo "Backup complete!"
@@ -182,15 +182,15 @@ echo "Cleaning old backups..."
 BACKUP_COUNT=$(jq length "$BACKUPS_JSON")
 if [[ $BACKUP_COUNT -gt 5 ]]; then
     echo "Keeping only last 5 backups"
-    jq '.[-5:]' "$BACKUPS_JSON" >"${BACKUPS_JSON}.tmp"
+    jq '.[-5:]' "$BACKUPS_JSON" > "${BACKUPS_JSON}.tmp"
     sudo mv "${BACKUPS_JSON}.tmp" "$BACKUPS_JSON"
 
     # Remove old files
-    jq -r '.[].name' "${BACKUPS_JSON}.old" 2>/dev/null | while read -r old_name; do
-        if ! jq -e ".[] | select(.name == \"$old_name\")" "$BACKUPS_JSON" >/dev/null; then
+    jq -r '.[].name' "${BACKUPS_JSON}.old" 2> /dev/null | while read -r old_name; do
+        if ! jq -e ".[] | select(.name == \"$old_name\")" "$BACKUPS_JSON" > /dev/null; then
             echo "Removing old backup: $old_name"
-            sudo rm -f "${BACKUP_DIR}"/*"${old_name}"* 2>/dev/null || true
-            sudo rm -f "${CONFIG_DIR}"/*"${old_name}"* 2>/dev/null || true
+            sudo rm -f "${BACKUP_DIR}"/*"${old_name}"* 2> /dev/null || true
+            sudo rm -f "${CONFIG_DIR}"/*"${old_name}"* 2> /dev/null || true
         fi
     done
 fi

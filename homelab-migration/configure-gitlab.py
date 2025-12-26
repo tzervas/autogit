@@ -32,10 +32,12 @@ class GitLabConfigurator:
     def __init__(self, base_url: str, token: str):
         self.base_url = base_url.rstrip("/")
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            }
+        )
 
     def _api_call(self, method: str, endpoint: str, **kwargs) -> requests.Response:
         url = f"{self.base_url}/api/v4{endpoint}"
@@ -94,10 +96,14 @@ class GitLabConfigurator:
     def add_user_to_group(self, user_id: int, group_id: int, access_level: int):
         """Add user to group with access level (10=Guest, 20=Reporter, 30=Developer, 40=Maintainer, 50=Owner)."""
         try:
-            self._api_call("POST", f"/groups/{group_id}/members", json={
-                "user_id": user_id,
-                "access_level": access_level,
-            })
+            self._api_call(
+                "POST",
+                f"/groups/{group_id}/members",
+                json={
+                    "user_id": user_id,
+                    "access_level": access_level,
+                },
+            )
             print(f"Added user {user_id} to group {group_id} with level {access_level}")
         except requests.HTTPError as e:
             if e.response.status_code == 409:  # Already a member
@@ -171,22 +177,20 @@ class GitLabConfigurator:
         tokens["ci_token"] = self.create_personal_access_token(
             ci_user["id"],
             "CI Token",
-            ["api", "read_repository", "write_repository"]  # Minimal for CI
+            ["api", "read_repository", "write_repository"],  # Minimal for CI
         )
 
         # Admin token with broader scopes for admin tasks
         tokens["admin_token"] = self.create_personal_access_token(
-            admin_user["id"],
-            "Admin Token",
-            ["api", "read_user", "sudo"]  # For admin operations
+            admin_user["id"], "Admin Token", ["api", "read_user", "sudo"]  # For admin operations
         )
 
         # Output tokens (insecure, but for setup)
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("GENERATED TOKENS (store securely, will not be shown again):")
         for name, token in tokens.items():
             print(f"{name}: {token}")
-        print("="*50)
+        print("=" * 50)
 
         return {
             "users": created_users,
@@ -208,6 +212,7 @@ def main():
 
     # Optionally save config to file
     import json
+
     with open("homelab-gitlab/gitlab-config.json", "w") as f:
         json.dump(result, f, indent=2)
     print("Configuration saved to homelab-gitlab/gitlab-config.json")

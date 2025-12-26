@@ -37,13 +37,13 @@ sudo chown kang:kang "$NEW_PATH"
 
 # Move data
 echo "Moving data (this may take a while)..."
-sudo mv "$OLD_PATH"/* "$NEW_PATH/" 2>/dev/null || true
-sudo mv "$OLD_PATH"/.* "$NEW_PATH/" 2>/dev/null || true
+sudo mv "$OLD_PATH"/* "$NEW_PATH/" 2> /dev/null || true
+sudo mv "$OLD_PATH"/.* "$NEW_PATH/" 2> /dev/null || true
 
 # Update .env file
 echo "Updating .env file..."
 if ! grep -q "^GITLAB_DATA_PATH=" .env; then
-    echo "GITLAB_DATA_PATH=$NEW_PATH" >>.env
+    echo "GITLAB_DATA_PATH=$NEW_PATH" >> .env
 fi
 
 # Start services
@@ -54,7 +54,7 @@ DOCKER_HOST=unix:///run/user/1000/docker.sock docker compose up -d
 echo "Waiting for GitLab to be healthy..."
 timeout=600
 while [[ $timeout -gt 0 ]]; do
-    if curl -s -f http://localhost:3000/-/health >/dev/null 2>&1; then
+    if curl -s -f http://localhost:3000/-/health > /dev/null 2>&1; then
         break
     fi
     sleep 10
@@ -69,7 +69,7 @@ fi
 
 # Clean up old directory
 echo "Cleaning up old directory..."
-sudo rmdir "$OLD_PATH" 2>/dev/null || echo "Could not remove $OLD_PATH (may not be empty)"
+sudo rmdir "$OLD_PATH" 2> /dev/null || echo "Could not remove $OLD_PATH (may not be empty)"
 
 # Verify
 echo "Verifying migration..."

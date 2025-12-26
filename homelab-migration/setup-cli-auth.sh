@@ -24,7 +24,7 @@ CREDENTIALS_FILE="$HOME/.git-credentials"
 GITLAB_HOST=$(echo "$GITLAB_URL" | sed 's|http://||' | sed 's|https://||')
 
 # Add GitLab credentials
-echo "http://ci-user:$CI_TOKEN@$GITLAB_HOST" >>"$CREDENTIALS_FILE"
+echo "http://ci-user:$CI_TOKEN@$GITLAB_HOST" >> "$CREDENTIALS_FILE"
 
 # Set proper permissions
 chmod 600 "$CREDENTIALS_FILE"
@@ -32,7 +32,7 @@ chmod 600 "$CREDENTIALS_FILE"
 echo "✅ Git credentials configured"
 
 # Configure GitLab CLI if available
-if command -v glab >/dev/null 2>&1; then
+if command -v glab > /dev/null 2>&1; then
     echo "🛠️  Configuring GitLab CLI (glab)..."
     glab auth login --hostname "$GITLAB_HOST" --token "$CI_TOKEN"
     echo "✅ GitLab CLI configured"
@@ -42,7 +42,7 @@ fi
 
 # Test authentication
 echo "🧪 Testing authentication..."
-if git ls-remote "$GITLAB_URL/ci-user/test.git" >/dev/null 2>&1; then
+if git ls-remote "$GITLAB_URL/ci-user/test.git" > /dev/null 2>&1; then
     echo "✅ Authentication test passed"
 else
     echo "⚠️  Authentication test failed (this is normal if no test repo exists)"

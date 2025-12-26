@@ -1,7 +1,6 @@
 # Release CI Workflow Update Summary
 
-**Date**: 2024-12-24\
-**Branch**: copilot/update-ci-release-process
+**Date**: 2024-12-24 **Branch**: copilot/update-ci-release-process
 
 ## Problem Statement
 

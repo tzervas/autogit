@@ -6,14 +6,14 @@ autogit supports shell completions for all major shells including nushell.
 
 ### Available Shells
 
-| Shell | Command |
-|-------|---------|
-| Bash | `autogit completions bash` |
-| Zsh | `autogit completions zsh` |
-| Fish | `autogit completions fish` |
+| Shell      | Command                           |
+| ---------- | --------------------------------- |
+| Bash       | `autogit completions bash`        |
+| Zsh        | `autogit completions zsh`         |
+| Fish       | `autogit completions fish`        |
 | PowerShell | `autogit completions power-shell` |
-| Elvish | `autogit completions elvish` |
-| Nushell | `autogit completions nushell` |
+| Elvish     | `autogit completions elvish`      |
+| Nushell    | `autogit completions nushell`     |
 
 ### Installation
 
@@ -66,7 +66,7 @@ use ~/.config/nushell/autogit-completions.nu *
 Invoke-Expression (& autogit completions power-shell | Out-String)
 ```
 
----
+______________________________________________________________________
 
 ## Starship Prompt Integration
 
@@ -80,12 +80,12 @@ autogit includes a hidden `_starship` command optimized for prompt integration.
 
 ### Status Indicators
 
-| Symbol | Meaning |
-|--------|---------|
-| `⬡` | GitLab connected |
-| `⬢` | GitLab disconnected / not configured |
-| `M:N` | N mirrors configured |
-| `R:N` | N runners online |
+| Symbol | Meaning                              |
+| ------ | ------------------------------------ |
+| `⬡`    | GitLab connected                     |
+| `⬢`    | GitLab disconnected / not configured |
+| `M:N`  | N mirrors configured                 |
+| `R:N`  | N runners online                     |
 
 Example output: `⬡ M:3 R:2` = connected, 3 mirrors, 2 runners active
 
@@ -136,11 +136,12 @@ mkdir ~/.cache/starship
 starship init nu | save -f ~/.cache/starship/init.nu
 ```
 
----
+______________________________________________________________________
 
 ## Cache Location
 
-The starship integration caches status at `/tmp/autogit-starship-cache` with a 30-second TTL. This prevents excessive API calls when your prompt refreshes frequently.
+The starship integration caches status at `/tmp/autogit-starship-cache` with a 30-second TTL. This
+prevents excessive API calls when your prompt refreshes frequently.
 
 To force a fresh status check, delete the cache:
 

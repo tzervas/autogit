@@ -54,12 +54,12 @@ remote() {
 
 # Check if container exists
 container_exists() {
-    remote "docker ps -a --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}$'" 2>/dev/null
+    remote "docker ps -a --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}$'" 2> /dev/null
 }
 
 # Check if container is running
 container_running() {
-    remote "docker ps --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}$'" 2>/dev/null
+    remote "docker ps --format '{{.Names}}' | grep -q '^${CONTAINER_NAME}$'" 2> /dev/null
 }
 
 # Check if container is healthy
@@ -94,34 +94,34 @@ action_status() {
     status=$(get_status)
 
     case "$status" in
-    ABSENT)
-        log_warn "GitLab is not deployed"
-        echo "   Run: ./deploy.sh to deploy"
-        return 1
-        ;;
-    STOPPED)
-        log_warn "GitLab container exists but is stopped"
-        remote "docker ps -a --filter name=${CONTAINER_NAME} --format 'table {{.Status}}\t{{.Ports}}'"
-        echo "   Run: ./deploy.sh to start"
-        return 1
-        ;;
-    STARTING)
-        log_warn "GitLab is starting (not yet healthy)"
-        remote "docker stats --no-stream ${CONTAINER_NAME} --format 'CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}'" 2>/dev/null || true
-        echo "   Wait for health check or check logs: docker logs ${CONTAINER_NAME}"
-        return 0
-        ;;
-    HEALTHY)
-        log_ok "GitLab is healthy and running"
-        remote "docker stats --no-stream ${CONTAINER_NAME} --format 'CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}'" 2>/dev/null || true
+        ABSENT)
+            log_warn "GitLab is not deployed"
+            echo "   Run: ./deploy.sh to deploy"
+            return 1
+            ;;
+        STOPPED)
+            log_warn "GitLab container exists but is stopped"
+            remote "docker ps -a --filter name=${CONTAINER_NAME} --format 'table {{.Status}}\t{{.Ports}}'"
+            echo "   Run: ./deploy.sh to start"
+            return 1
+            ;;
+        STARTING)
+            log_warn "GitLab is starting (not yet healthy)"
+            remote "docker stats --no-stream ${CONTAINER_NAME} --format 'CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}'" 2> /dev/null || true
+            echo "   Wait for health check or check logs: docker logs ${CONTAINER_NAME}"
+            return 0
+            ;;
+        HEALTHY)
+            log_ok "GitLab is healthy and running"
+            remote "docker stats --no-stream ${CONTAINER_NAME} --format 'CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}'" 2> /dev/null || true
 
-        # Show version
-        local version
-        version=$(remote "docker exec ${CONTAINER_NAME} cat /opt/gitlab/version-manifest.txt 2>/dev/null | head -1" || echo "unknown")
-        echo "   Version: ${version}"
-        echo "   URL: http://${HOMELAB_HOST}:${HTTP_PORT:-8080}"
-        return 0
-        ;;
+            # Show version
+            local version
+            version=$(remote "docker exec ${CONTAINER_NAME} cat /opt/gitlab/version-manifest.txt 2>/dev/null | head -1" || echo "unknown")
+            echo "   Version: ${version}"
+            echo "   URL: http://${HOMELAB_HOST}:${HTTP_PORT:-8080}"
+            return 0
+            ;;
     esac
 }
 
@@ -134,17 +134,17 @@ action_deploy() {
 
     # Check current state
     case "$status" in
-    HEALTHY)
-        log_skip "GitLab is already running and healthy"
-        log "   Use --force to redeploy anyway"
-        return 0
-        ;;
-    STARTING)
-        log_skip "GitLab is currently starting"
-        log "   Waiting for health check..."
-        wait_for_health
-        return $?
-        ;;
+        HEALTHY)
+            log_skip "GitLab is already running and healthy"
+            log "   Use --force to redeploy anyway"
+            return 0
+            ;;
+        STARTING)
+            log_skip "GitLab is currently starting"
+            log "   Waiting for health check..."
+            wait_for_health
+            return $?
+            ;;
     esac
 
     # Ensure remote directory exists
@@ -242,24 +242,24 @@ wait_for_health() {
         status=$(get_status)
 
         case "$status" in
-        HEALTHY)
-            log_ok "GitLab is healthy! (${elapsed}s)"
-            echo ""
-            echo "🎉 Deployment complete!"
-            echo "   URL: http://${HOMELAB_HOST}:${HTTP_PORT:-8080}"
-            echo "   SSH: ssh://git@${HOMELAB_HOST}:${SSH_PORT:-2222}"
-            return 0
-            ;;
-        ABSENT | STOPPED)
-            log_err "Container stopped unexpectedly"
-            return 1
-            ;;
-        STARTING)
-            # Show progress
-            local mem cpu
-            read -r cpu mem <<<"$(remote "docker stats --no-stream ${CONTAINER_NAME} --format '{{.CPUPerc}} {{.MemUsage}}'" 2>/dev/null || echo "- -")"
-            printf "\r[%3ds] Initializing... CPU: %s | Memory: %s    " "$elapsed" "$cpu" "$mem"
-            ;;
+            HEALTHY)
+                log_ok "GitLab is healthy! (${elapsed}s)"
+                echo ""
+                echo "🎉 Deployment complete!"
+                echo "   URL: http://${HOMELAB_HOST}:${HTTP_PORT:-8080}"
+                echo "   SSH: ssh://git@${HOMELAB_HOST}:${SSH_PORT:-2222}"
+                return 0
+                ;;
+            ABSENT | STOPPED)
+                log_err "Container stopped unexpectedly"
+                return 1
+                ;;
+            STARTING)
+                # Show progress
+                local mem cpu
+                read -r cpu mem <<< "$(remote "docker stats --no-stream ${CONTAINER_NAME} --format '{{.CPUPerc}} {{.MemUsage}}'" 2> /dev/null || echo "- -")"
+                printf "\r[%3ds] Initializing... CPU: %s | Memory: %s    " "$elapsed" "$cpu" "$mem"
+                ;;
         esac
 
         sleep "$HEALTH_INTERVAL"
@@ -277,7 +277,7 @@ wait_for_health() {
 #───────────────────────────────────────────────────────────────────────────────
 
 show_help() {
-    cat <<EOF
+    cat << EOF
 GitLab Homelab Deployment
 
 Usage: ./deploy.sh [OPTIONS]
@@ -314,31 +314,31 @@ main() {
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
-        --status) action="status" ;;
-        --bootstrap) action="bootstrap" ;;
-        --full) action="full" ;;
-        --teardown) action="teardown" ;;
-        --force) force=true ;;
-        --help | -h)
-            show_help
-            exit 0
-            ;;
-        *)
-            log_err "Unknown option: $1"
-            show_help
-            exit 1
-            ;;
+            --status) action="status" ;;
+            --bootstrap) action="bootstrap" ;;
+            --full) action="full" ;;
+            --teardown) action="teardown" ;;
+            --force) force=true ;;
+            --help | -h)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_err "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
         esac
         shift
     done
 
     # Execute action
     case "$action" in
-    status) action_status ;;
-    deploy) action_deploy ;;
-    bootstrap) action_bootstrap ;;
-    full) action_full ;;
-    teardown) action_teardown ;;
+        status) action_status ;;
+        deploy) action_deploy ;;
+        bootstrap) action_bootstrap ;;
+        full) action_full ;;
+        teardown) action_teardown ;;
     esac
 }
 

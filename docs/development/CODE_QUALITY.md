@@ -289,14 +289,16 @@ make update
 
 ## Multiagent Development
 
-AutoGit uses a multiagent orchestration system for complex tasks. All contributors must follow the standards defined in:
+AutoGit uses a multiagent orchestration system for complex tasks. All contributors must follow the
+standards defined in:
 
 - `.github/agents/shared-context.md` - Shared project standards and context.
 - `.github/instructions/copilot-instructions.md` - Project-specific Copilot instructions.
 
 ### Threat Modeling Discipline
 
-Every significant change (PR, architectural decision, or configuration update) **must** include a concise threat model paragraph containing:
+Every significant change (PR, architectural decision, or configuration update) **must** include a
+concise threat model paragraph containing:
 
 - **Sensitive data at risk?** (Tokens, keys, credentials)
 - **Primary failure modes?** (Container compromise, data loss)
@@ -307,13 +309,15 @@ Every significant change (PR, architectural decision, or configuration update) *
 
 All documentation must adhere to the following standards:
 
-- **Markdown files** (*.md) must be linted with `markdownlint` and formatted with `mdformat`.
-- **YAML files** (*.yml, *.yaml) must be linted with `yamllint`.
-- **Python docstrings** should follow the [Google style guide](https://google.github.io/styleguide/pyguide.html#383-Documentation-strings).
+- **Markdown files** (\*.md) must be linted with `markdownlint` and formatted with `mdformat`.
+- **YAML files** (\*.yml, \*.yaml) must be linted with `yamllint`.
+- **Python docstrings** should follow the
+  [Google style guide](https://google.github.io/styleguide/pyguide.html#383-Documentation-strings).
 
 ### Versioning
 
-Documentation versions are tied to the code version. Update the version in `docs/conf.py` and `pyproject.toml` simultaneously.
+Documentation versions are tied to the code version. Update the version in `docs/conf.py` and
+`pyproject.toml` simultaneously.
 
 ### Publishing
 
@@ -324,12 +328,14 @@ Documentation is auto-published on release. Ensure all docs are up-to-date befor
 Releases are managed through Git tags. To create a new release:
 
 1. Update `pyproject.toml` version.
-2. Commit changes.
-3. Tag the release: `git tag -a vX.Y.Z -m "Release version X.Y.Z"`
-4. Push tags: `git push --tags`
+1. Commit changes.
+1. Tag the release: `git tag -a vX.Y.Z -m "Release version X.Y.Z"`
+1. Push tags: `git push --tags`
 
 CI will automatically build and publish the release.
 
 ## Support
 
-For support, contact the AutoGit maintainers or create an issue in the repository. Provide detailed information about your environment, the steps to reproduce the issue, and any relevant logs or error messages.
+For support, contact the AutoGit maintainers or create an issue in the repository. Provide detailed
+information about your environment, the steps to reproduce the issue, and any relevant logs or error
+messages.

@@ -136,14 +136,14 @@ services:
     # CONTAINER RESOURCES
     #═══════════════════════════════════════════════════════════════════════════
     ports:
-      - "${HTTP_PORT:-8080}:80"     # HTTP (rootless-compatible)
-      - "${HTTPS_PORT:-8443}:443"   # HTTPS
-      - "${SSH_PORT:-2222}:22"      # SSH
+    - "${HTTP_PORT:-8080}:80"       # HTTP (rootless-compatible)
+    - "${HTTPS_PORT:-8443}:443"     # HTTPS
+    - "${SSH_PORT:-2222}:22"        # SSH
 
     volumes:
-      - gitlab-config:/etc/gitlab
-      - gitlab-logs:/var/log/gitlab
-      - gitlab-data:/var/opt/gitlab
+    - gitlab-config:/etc/gitlab
+    - gitlab-logs:/var/log/gitlab
+    - gitlab-data:/var/opt/gitlab
 
     shm_size: '${SHM_SIZE:-2gb}'
 
@@ -164,7 +164,7 @@ services:
       start_period: 300s  # 5 min startup grace
 
     networks:
-      - gitlab-network
+    - gitlab-network
 
   #═════════════════════════════════════════════════════════════════════════════
   # GITLAB RUNNER (optional - for local CI jobs)
@@ -174,15 +174,15 @@ services:
     container_name: autogit-runner
     restart: unless-stopped
     volumes:
-      - runner-config:/etc/gitlab-runner
-      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+    - runner-config:/etc/gitlab-runner
+    - /run/user/1000/docker.sock:/var/run/docker.sock:ro
     depends_on:
       gitlab:
         condition: service_healthy
     networks:
-      - gitlab-network
+    - gitlab-network
     profiles:
-      - runner  # Only start with: docker compose --profile runner up
+    - runner    # Only start with: docker compose --profile runner up
 
 networks:
   gitlab-network:

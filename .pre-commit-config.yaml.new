@@ -1,0 +1,166 @@
+# =============================================================================
+# PRE-COMMIT CONFIGURATION - AutoGit
+# =============================================================================
+# This configuration ensures LOCAL checks match REMOTE CI checks exactly.
+# All tools read from pyproject.toml for centralized configuration.
+#
+# Setup: pre-commit install && pre-commit install --hook-type commit-msg
+# Run:   pre-commit run --all-files
+# =============================================================================
+
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  # ===========================================================================
+  # STAGE 1: Basic File Hygiene (Fast, Always Run)
+  # ===========================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Whitespace & line endings
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+      # File validation
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+      # Code quality
+      - id: check-ast
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: check-merge-conflict
+      - id: check-case-conflict
+
+      # Executables
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # ===========================================================================
+  # STAGE 2: Python - Ruff (Unified Linting & Formatting)
+  # ===========================================================================
+  # Ruff replaces: black, isort, flake8, pyupgrade, autoflake
+  # 10-100x faster, single tool, config in pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Linter - checks and auto-fixes
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+        types_or: [python, pyi]
+
+      # Formatter - replaces black
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # ===========================================================================
+  # STAGE 3: Python - Type Checking (Optional but Recommended)
+  # ===========================================================================
+  # Mypy provides static type checking - config in pyproject.toml
+  # Disabled by default for gradual adoption; enable when ready
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.13.0
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-requests]
+  #       args: ['--config-file=pyproject.toml']
+
+  # ===========================================================================
+  # STAGE 4: Shell Scripts
+  # ===========================================================================
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning', '--exclude=SC1091,SC2029']
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+      - id: shfmt
+        args: ['-w', '-s', '-i', '4', '-bn', '-ci', '-sr']
+
+  # ===========================================================================
+  # STAGE 5: YAML Linting
+  # ===========================================================================
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ['-c', 'config/.yamllint.yml']
+
+  # ===========================================================================
+  # STAGE 6: Markdown Linting & Formatting
+  # ===========================================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: ['--config', '.markdownlint.json']
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.21
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-black
+        args: ['--wrap', '100']
+
+  # ===========================================================================
+  # STAGE 7: Docker & Infrastructure
+  # ===========================================================================
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+  # ===========================================================================
+  # STAGE 8: Security Checks
+  # ===========================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'package-lock.json|\.venv/|\.git/|\.md$|uv\.lock'
+
+  # ===========================================================================
+  # STAGE 9: Commit Message Validation
+  # ===========================================================================
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: ['--force-scope']
+
+# =============================================================================
+# CI/Local Parity Notes:
+# =============================================================================
+# This pre-commit config is designed to match CI exactly:
+#
+# 1. Python linting/formatting: Ruff (same version, same pyproject.toml config)
+# 2. Shell linting: shellcheck + shfmt (same args)
+# 3. YAML linting: yamllint (same config file)
+# 4. Markdown: markdownlint (same config file)
+# 5. Docker: hadolint (same ignores)
+# 6. Secrets: detect-secrets (same baseline)
+#
+# If pre-commit passes locally, CI will pass remotely.
+# =============================================================================

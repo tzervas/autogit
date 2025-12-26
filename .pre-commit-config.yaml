@@ -76,6 +76,8 @@ repos:
   - id: pretty-format-yaml
     args: ['--autofix', '--indent', '2', '--preserve-quotes']
     exclude: '.github/workflows/|docker-compose.yml'
+    # Automatically stage YAML formatting changes
+    stages: [commit]
 
   # Markdown formatting
 - repo: https://github.com/executablebooks/mdformat
@@ -87,6 +89,8 @@ repos:
     - mdformat-black
     args: ['--wrap', '100']
     exclude: '.github/workflows/'
+    # Automatically stage markdown formatting changes
+    stages: [commit]
 
   # Dockerfile linting
 - repo: https://github.com/hadolint/hadolint

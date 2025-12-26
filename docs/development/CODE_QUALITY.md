@@ -1,23 +1,23 @@
 # Code Quality & CI/CD Standards
 
-This document describes the standardized code quality checks used in AutoGit to ensure
-local development and CI environments produce identical results.
+This document describes the standardized code quality checks used in AutoGit to ensure local
+development and CI environments produce identical results.
 
 ## Philosophy: "If It Works Here, It Works There"
 
-The primary goal is **local/remote parity** - the exact same checks run locally (via pre-commit)
-and remotely (via CI), using the same tools, same versions, and same configuration.
+The primary goal is **local/remote parity** - the exact same checks run locally (via pre-commit) and
+remotely (via CI), using the same tools, same versions, and same configuration.
 
 ## Tool Stack
 
 ### Python Ecosystem
 
-| Tool | Purpose | Replaces |
-|------|---------|----------|
-| **Ruff** | Linting + Formatting | Black, isort, flake8, pyupgrade, autoflake |
-| **Mypy** | Static type checking | - |
-| **Pytest** | Testing framework | unittest (optional migration) |
-| **Coverage** | Code coverage | - |
+| Tool         | Purpose              | Replaces                                   |
+| ------------ | -------------------- | ------------------------------------------ |
+| **Ruff**     | Linting + Formatting | Black, isort, flake8, pyupgrade, autoflake |
+| **Mypy**     | Static type checking | -                                          |
+| **Pytest**   | Testing framework    | unittest (optional migration)              |
+| **Coverage** | Code coverage        | -                                          |
 
 **Why Ruff?**
 
@@ -28,25 +28,25 @@ and remotely (via CI), using the same tools, same versions, and same configurati
 
 ### Shell Scripts
 
-| Tool | Purpose |
-|------|---------|
-| **ShellCheck** | Shell script linting |
-| **shfmt** | Shell script formatting |
+| Tool           | Purpose                 |
+| -------------- | ----------------------- |
+| **ShellCheck** | Shell script linting    |
+| **shfmt**      | Shell script formatting |
 
 ### Documentation
 
-| Tool | Purpose |
-|------|---------|
-| **markdownlint** | Markdown linting |
-| **mdformat** | Markdown formatting |
-| **yamllint** | YAML linting |
+| Tool             | Purpose             |
+| ---------------- | ------------------- |
+| **markdownlint** | Markdown linting    |
+| **mdformat**     | Markdown formatting |
+| **yamllint**     | YAML linting        |
 
 ### Security
 
-| Tool | Purpose |
-|------|---------|
-| **detect-secrets** | Secret detection |
-| **hadolint** | Dockerfile linting |
+| Tool               | Purpose            |
+| ------------------ | ------------------ |
+| **detect-secrets** | Secret detection   |
+| **hadolint**       | Dockerfile linting |
 
 ## Configuration Files
 
@@ -86,13 +86,13 @@ uv run pre-commit install --hook-type commit-msg
 ### Hook Stages
 
 1. **File Hygiene** - Whitespace, line endings, file validation
-2. **Python** - Ruff lint + format
-3. **Shell** - ShellCheck + shfmt
-4. **YAML** - yamllint
-5. **Markdown** - markdownlint + mdformat
-6. **Docker** - hadolint
-7. **Security** - detect-secrets
-8. **Commit Message** - Conventional commit validation
+1. **Python** - Ruff lint + format
+1. **Shell** - ShellCheck + shfmt
+1. **YAML** - yamllint
+1. **Markdown** - markdownlint + mdformat
+1. **Docker** - hadolint
+1. **Security** - detect-secrets
+1. **Commit Message** - Conventional commit validation
 
 ### Running Manually
 
@@ -114,21 +114,21 @@ uv run pre-commit run ruff --all-files
 The PR validation workflow (`pr-validation.yml`) runs:
 
 1. Branch naming validation
-2. PR target validation
-3. Lint & auto-fix (self-healing)
-4. Syntax validation (Python, Shell, YAML, JSON)
-5. Documentation checks
-6. Docker validation
+1. PR target validation
+1. Lint & auto-fix (self-healing)
+1. Syntax validation (Python, Shell, YAML, JSON)
+1. Documentation checks
+1. Docker validation
 
 ### GitLab CI
 
 The GitLab CI pipeline (`.gitlab-ci.yml`) runs:
 
 1. Syntax validation
-2. Dependency checks
-3. Unit tests
-4. Integration tests
-5. Docker builds
+1. Dependency checks
+1. Unit tests
+1. Integration tests
+1. Docker builds
 
 ## Commit Messages
 
@@ -254,8 +254,8 @@ uv run pre-commit install --install-hooks
 ### CI passes locally but fails remotely
 
 1. Ensure you're using the same Python version (3.13)
-2. Run `make ci` to simulate CI locally
-3. Check for environment-specific issues
+1. Run `make ci` to simulate CI locally
+1. Check for environment-specific issues
 
 ### Type errors in third-party libraries
 
@@ -270,9 +270,9 @@ ignore_missing_imports = true
 ## Adding New Checks
 
 1. Add to `pyproject.toml` if Python-related
-2. Add to `.pre-commit-config.yaml`
-3. Add to relevant CI workflow
-4. Update this documentation
+1. Add to `.pre-commit-config.yaml`
+1. Add to relevant CI workflow
+1. Update this documentation
 
 ## Version Pinning
 

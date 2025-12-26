@@ -1,11 +1,15 @@
 # AutoGit Platform Architecture
+
 # Comprehensive Self-Hosted GitOps Solution
+
 # Version 2.0 - Full Stack Design
+
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Vision Statement
 
 A **one-touch, self-healing, fully automated** GitOps platform that provides:
+
 - Self-hosted Git (GitLab CE) with full-depth repository mirroring
 - Automated DNS, SSL, and ingress management
 - Lifecycle-managed compute runners (CPU + GPU)
@@ -14,7 +18,7 @@ A **one-touch, self-healing, fully automated** GitOps platform that provides:
 - Infrastructure as Code for any environment
 - Extensible Python API with OpenAPI specification
 
----
+______________________________________________________________________
 
 ## Architecture Overview
 
@@ -64,7 +68,7 @@ A **one-touch, self-healing, fully automated** GitOps platform that provides:
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## Component Specifications
 
@@ -86,6 +90,7 @@ PORT_ALLOCATION=dynamic  # auto-assign from pool
 ```
 
 **Service Discovery Protocol:**
+
 ```json
 {
   "service": "gitlab",
@@ -101,6 +106,7 @@ PORT_ALLOCATION=dynamic  # auto-assign from pool
 ### 2. DNS Automation
 
 **Supported Providers:**
+
 - Cloudflare (API-driven)
 - AWS Route53
 - Google Cloud DNS
@@ -108,6 +114,7 @@ PORT_ALLOCATION=dynamic  # auto-assign from pool
 - Manual (outputs required records)
 
 **Auto-generated Records:**
+
 ```
 # A Records (pointing to ingress)
 *.vectorweight.com     → 192.168.1.170
@@ -119,11 +126,11 @@ api.vectorweight.com      → 192.168.1.170
 ```
 
 **Implementation:**
+
 ```python
 # autogit/dns/providers/cloudflare.py
 class CloudflareDNSProvider(DNSProvider):
-    def create_record(self, name: str, type: str, content: str) -> DNSRecord:
-        ...
+    def create_record(self, name: str, type: str, content: str) -> DNSRecord: ...
 
     def ensure_wildcard(self, domain: str, target: str) -> None:
         """Create *.domain pointing to target"""
@@ -133,12 +140,14 @@ class CloudflareDNSProvider(DNSProvider):
 ### 3. SSL/TLS Automation
 
 **Certificate Strategy:**
+
 - Wildcard certificate: `*.vectorweight.com`
 - Auto-renewal via ACME (Let's Encrypt)
 - DNS-01 challenge (works for internal services)
 - Fallback to HTTP-01 for public services
 
 **Implementation:**
+
 ```yaml
 # Traefik configuration
 certificatesResolvers:
@@ -155,17 +164,20 @@ certificatesResolvers:
 ### 4. Ingress Layer
 
 **Option A: Traefik (Recommended)**
+
 - Native Docker integration
 - Auto-discovery via labels
 - Built-in Let's Encrypt
 - Middleware support (for prompt injection filter)
 
 **Option B: Nginx + Certbot**
+
 - More manual but familiar
 - Template-based configuration
 - Separate renewal cron
 
 **Routing Rules:**
+
 ```yaml
 # Traefik dynamic config (auto-generated from .env)
 http:
@@ -190,6 +202,7 @@ http:
 ### 5. Prompt Injection Protection Module
 
 **Threat Vectors:**
+
 - Hidden text (zero-width chars, white-on-white)
 - Unicode tricks (homoglyphs, RTL override)
 - Markdown/HTML injection
@@ -197,6 +210,7 @@ http:
 - Instruction injection patterns
 
 **Architecture:**
+
 ```python
 # autogit/security/prompt_filter.py
 class PromptInjectionFilter:
@@ -225,6 +239,7 @@ class PromptInjectionFilter:
 ```
 
 **Quarantine Storage:**
+
 ```json
 {
   "id": "q-20251226-001",
@@ -274,6 +289,7 @@ class PromptInjectionFilter:
 ```
 
 **Log Enrichment Pipeline:**
+
 ```python
 # autogit/observability/enricher.py
 class LogEnricher:
@@ -300,6 +316,7 @@ class LogEnricher:
 **Framework:** FastAPI with OpenAPI 3.1 specification
 
 **Provider/Consumer Pattern:**
+
 ```python
 # autogit/api/providers/base.py
 class Provider(ABC):
@@ -319,19 +336,18 @@ class CloudflareProvider(DNSProvider):
     provider_type = "dns"
     provider_name = "cloudflare"
 
-    async def create_record(self, record: DNSRecord) -> DNSRecord:
-        ...
+    async def create_record(self, record: DNSRecord) -> DNSRecord: ...
 
 
 # autogit/api/connectors/gitlab.py
 class GitLabConnector(Connector):
     """Connector for GitLab operations"""
 
-    async def mirror_repository(self, source: str, dest: str) -> MirrorResult:
-        ...
+    async def mirror_repository(self, source: str, dest: str) -> MirrorResult: ...
 ```
 
 **OpenAPI Specification:**
+
 ```yaml
 openapi: 3.1.0
 info:
@@ -429,11 +445,12 @@ components:
               type: integer
 ```
 
----
+______________________________________________________________________
 
 ## Extension Framework
 
 **Plugin Architecture:**
+
 ```python
 # autogit/extensions/base.py
 class Extension(ABC):
@@ -464,6 +481,7 @@ class CustomDNSExtension(Extension):
 ```
 
 **Supported Provider Types:**
+
 - `dns` - DNS record management
 - `ssl` - Certificate management
 - `storage` - Artifact/backup storage
@@ -471,11 +489,12 @@ class CustomDNSExtension(Extension):
 - `auth` - Authentication providers (LDAP, OIDC)
 - `compute` - GPU/CPU compute providers
 
----
+______________________________________________________________________
 
 ## Infrastructure as Code
 
 **Output Formats:**
+
 - Docker Compose (current)
 - Kubernetes manifests
 - Terraform modules
@@ -483,6 +502,7 @@ class CustomDNSExtension(Extension):
 - Ansible playbooks
 
 **IaC Generation:**
+
 ```python
 # autogit/iac/generator.py
 class IaCGenerator:
@@ -503,11 +523,12 @@ class IaCGenerator:
         return generator.render(state)
 ```
 
----
+______________________________________________________________________
 
 ## Implementation Phases
 
 ### Phase 1: Shell Foundation (Current)
+
 - [x] GitLab deployment
 - [x] Port conflict resolution
 - [x] Resource right-sizing
@@ -516,12 +537,14 @@ class IaCGenerator:
 - [ ] Basic SSL setup
 
 ### Phase 2: Ingress & SSL
+
 - [ ] Traefik deployment
 - [ ] Wildcard certificate automation
 - [ ] Subdomain routing
 - [ ] Service discovery via labels
 
 ### Phase 3: Observability
+
 - [ ] Loki + Promtail (logs)
 - [ ] Tempo (traces)
 - [ ] Prometheus (metrics)
@@ -529,23 +552,26 @@ class IaCGenerator:
 - [ ] Meilisearch (semantic search)
 
 ### Phase 4: Python Consolidation
+
 - [ ] FastAPI scaffolding
 - [ ] OpenAPI specification
 - [ ] Provider framework
 - [ ] Migrate shell scripts
 
 ### Phase 5: Security
+
 - [ ] Prompt injection filter
 - [ ] Quarantine system
 - [ ] Security dashboards
 - [ ] Audit logging
 
 ### Phase 6: IaC Export
+
 - [ ] State capture
 - [ ] Multi-format generation
 - [ ] Cloud provider support
 
----
+______________________________________________________________________
 
 ## File Structure
 
@@ -590,44 +616,44 @@ autogit/
     └── guides/
 ```
 
----
+______________________________________________________________________
 
 ## Security Considerations
 
-| Layer | Threat | Mitigation |
-|-------|--------|------------|
-| Ingress | DDoS | Rate limiting, Cloudflare proxy |
-| Ingress | Prompt injection | Filter middleware, quarantine |
-| Services | Credential exposure | Encrypted secrets, no logs |
-| DNS | Hijacking | DNSSEC, short TTL |
-| SSL | Certificate theft | Secure ACME storage, auto-rotate |
-| API | Unauthorized access | JWT auth, API keys, RBAC |
-| Logs | Sensitive data leak | PII scrubbing, encryption at rest |
+| Layer    | Threat              | Mitigation                        |
+| -------- | ------------------- | --------------------------------- |
+| Ingress  | DDoS                | Rate limiting, Cloudflare proxy   |
+| Ingress  | Prompt injection    | Filter middleware, quarantine     |
+| Services | Credential exposure | Encrypted secrets, no logs        |
+| DNS      | Hijacking           | DNSSEC, short TTL                 |
+| SSL      | Certificate theft   | Secure ACME storage, auto-rotate  |
+| API      | Unauthorized access | JWT auth, API keys, RBAC          |
+| Logs     | Sensitive data leak | PII scrubbing, encryption at rest |
 
----
+______________________________________________________________________
 
 ## Next Steps (Immediate)
 
 1. **Run credential bootstrap** (root password expires in ~20h)
-2. **Create DNS records** (manual or automated)
-3. **Deploy Traefik** with wildcard SSL
-4. **Test subdomain routing**
-5. **Document current state** for IaC generation
+1. **Create DNS records** (manual or automated)
+1. **Deploy Traefik** with wildcard SSL
+1. **Test subdomain routing**
+1. **Document current state** for IaC generation
 
----
+______________________________________________________________________
 
 ## Resource Sizing Guide
 
-| Component | Minimal | Homelab | Team | Production |
-|-----------|---------|---------|------|------------|
-| GitLab | 4C/4G | 6C/6G | 12C/16G | 24C/32G |
-| Traefik | 0.5C/128M | 1C/256M | 2C/512M | 4C/1G |
-| Grafana | 0.5C/256M | 1C/512M | 2C/1G | 4C/2G |
-| Loki | 1C/512M | 2C/1G | 4C/4G | 8C/8G |
-| Tempo | 0.5C/256M | 1C/512M | 2C/2G | 4C/4G |
-| Prometheus | 1C/512M | 2C/1G | 4C/4G | 8C/8G |
-| Meilisearch | 1C/512M | 2C/1G | 4C/4G | 8C/16G |
-| AutoGit API | 0.5C/256M | 1C/512M | 2C/1G | 4C/2G |
-| **Total** | **9C/6.5G** | **16C/11G** | **32C/33G** | **64C/73G** |
+| Component   | Minimal     | Homelab     | Team        | Production  |
+| ----------- | ----------- | ----------- | ----------- | ----------- |
+| GitLab      | 4C/4G       | 6C/6G       | 12C/16G     | 24C/32G     |
+| Traefik     | 0.5C/128M   | 1C/256M     | 2C/512M     | 4C/1G       |
+| Grafana     | 0.5C/256M   | 1C/512M     | 2C/1G       | 4C/2G       |
+| Loki        | 1C/512M     | 2C/1G       | 4C/4G       | 8C/8G       |
+| Tempo       | 0.5C/256M   | 1C/512M     | 2C/2G       | 4C/4G       |
+| Prometheus  | 1C/512M     | 2C/1G       | 4C/4G       | 8C/8G       |
+| Meilisearch | 1C/512M     | 2C/1G       | 4C/4G       | 8C/16G      |
+| AutoGit API | 0.5C/256M   | 1C/512M     | 2C/1G       | 4C/2G       |
+| **Total**   | **9C/6.5G** | **16C/11G** | **32C/33G** | **64C/73G** |
 
 Your homelab (28C/120G) can easily run the full Homelab tier with room for GPU runners.

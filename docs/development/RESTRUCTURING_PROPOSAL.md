@@ -1,14 +1,14 @@
 # AutoGit Codebase Restructuring Proposal
 
-**Date**: December 2025
-**Status**: Proposal
-**Scope**: Directory structure, documentation consolidation, script organization
+**Date**: December 2025 **Status**: Proposal **Scope**: Directory structure, documentation
+consolidation, script organization
 
----
+______________________________________________________________________
 
 ## Executive Summary
 
 The AutoGit codebase has accumulated significant organizational debt during rapid development:
+
 - **18 markdown files at project root** (should only have 2-3)
 - **87 documentation files** with substantial redundancy
 - **31 shell scripts** with potential duplication
@@ -17,33 +17,33 @@ The AutoGit codebase has accumulated significant organizational debt during rapi
 
 This proposal provides a structured migration plan to achieve a clean, maintainable codebase.
 
----
+______________________________________________________________________
 
 ## Current State Analysis
 
 ### 📁 Root Directory Issues
 
-| File | Recommendation | Reason |
-|------|---------------|--------|
-| `README.md` | **Keep** | Essential project entry point |
-| `CONTRIBUTING.md` | **Keep** | Standard open-source convention |
-| `AUTOMATED_WORKFLOW_DOCS_INDEX.md` | Archive → `docs/archive/` | Index for specific release work |
-| `BRANCH_ANALYSIS.md` | Archive → `docs/archive/releases/` | Historical branch analysis |
-| `BRANCH_PROTECTION_GUIDE.md` | Move → `docs/workflows/` | Active guide, wrong location |
-| `DEPLOYMENT_READINESS.md` | Archive → `docs/archive/releases/` | v0.2.0 specific status |
-| `EXECUTIVE_SUMMARY.md` | Archive → `docs/archive/releases/` | v0.3.0 planning summary |
-| `IMPLEMENTATION_SUMMARY.md` | Archive → `docs/archive/` | Workflow fixes summary |
-| `NEXT_WORK_ITEMS.md` | Archive → `docs/archive/` | Superseded by ROADMAP |
-| `PROJECT_TIMELINE_VELOCITY.md` | Archive → `docs/archive/` | Historical metrics |
-| `PR_SUMMARY.md` | Archive → `docs/archive/releases/` | v0.2.0 PR summary |
-| `QUICKSTART_AUTOMATED_WORKFLOW.md` | Move → `docs/tutorials/` | Active guide, wrong location |
-| `READY_FOR_RELEASE.md` | Archive → `docs/archive/releases/` | v0.2.0 status doc |
-| `RELEASE_CI_UPDATE.md` | Archive → `docs/archive/` | CI update summary |
-| `RELEASE_NOTES_v0.2.0.md` | Move → `docs/releases/` | Release notes (create directory) |
-| `SECURITY_SUMMARY.md` | Archive → `docs/archive/` | Summary doc |
-| `SETUP_COMPLETE.md` | Archive → `docs/archive/` | Historical status |
-| `WORKFLOW_FAILURE_ANALYSIS.md` | Archive → `docs/archive/` | Debugging notes |
-| `WORKFLOW_PERMISSIONS_AUDIT.md` | Archive → `docs/archive/` | Audit results |
+| File                               | Recommendation                     | Reason                           |
+| ---------------------------------- | ---------------------------------- | -------------------------------- |
+| `README.md`                        | **Keep**                           | Essential project entry point    |
+| `CONTRIBUTING.md`                  | **Keep**                           | Standard open-source convention  |
+| `AUTOMATED_WORKFLOW_DOCS_INDEX.md` | Archive → `docs/archive/`          | Index for specific release work  |
+| `BRANCH_ANALYSIS.md`               | Archive → `docs/archive/releases/` | Historical branch analysis       |
+| `BRANCH_PROTECTION_GUIDE.md`       | Move → `docs/workflows/`           | Active guide, wrong location     |
+| `DEPLOYMENT_READINESS.md`          | Archive → `docs/archive/releases/` | v0.2.0 specific status           |
+| `EXECUTIVE_SUMMARY.md`             | Archive → `docs/archive/releases/` | v0.3.0 planning summary          |
+| `IMPLEMENTATION_SUMMARY.md`        | Archive → `docs/archive/`          | Workflow fixes summary           |
+| `NEXT_WORK_ITEMS.md`               | Archive → `docs/archive/`          | Superseded by ROADMAP            |
+| `PROJECT_TIMELINE_VELOCITY.md`     | Archive → `docs/archive/`          | Historical metrics               |
+| `PR_SUMMARY.md`                    | Archive → `docs/archive/releases/` | v0.2.0 PR summary                |
+| `QUICKSTART_AUTOMATED_WORKFLOW.md` | Move → `docs/tutorials/`           | Active guide, wrong location     |
+| `READY_FOR_RELEASE.md`             | Archive → `docs/archive/releases/` | v0.2.0 status doc                |
+| `RELEASE_CI_UPDATE.md`             | Archive → `docs/archive/`          | CI update summary                |
+| `RELEASE_NOTES_v0.2.0.md`          | Move → `docs/releases/`            | Release notes (create directory) |
+| `SECURITY_SUMMARY.md`              | Archive → `docs/archive/`          | Summary doc                      |
+| `SETUP_COMPLETE.md`                | Archive → `docs/archive/`          | Historical status                |
+| `WORKFLOW_FAILURE_ANALYSIS.md`     | Archive → `docs/archive/`          | Debugging notes                  |
+| `WORKFLOW_PERMISSIONS_AUDIT.md`    | Archive → `docs/archive/`          | Audit results                    |
 
 **After cleanup**: Only `README.md` and `CONTRIBUTING.md` at root.
 
@@ -79,6 +79,7 @@ docs/status/
 Mix of active guides and status documents:
 
 **Keep as Active Guides:**
+
 - `README.md`
 - `CODE_QUALITY.md` (new)
 - `GIT_WORKFLOW.md`
@@ -89,6 +90,7 @@ Mix of active guides and status documents:
 - `STYLE_GUIDE.md`
 
 **Archive:**
+
 - `COORDINATOR_IMPLEMENTATION_SUMMARY.md`
 - `DYNAMIC_RUNNER_IMPLEMENTATION_COMPLETE.md`
 - `FULL_TEST_RESULTS.md`
@@ -109,9 +111,10 @@ scripts/
 ```
 
 **Problems:**
+
 1. Three setup scripts with unclear purposes
-2. `.bak` file should not be in repo
-3. No logical grouping
+1. `.bak` file should not be in repo
+1. No logical grouping
 
 ### ⚙️ GitHub Workflows Issues
 
@@ -122,11 +125,12 @@ scripts/
 ```
 
 Disabled workflows should be:
+
 - Archived if no longer needed
 - Documented if temporarily disabled
 - Re-enabled or deleted
 
----
+______________________________________________________________________
 
 ## Proposed Structure
 
@@ -264,7 +268,7 @@ scripts/setup.sh                   # Superseded by first-time-setup.sh
 .github/workflows/*.yml.disabled   # Review each, delete or document why disabled
 ```
 
----
+______________________________________________________________________
 
 ## Migration Plan
 
@@ -357,12 +361,12 @@ echo "# Workflow Documentation" > .github/workflows/README.md
 After moving files, update all references:
 
 1. **README.md** - Update documentation links
-2. **docs/INDEX.md** - Update entire index
-3. **CI workflows** - Update script paths
-4. **Makefile** - Update script references
-5. **CONTRIBUTING.md** - Update development guides references
+1. **docs/INDEX.md** - Update entire index
+1. **CI workflows** - Update script paths
+1. **Makefile** - Update script references
+1. **CONTRIBUTING.md** - Update development guides references
 
----
+______________________________________________________________________
 
 ## Validation Checklist
 
@@ -376,41 +380,43 @@ After restructuring, verify:
 - [ ] README is accurate
 - [ ] INDEX.md reflects new structure
 
----
+______________________________________________________________________
 
 ## Benefits
 
 ### Immediate
+
 - Clean root directory (2 files vs 18)
 - Logical documentation navigation
 - Categorized scripts
 - Easier onboarding
 
 ### Long-term
+
 - Reduced maintenance burden
 - Clear separation of active vs historical docs
 - Consistent structure for future additions
 - Easier automated documentation generation
 
----
+______________________________________________________________________
 
 ## Risk Mitigation
 
-| Risk | Mitigation |
-|------|-----------|
-| Broken links | Run link checker post-migration |
-| CI failures | Update paths in workflows before moving |
-| Lost history | Use `git mv` to preserve history |
-| Confusion | Clear commit messages explaining moves |
+| Risk         | Mitigation                              |
+| ------------ | --------------------------------------- |
+| Broken links | Run link checker post-migration         |
+| CI failures  | Update paths in workflows before moving |
+| Lost history | Use `git mv` to preserve history        |
+| Confusion    | Clear commit messages explaining moves  |
 
----
+______________________________________________________________________
 
 ## Appendix: File Counts
 
-| Location | Current | After |
-|----------|---------|-------|
-| Root `.md` files | 18 | 2-3 |
-| `docs/status/` | 18 | 0 (archived) |
-| `docs/archive/` | 9 | ~40 |
-| `scripts/` (flat) | 31 | 0 |
-| `scripts/*/` (organized) | 0 | 31 |
+| Location                 | Current | After        |
+| ------------------------ | ------- | ------------ |
+| Root `.md` files         | 18      | 2-3          |
+| `docs/status/`           | 18      | 0 (archived) |
+| `docs/archive/`          | 9       | ~40          |
+| `scripts/` (flat)        | 31      | 0            |
+| `scripts/*/` (organized) | 0       | 31           |

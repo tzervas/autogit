@@ -1,10 +1,13 @@
 # AutoGit: Self-Hosted GitOps Platform
+
 # Architecture Specification v1.0
+
 # ═══════════════════════════════════════════════════════════════════════════════
 
 ## Vision
 
 One-touch deployment of a complete self-hosted GitOps platform:
+
 - Self-hosted Git (GitLab CE) with full-depth mirroring
 - Automated lifecycle-managed compute runners (CPU + GPU)
 - Local and remote GPU support for inference/render workloads
@@ -189,6 +192,7 @@ autogit logs [component]           # View logs
 ## Implementation Phases
 
 ### Phase 1: Shell Foundation (CURRENT)
+
 - [x] GitLab deployment (docker-compose)
 - [x] Port conflict fix
 - [x] Resource right-sizing
@@ -197,24 +201,28 @@ autogit logs [component]           # View logs
 - [ ] Mirroring setup
 
 ### Phase 2: Python Consolidation
+
 - [ ] Port existing Python scripts to unified package
 - [ ] Pydantic config schema
 - [ ] Typer CLI scaffolding
 - [ ] GitLab client cleanup
 
 ### Phase 3: Runner Management
+
 - [ ] CPU runner auto-registration
 - [ ] GPU runner discovery (NVIDIA)
 - [ ] Runner health monitoring
 - [ ] Dynamic scaling
 
 ### Phase 4: Self-Healing
+
 - [ ] State machine implementation
 - [ ] Reconciliation loop
 - [ ] Failure detection
 - [ ] Auto-repair actions
 
 ### Phase 5: GPU Compute
+
 - [ ] NVIDIA container toolkit integration
 - [ ] Inference job scheduling
 - [ ] Render workload management
@@ -222,14 +230,14 @@ autogit logs [component]           # View logs
 
 ## Threat Model
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Credentials leak | Full system compromise | File perms 600, env vars, no logs |
-| Runner compromise | Lateral movement | Network isolation, limited scopes |
-| GitLab corruption | Data loss | Automated backups, BTRFS snapshots |
-| GPU resource exhaustion | Workload starvation | Resource quotas, scheduling |
-| Network partition | Split brain | Health checks, graceful degradation |
-| Self-heal loop | System thrashing | Backoff, human intervention flag |
+| Risk                    | Impact                 | Mitigation                          |
+| ----------------------- | ---------------------- | ----------------------------------- |
+| Credentials leak        | Full system compromise | File perms 600, env vars, no logs   |
+| Runner compromise       | Lateral movement       | Network isolation, limited scopes   |
+| GitLab corruption       | Data loss              | Automated backups, BTRFS snapshots  |
+| GPU resource exhaustion | Workload starvation    | Resource quotas, scheduling         |
+| Network partition       | Split brain            | Health checks, graceful degradation |
+| Self-heal loop          | System thrashing       | Backoff, human intervention flag    |
 
 ## Dependencies
 
@@ -257,19 +265,19 @@ gpu = [
 
 ## File Mapping: Shell → Python
 
-| Shell Script | Python Module | Status |
-|--------------|---------------|--------|
-| `deploy-clean.sh` | `autogit.gitlab.deploy` | Planned |
-| `bootstrap-gitlab-users.sh` | `autogit.gitlab.bootstrap` | Planned |
-| `setup-mirroring.py` | `autogit.gitlab.mirror` | Exists |
-| `check-status.sh` | `autogit.core.health` | Planned |
-| `diagnose.sh` | `autogit.utils.diagnostics` | Planned |
-| `tools/gitlab_client.py` | `autogit.gitlab.client` | Exists |
-| `scripts/register-runners.sh` | `autogit.runners.manager` | Planned |
+| Shell Script                  | Python Module               | Status  |
+| ----------------------------- | --------------------------- | ------- |
+| `deploy-clean.sh`             | `autogit.gitlab.deploy`     | Planned |
+| `bootstrap-gitlab-users.sh`   | `autogit.gitlab.bootstrap`  | Planned |
+| `setup-mirroring.py`          | `autogit.gitlab.mirror`     | Exists  |
+| `check-status.sh`             | `autogit.core.health`       | Planned |
+| `diagnose.sh`                 | `autogit.utils.diagnostics` | Planned |
+| `tools/gitlab_client.py`      | `autogit.gitlab.client`     | Exists  |
+| `scripts/register-runners.sh` | `autogit.runners.manager`   | Planned |
 
 ## Next Steps
 
 1. **Immediate**: Run bootstrap, capture creds, verify mirroring
-2. **This week**: Document all working shell scripts
-3. **Next sprint**: Create `autogit` Python package scaffold
-4. **Following**: Port scripts incrementally, test each
+1. **This week**: Document all working shell scripts
+1. **Next sprint**: Create `autogit` Python package scaffold
+1. **Following**: Port scripts incrementally, test each

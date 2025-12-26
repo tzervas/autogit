@@ -1,21 +1,27 @@
 # Homelab GitLab Configuration
 
-This directory contains scripts to configure and manage a self-hosted GitLab instance
-programmatically.
+**Docker Compose:** Use `docker-compose.homelab.yml` (optimized for homelab deployment)
+
+This directory contains scripts to configure and manage a self-hosted GitLab instance programmatically.
+
+**Key Features:**
+- PostgreSQL performance tuning (fixes DB initialization hanging)
+- HTTPS/SSL configuration with custom domains
+- Automated backup/restore tooling
+- Python-based GitLab API configuration
+- Comprehensive deployment monitoring
 
 ## Quick Start - Fresh Deployment
 
 For a completely fresh GitLab setup with automatic repository mirroring:
 
 ### Option 1: Automated (Recommended)
-
 ```bash
 # Configure your tokens in .env file, then:
 ./setup-optimized.sh
 ```
 
 ### Option 2: Manual Configuration
-
 ```bash
 # 1. Deploy fresh GitLab instance
 export GITLAB_URL="https://gitlab.vectorweight.com"
@@ -49,7 +55,6 @@ nano .env
 ```
 
 **Required Variables:**
-
 ```bash
 # GitLab Configuration
 GITLAB_URL=https://gitlab.vectorweight.com
@@ -63,7 +68,6 @@ GITLAB_ROOT_TOKEN=your_root_token_here
 ```
 
 **Optional Variables:**
-
 ```bash
 # Deployment Configuration
 DOCKER_COMPOSE_COMMAND="sudo docker compose"
@@ -77,8 +81,7 @@ GITLAB_SIDEKIQ_CONCURRENCY=5
 
 ### Automatic Environment Loading
 
-All setup scripts automatically load the `.env` file if present, eliminating the need for manual
-token entry.
+All setup scripts automatically load the `.env` file if present, eliminating the need for manual token entry.
 
 ### Security Features
 
@@ -88,7 +91,6 @@ token entry.
 - **Safe Logging:** Monitoring outputs are sanitized before logging
 
 **Example Output:**
-
 ```
 🌐 GitLab URL: https://gitlab.vectorweight.com
 🐙 GitHub Token: github_pat_1...***
@@ -98,51 +100,42 @@ token entry.
 ## Performance Monitoring & Optimization
 
 ### `monitor-deployment.sh`
-
 Comprehensive deployment monitoring script that captures logs, metrics, and timing data.
 
 **Captures:**
-
 - System resources (CPU, memory, disk I/O, network)
 - Docker container logs in real-time
 - Deployment phase timings
 - GitLab health status
 
 **Usage:**
-
 ```bash
 # Run in parallel with deployment
 ./monitor-deployment.sh
 ```
 
 **Output:**
-
 - `deployment-logs/deployment_monitor_TIMESTAMP.log`: Detailed logs
 - `deployment-logs/deployment_metrics_TIMESTAMP.csv`: CSV metrics data
 
 ### `analyze-deployment.sh`
-
 Analyzes monitoring data to identify bottlenecks and suggest optimizations.
 
 **Features:**
-
 - Phase timing analysis
 - Resource usage patterns
 - Error detection
 - Optimization recommendations
 
 **Usage:**
-
 ```bash
 ./analyze-deployment.sh
 ```
 
 ### `setup-optimized.sh`
-
 Performance-optimized deployment script with parallel processing and pre-optimizations.
 
 **Optimizations:**
-
 - Pre-pulls Docker images
 - Parallel task execution
 - Pre-generates SSL certificates
@@ -150,7 +143,6 @@ Performance-optimized deployment script with parallel processing and pre-optimiz
 - Reduced deployment time
 
 **Usage:**
-
 ```bash
 export GITHUB_PAT_MIRROR="your-github-token"
 export GITLAB_PAT_MIRROR="your-gitlab-token"
@@ -162,31 +154,27 @@ export GITLAB_PAT_MIRROR="your-gitlab-token"
 ### Common Bottlenecks & Solutions
 
 1. **Docker Image Downloads (5-10 minutes)**
-
    - **Solution:** Pre-pull images: `sudo docker pull gitlab/gitlab-ce:latest`
    - **Impact:** Saves 5-8 minutes on first deployment
 
-1. **SSL Certificate Generation (10-30 seconds)**
-
+2. **SSL Certificate Generation (10-30 seconds)**
    - **Solution:** Pre-generate certificates before deployment
    - **Impact:** Saves 20-30 seconds per deployment
 
-1. **GitLab Initialization (3-8 minutes)**
-
+3. **GitLab Initialization (3-8 minutes)**
    - **Solution:** Optimize GitLab configuration for faster startup
    - **Impact:** Can reduce initialization time by 50%
 
-1. **Repository Mirroring (2-5 minutes)**
-
+4. **Repository Mirroring (2-5 minutes)**
    - **Solution:** Parallel processing of mirror setup
    - **Impact:** Reduces setup time by 60%
 
 ### Monitoring Best Practices
 
 1. **Always monitor deployments** to identify new bottlenecks
-1. **Compare metrics** between deployments to measure improvements
-1. **Focus on the slowest phases** for maximum impact
-1. **Test optimizations** in a staging environment first
+2. **Compare metrics** between deployments to measure improvements
+3. **Focus on the slowest phases** for maximum impact
+4. **Test optimizations** in a staging environment first
 
 ### Expected Performance Targets
 
@@ -197,11 +185,9 @@ export GITLAB_PAT_MIRROR="your-gitlab-token"
 - **Repository mirroring:** < 2 minutes
 
 ### `deploy-fresh.sh`
-
 Deploys a fresh, optimized GitLab CE instance with Docker Compose.
 
 **Features:**
-
 - Optimized for homelab use (reduced resource usage)
 - Automatic health checks
 - GitLab Runner included
@@ -209,52 +195,43 @@ Deploys a fresh, optimized GitLab CE instance with Docker Compose.
 - Initial root password retrieval
 
 **Usage:**
-
 ```bash
 export GITLAB_URL="http://homelab:8080"  # Optional
 ./deploy-fresh.sh
 ```
 
 ### `configure-gitlab-fresh.py`
-
 Sets up users, groups, and access tokens for repository mirroring.
 
 **Creates:**
-
 - `ci-user`: For automated repository operations
 - `admin`: For administrative tasks
 - `projects` group: Container for mirrored repositories
 - Scoped access tokens with minimal permissions
 
 **Usage:**
-
 ```bash
 export GITLAB_ROOT_TOKEN="initial-root-token"
 uv run python configure-gitlab-fresh.py
 ```
 
 **Outputs:**
-
 - `gitlab-fresh-config.json`: Complete configuration with tokens
 - Prints access tokens (save securely!)
 
 ### `setup-mirroring.py`
-
 Automatically creates mirrors of all your public repositories.
 
 **Mirrors:**
-
 - All public GitHub repositories from `tzervas`
 - All GitLab repositories from `vector_weight`
 - Creates projects in the `projects` group
 
 **Requirements:**
-
 - GitHub personal access token with `repo` scope
 - GitLab personal access token with `read_repository` scope
 
 **Usage:**
-
 ```bash
 export GITHUB_TOKEN="github-token"
 export GITLAB_MIRROR_TOKEN="gitlab-token"
@@ -262,21 +239,17 @@ uv run python setup-mirroring.py
 ```
 
 **Outputs:**
-
 - `repository-mirrors.json`: Mirror configuration and status
 
 ### `setup-cli-auth.sh`
-
 Configures local CLI tools to authenticate with GitLab.
 
 **Configures:**
-
 - Git credential helper
 - GitLab CLI (glab) if installed
 - Tests authentication
 
 **Usage:**
-
 ```bash
 ./setup-cli-auth.sh
 ```
@@ -284,11 +257,9 @@ Configures local CLI tools to authenticate with GitLab.
 ## Legacy Scripts (Backup/Restore)
 
 ### `configure-gitlab.py`
-
 Configures users, groups, roles, and scoped tokens in GitLab.
 
 **Usage:**
-
 ```bash
 export GITLAB_URL="http://192.168.1.170:3000"
 export GITLAB_TOKEN="your-root-token"
@@ -296,7 +267,6 @@ uv run python homelab-gitlab/configure-gitlab.py
 ```
 
 **What it does:**
-
 - Creates users: `ci-user`, `admin-user`
 - Creates groups: `debian-sid`
 - Assigns roles
@@ -304,17 +274,14 @@ uv run python homelab-gitlab/configure-gitlab.py
 - Saves config to `gitlab-config.json`
 
 **Security Notes:**
-
 - Uses root token for initial setup
 - Creates minimal-scoped tokens for operations
 - Outputs tokens once (store securely)
 
 ### `backup-gitlab.sh`
-
 Creates full GitLab backup including configuration and data.
 
 **Usage (on GitLab server):**
-
 ```bash
 export GITLAB_TOKEN="admin-token"
 export GPG_PASSPHRASE="your-secure-passphrase"
@@ -322,7 +289,6 @@ sudo ./backup-gitlab.sh [backup-name]
 ```
 
 **Features:**
-
 - Exports configuration via API
 - Creates GitLab data backup
 - **Secure backup of sensitive files** (gitlab.rb, gitlab-secrets.json) with GPG encryption
@@ -331,17 +297,14 @@ sudo ./backup-gitlab.sh [backup-name]
 - Auto-cleans old backups (keeps last 5)
 
 **Security Features:**
-
 - Sensitive configuration files are encrypted with AES256
 - Encryption passphrase required via `GPG_PASSPHRASE` environment variable
 - Encrypted files stored as `.gpg` files in config directory
 
 ### `run-gitlab-backup.sh`
-
 Orchestrates backup from local machine via SSH.
 
 **Usage:**
-
 ```bash
 export GITLAB_TOKEN="admin-token"
 export GPG_PASSPHRASE="your-secure-passphrase"  # Optional: enables secure backup of sensitive files
@@ -351,25 +314,21 @@ export SSH_USER="spooky"        # optional
 ```
 
 ### `decrypt-sensitive-files.sh`
-
 Decrypts sensitive GitLab configuration files from encrypted backup.
 
 **Usage (on GitLab server):**
-
 ```bash
 export GPG_PASSPHRASE="your-secure-passphrase"
 ./decrypt-sensitive-files.sh <backup-name> <output-dir>
 ```
 
 **Example:**
-
 ```bash
 export GPG_PASSPHRASE="my-secret-passphrase"
 ./decrypt-sensitive-files.sh 20231225_143022 /tmp/gitlab-restore
 ```
 
 **Features:**
-
 - Decrypts gitlab.rb and gitlab-secrets.json from GPG-encrypted backups
 - Sets secure permissions (600) on decrypted files
 - Warns about secure deletion after use
@@ -377,18 +336,15 @@ export GPG_PASSPHRASE="my-secret-passphrase"
 ## Backup Strategy
 
 **Naming Convention:**
-
 - Automatic: `YYYYMMDD_HHMMSS` (e.g., `20231225_143022`)
 - Custom: Any string (e.g., `pre-upgrade`, `v1.0`)
 
 **Storage:**
-
 - Config exports: `/var/opt/gitlab/backups/config/`
 - Data backups: `/var/opt/gitlab/backups/` (compressed)
 - Registry: `/var/opt/gitlab/backups/backups.json`
 
 **Retention:**
-
 - Keeps last 5 backups automatically
 - Compressed for efficiency
 - Includes metadata for restore verification
@@ -396,10 +352,10 @@ export GPG_PASSPHRASE="my-secret-passphrase"
 ## Workflow
 
 1. **Initial Setup:** Run `configure-gitlab.py` with root token to create users/tokens
-1. **Switch to Scoped Tokens:** Use generated tokens for future operations
-1. **Regular Backups:** Run `run-gitlab-backup.sh` weekly/monthly
-1. **Export Config:** Run `export-gitlab-config.py` for config-only backup
-1. **Restore if Needed:** Use `restore-gitlab.sh` with backup name
+2. **Switch to Scoped Tokens:** Use generated tokens for future operations
+3. **Regular Backups:** Run `run-gitlab-backup.sh` weekly/monthly
+4. **Export Config:** Run `export-gitlab-config.py` for config-only backup
+5. **Restore if Needed:** Use `restore-gitlab.sh` with backup name
 
 ## Threat Model
 

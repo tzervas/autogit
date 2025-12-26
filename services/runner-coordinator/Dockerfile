@@ -26,7 +26,7 @@ ARG VARIANT=release
 # -----------------------------------------------------------------------------
 # Stage 1: Builder - Install and compile dependencies
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 
@@ -51,7 +51,7 @@ RUN python -m compileall -b app/
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime - Minimal production image
 # -----------------------------------------------------------------------------
-FROM python:3.11-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # Re-declare build args for this stage
 ARG BUILD_DATE

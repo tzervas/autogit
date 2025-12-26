@@ -1,12 +1,13 @@
-import unittest
-from unittest.mock import patch, MagicMock
 import os
 import sys
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add tools directory to path to import GitLabClient
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../tools")))
 
-from gitlab_client import GitLabClient, GitLabApiError
+from gitlab_client import GitLabApiError, GitLabClient
+
 
 class TestGitLabClient(unittest.TestCase):
     def setUp(self):
@@ -14,7 +15,7 @@ class TestGitLabClient(unittest.TestCase):
         self.base_url = "http://gitlab.example.com"
         self.client = GitLabClient(base_url=self.base_url, token=self.token)
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_request_success(self, mock_request):
         # Mock successful response
         mock_response = MagicMock()
@@ -32,10 +33,10 @@ class TestGitLabClient(unittest.TestCase):
             headers=self.client.headers,
             json=None,
             params=None,
-            timeout=10
+            timeout=10,
         )
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_request_error(self, mock_request):
         # Mock error response
         mock_response = MagicMock()
@@ -50,7 +51,7 @@ class TestGitLabClient(unittest.TestCase):
         self.assertEqual(cm.exception.status_code, 404)
         self.assertIn("Project not found", cm.exception.message)
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_get_users(self, mock_request):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -62,7 +63,7 @@ class TestGitLabClient(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["username"], "admin")
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_create_project(self, mock_request):
         mock_response = MagicMock()
         mock_response.status_code = 201
@@ -75,9 +76,9 @@ class TestGitLabClient(unittest.TestCase):
 
         # Check if path was auto-generated
         args, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['json']['path'], "new-project")
+        self.assertEqual(kwargs["json"]["path"], "new-project")
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_protect_branch(self, mock_request):
         mock_response = MagicMock()
         mock_response.status_code = 201
@@ -89,14 +90,14 @@ class TestGitLabClient(unittest.TestCase):
         self.assertEqual(result["name"], "main")
 
         args, kwargs = mock_request.call_args
-        self.assertEqual(kwargs['json']['name'], "main")
-        self.assertEqual(kwargs['json']['push_access_level'], 40)
+        self.assertEqual(kwargs["json"]["name"], "main")
+        self.assertEqual(kwargs["json"]["push_access_level"], 40)
 
-    @patch('requests.request')
+    @patch("requests.request")
     def test_unprotect_branch_encoding(self, mock_request):
         mock_response = MagicMock()
         mock_response.status_code = 204
-        mock_response.content = b''
+        mock_response.content = b""
         mock_request.return_value = mock_response
 
         self.client.unprotect_branch(1, "feature/test")
@@ -105,5 +106,6 @@ class TestGitLabClient(unittest.TestCase):
         # Check if branch name was URL encoded
         self.assertIn("feature%2Ftest", args[1])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

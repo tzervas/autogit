@@ -21,7 +21,8 @@ log_error() { echo -e "${RED}❌ $1${NC}"; }
 # Backup existing .env if it exists
 backup_existing_env() {
     if [[ -f ".env" ]]; then
-        local backup=".env.backup.$(date +%Y%m%d_%H%M%S)"
+        local backup
+        backup=".env.backup.$(date +%Y%m%d_%H%M%S)"
         cp .env "$backup"
         log_info "Backed up existing .env to $backup"
     fi
@@ -36,7 +37,7 @@ migrate_file() {
         log_info "Migrating $file ($description)..."
 
         # Skip comment lines and empty lines, append to .env
-        grep -v '^#' "$file" | grep -v '^$' >>.env || true
+        grep -v '^#' "$file" | grep -v '^$' >> .env || true
 
         # Remove the old file
         rm "$file"
@@ -53,7 +54,7 @@ deduplicate_env() {
 
         # Create a temporary file with unique entries
         local temp_file=".env.temp"
-        awk -F'=' '!seen[$1]++' .env >"$temp_file"
+        awk -F'=' '!seen[$1]++' .env > "$temp_file"
         mv "$temp_file" .env
 
         log_info "Deduplication complete"

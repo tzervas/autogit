@@ -1,23 +1,22 @@
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import List
-from contextlib import asynccontextmanager
-import datetime
 import asyncio
-import os
+import datetime
 import logging
-from sqlalchemy.orm import Session
+import os
+from contextlib import asynccontextmanager
+from typing import List
+
+from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from .driver import DockerDriver
+from .models import Base, Job, Runner
 from .runner_manager import RunnerManager
-from .models import Base, Runner, Job
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,7 @@ MAX_IDLE_RUNNERS = int(os.getenv("MAX_IDLE_RUNNERS", "0"))
 # Global runner manager instance
 runner_manager_instance = None
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -63,7 +63,9 @@ async def lifespan(app: FastAPI):
     if not GITLAB_RUNNER_REGISTRATION_TOKEN:
         logger.warning("⚠ GITLAB_RUNNER_REGISTRATION_TOKEN not set")
     else:
-        logger.info(f"✓ GITLAB_RUNNER_REGISTRATION_TOKEN configured ({GITLAB_RUNNER_REGISTRATION_TOKEN[:20]}...)")
+        logger.info(
+            f"✓ GITLAB_RUNNER_REGISTRATION_TOKEN configured ({GITLAB_RUNNER_REGISTRATION_TOKEN[:20]}...)"
+        )
 
     # Start the lifecycle manager in the background
     db = SessionLocal()
@@ -74,7 +76,7 @@ async def lifespan(app: FastAPI):
         gitlab_token=GITLAB_TOKEN,
         cooldown_minutes=COOLDOWN_MINUTES,
         max_idle_runners=MAX_IDLE_RUNNERS,
-        runner_registration_token=GITLAB_RUNNER_REGISTRATION_TOKEN
+        runner_registration_token=GITLAB_RUNNER_REGISTRATION_TOKEN,
     )
 
     # Start the lifecycle manager task
@@ -95,7 +97,9 @@ async def lifespan(app: FastAPI):
         logger.info("Runner lifecycle manager stopped gracefully")
     db.close()
 
+
 app = FastAPI(title="AutoGit Runner Coordinator", version="0.2.0", lifespan=lifespan)
+
 
 # Dependency
 def get_db():
@@ -104,6 +108,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 # Models
 class JobWebhook(BaseModel):
@@ -114,6 +119,7 @@ class JobWebhook(BaseModel):
     user_name: str
     project_name: str
 
+
 class RunnerStatus(BaseModel):
     id: str
     name: str
@@ -121,6 +127,7 @@ class RunnerStatus(BaseModel):
     architecture: str
     gpu_enabled: bool
     last_seen: datetime.datetime
+
 
 class RunnerRegistrationRequest(BaseModel):
     gitlab_url: str
@@ -130,10 +137,12 @@ class RunnerRegistrationRequest(BaseModel):
     executor: str = "docker"
     docker_image: str = "python:3.11-slim"
 
+
 # Endpoints
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.datetime.now()}
+
 
 @app.get("/status")
 async def get_system_status(db: Session = Depends(get_db)):
@@ -141,9 +150,7 @@ async def get_system_status(db: Session = Depends(get_db)):
     Get system status including runner and job counts
     """
     total_runners = db.query(Runner).count()
-    active_runners = db.query(Runner).filter(
-        Runner.status.in_(["idle", "busy"])
-    ).count()
+    active_runners = db.query(Runner).filter(Runner.status.in_(["idle", "busy"])).count()
     idle_runners = db.query(Runner).filter(Runner.status == "idle").count()
     provisioning_runners = db.query(Runner).filter(Runner.status == "provisioning").count()
 
@@ -155,17 +162,16 @@ async def get_system_status(db: Session = Depends(get_db)):
         "cooldown_minutes": COOLDOWN_MINUTES,
         "max_idle_runners": MAX_IDLE_RUNNERS,
         "gitlab_url": GITLAB_URL,
-        "gitlab_connected": bool(GITLAB_TOKEN)
+        "gitlab_connected": bool(GITLAB_TOKEN),
     }
+
 
 @app.get("/runners", response_model=List[RunnerStatus])
 async def list_runners(db: Session = Depends(get_db)):
     """
     List all active runners
     """
-    runners = db.query(Runner).filter(
-        Runner.status.in_(["idle", "busy", "provisioning"])
-    ).all()
+    runners = db.query(Runner).filter(Runner.status.in_(["idle", "busy", "provisioning"])).all()
 
     return [
         RunnerStatus(
@@ -174,21 +180,22 @@ async def list_runners(db: Session = Depends(get_db)):
             status=r.status,
             architecture=r.architecture,
             gpu_enabled=r.gpu_enabled,
-            last_seen=r.last_seen
+            last_seen=r.last_seen,
         )
         for r in runners
     ]
+
 
 @app.post("/runners/register")
 async def register_runner(request: RunnerRegistrationRequest):
     """
     Register a new GitLab runner and spawn it as a container.
     """
-    import string
     import random
+    import string
 
     # Generate unique runner name
-    runner_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+    runner_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
     runner_name = f"autogit-runner-{runner_id}"
 
     # Get configuration from environment
@@ -205,7 +212,7 @@ async def register_runner(request: RunnerRegistrationRequest):
             cpu_limit=runner_cpu_limit,
             mem_limit=runner_mem_limit,
             network=runner_network,
-            platform="linux/amd64"
+            platform="linux/amd64",
         )
 
         # Register the runner with GitLab
@@ -216,7 +223,7 @@ async def register_runner(request: RunnerRegistrationRequest):
             description=request.description,
             tags=",".join(request.tags),
             executor=request.executor,
-            docker_image=request.docker_image
+            docker_image=request.docker_image,
         )
 
         return {
@@ -224,10 +231,11 @@ async def register_runner(request: RunnerRegistrationRequest):
             "runner_id": result["id"],
             "runner_name": runner_name,
             "container_id": result["short_id"],
-            "registration_output": registration["output"]
+            "registration_output": registration["output"],
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to register runner: {str(e)}")
+
 
 @app.post("/webhook/job")
 async def handle_job_webhook(payload: JobWebhook, db: Session = Depends(get_db)):
@@ -239,18 +247,20 @@ async def handle_job_webhook(payload: JobWebhook, db: Session = Depends(get_db))
 
     # Create job in database
     new_job = Job(
-        gitlab_job_id=payload.checkout_sha, # Using SHA as placeholder for job ID
+        gitlab_job_id=payload.checkout_sha,  # Using SHA as placeholder for job ID
         project_id=payload.project_id,
         project_name=payload.project_name,
         status="queued",
-        architecture_req="amd64", # Default
-        gpu_req=False # Default
+        architecture_req="amd64",  # Default
+        gpu_req=False,  # Default
     )
     db.add(new_job)
     db.commit()
 
     return {"message": "Job received and queued", "job_id": payload.checkout_sha}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

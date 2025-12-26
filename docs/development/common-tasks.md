@@ -7,25 +7,30 @@ Quick reference guide for common development tasks in AutoGit.
 ### Step-by-Step Process
 
 1. **Check License Compatibility**
+
    ```bash
    # Verify dependency license
    pip-licenses --from=mixed --format=markdown
    ```
+
    Update `LICENSES.md` with new dependency
 
-2. **Create Component Structure**
+1. **Create Component Structure**
+
    ```bash
    mkdir -p src/new-component/{core,models,adapters,utils,tests}
    touch src/new-component/{__init__.py,README.md}
    ```
 
-3. **Implement Component**
+1. **Implement Component**
+
    - Follow [coding standards](standards.md)
    - Use SOLID principles
    - Add type hints
    - Write docstrings
 
-4. **Write Tests**
+1. **Write Tests**
+
    ```bash
    # Create test file
    touch src/new-component/tests/test_component.py
@@ -34,17 +39,20 @@ Quick reference guide for common development tasks in AutoGit.
    pytest src/new-component/tests/
    ```
 
-5. **Update Documentation**
+1. **Update Documentation**
+
    - Create `docs/new-component/README.md`
    - Update `docs/INDEX.md`
    - Create ADR if architectural change
 
-6. **Update Configuration**
+1. **Update Configuration**
+
    - Add to Docker Compose: `compose/dev/docker-compose.yml`
    - Add to Kubernetes: `charts/autogit/templates/`
    - Add configuration examples
 
-7. **Update Build System**
+1. **Update Build System**
+
    - Add to `pyproject.toml` if new module
    - Update `Makefile` if new commands
 
@@ -53,11 +61,13 @@ Quick reference guide for common development tasks in AutoGit.
 ### Adding a New Runner Feature
 
 1. **Identify Affected Components**
+
    - Fleeting plugin: `src/fleeting-plugin/`
    - Runner manager: `src/runner-manager/`
    - Configuration: `config/runners/`
 
-2. **Update Plugin Code**
+1. **Update Plugin Code**
+
    ```python
    # src/fleeting-plugin/core/plugin.py
    def new_feature(self, param: str) -> Result:
@@ -68,7 +78,8 @@ Quick reference guide for common development tasks in AutoGit.
        ...
    ```
 
-3. **Update Configuration**
+1. **Update Configuration**
+
    ```yaml
    # config/runners/config.yml
    runner:
@@ -77,7 +88,8 @@ Quick reference guide for common development tasks in AutoGit.
        parameter: value
    ```
 
-4. **Add Tests**
+1. **Add Tests**
+
    ```python
    # src/fleeting-plugin/tests/test_new_feature.py
    def test_new_feature():
@@ -86,13 +98,15 @@ Quick reference guide for common development tasks in AutoGit.
        assert result.success
    ```
 
-5. **Update Documentation**
+1. **Update Documentation**
+
    - Update `docs/runners/README.md`
    - Add `docs/runners/new-feature.md`
    - Update API docs: `docs/api/fleeting-plugin.md`
    - Add example: `examples/runners/new-feature/`
 
-6. **Update INDEX**
+1. **Update INDEX**
+
    ```bash
    # Add to docs/INDEX.md
    ```
@@ -102,15 +116,18 @@ Quick reference guide for common development tasks in AutoGit.
 ### Example: Adding Intel GPU Support
 
 1. **Research Vendor Requirements**
+
    - Driver requirements
    - Runtime requirements
    - Detection method
    - Device paths
 
-2. **Add Detection Logic**
+1. **Add Detection Logic**
+
    ```python
    # src/gpu-detector/detectors/intel.py
    from .base import GPUDetector
+
 
    class IntelGPUDetector(GPUDetector):
        """Detector for Intel GPUs.
@@ -123,7 +140,8 @@ Quick reference guide for common development tasks in AutoGit.
            ...
    ```
 
-3. **Update Configuration**
+1. **Update Configuration**
+
    ```yaml
    # config/gpu/gpu-config.yaml
    gpu:
@@ -133,13 +151,15 @@ Quick reference guide for common development tasks in AutoGit.
        devices: all
    ```
 
-4. **Update Kubernetes Device Plugin**
+1. **Update Kubernetes Device Plugin**
+
    ```yaml
    # charts/autogit/templates/gpu-device-plugin.yaml
    # Add Intel device plugin configuration
    ```
 
-5. **Write Tests**
+1. **Write Tests**
+
    ```python
    # src/gpu-detector/tests/test_intel.py
    def test_intel_detection():
@@ -148,13 +168,15 @@ Quick reference guide for common development tasks in AutoGit.
        assert len(gpus) > 0
    ```
 
-6. **Update Documentation**
+1. **Update Documentation**
+
    - Create `docs/gpu/intel.md`
    - Update `docs/gpu/README.md`
    - Update `docs/INDEX.md`
    - Add example: `examples/gpu/intel/`
 
-7. **Add Integration Test**
+1. **Add Integration Test**
+
    ```python
    # tests/integration/test_intel_gpu.py
    def test_intel_gpu_scheduling():
@@ -169,6 +191,7 @@ Quick reference guide for common development tasks in AutoGit.
 ```python
 import pytest
 from unittest.mock import Mock, patch
+
 
 class TestMyComponent:
     """Tests for MyComponent."""
@@ -193,7 +216,7 @@ class TestMyComponent:
         with pytest.raises(ValueError):
             component.do_something_invalid()
 
-    @patch('my_module.external_call')
+    @patch("my_module.external_call")
     def test_with_mock(self, mock_external, component):
         """Test with mocked external call."""
         mock_external.return_value = "mocked"
@@ -206,6 +229,7 @@ class TestMyComponent:
 ```python
 import pytest
 from testcontainers.postgres import PostgresContainer
+
 
 class TestRunnerLifecycle:
     """Integration tests for runner lifecycle."""
@@ -260,7 +284,9 @@ docker compose ps
 ```python
 # Add breakpoint in code
 def my_function():
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
     # Code continues here
 ```
 
@@ -349,11 +375,11 @@ import cProfile
 import pstats
 
 # Profile function
-cProfile.run('my_function()', 'profile.stats')
+cProfile.run("my_function()", "profile.stats")
 
 # Analyze results
-stats = pstats.Stats('profile.stats')
-stats.sort_stats('cumulative')
+stats = pstats.Stats("profile.stats")
+stats.sort_stats("cumulative")
 stats.print_stats(20)
 ```
 
@@ -522,9 +548,9 @@ mkdocs build
 If you're stuck:
 
 1. Check [Troubleshooting Guide](../troubleshooting/README.md)
-2. Search [existing issues](https://github.com/yourusername/autogit/issues)
-3. Ask in [GitHub Discussions](https://github.com/yourusername/autogit/discussions)
-4. Review [documentation](../INDEX.md)
+1. Search [existing issues](https://github.com/yourusername/autogit/issues)
+1. Ask in [GitHub Discussions](https://github.com/yourusername/autogit/discussions)
+1. Review [documentation](../INDEX.md)
 
 ## References
 

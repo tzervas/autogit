@@ -1,0 +1,22 @@
+# monitor-deployment.sh - DEPRECATED
+
+**Status:** Deprecated 2025-12-25
+**Replacement:** `homelab-migration/monitor-deployment.sh`
+
+This simple version (79 lines) has been replaced by the comprehensive monitoring
+script in `homelab-migration/monitor-deployment.sh` (281 lines) which includes:
+
+- Real-time metrics collection
+- CSV logging for analysis
+- Comprehensive health checks
+- Deployment timing analysis
+- Error detection and reporting
+
+## Migration
+
+Replace any references to `scripts/monitor-deployment.sh` with:
+```bash
+./homelab-migration/monitor-deployment.sh
+```
+
+The old file has been renamed to `.deprecated` for reference.

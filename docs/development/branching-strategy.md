@@ -2,13 +2,16 @@
 
 ## Overview
 
-AutoGit follows a structured branching strategy designed to maintain code quality, enable parallel development, and ensure smooth integration of features. This document outlines our branching model and workflow.
+AutoGit follows a structured branching strategy designed to maintain code quality, enable parallel
+development, and ensure smooth integration of features. This document outlines our branching model
+and workflow.
 
 ## Branch Structure
 
 ### Main Branches
 
 #### `main`
+
 - **Purpose**: Production-ready code
 - **Protection**: Fully protected, requires PR approval
 - **Deployment**: Automatically deployed to production
@@ -16,6 +19,7 @@ AutoGit follows a structured branching strategy designed to maintain code qualit
 - **Naming**: `main`
 
 #### `dev`
+
 - **Purpose**: Integration branch for completed features
 - **Protection**: Protected, requires PR approval
 - **Testing**: All features must pass CI/CD before merging
@@ -37,10 +41,10 @@ Feature branches are created for major features or tasks from the roadmap.
 #### Feature Branch Workflow
 
 1. Create feature branch from `dev`
-2. Break down task into subtasks
-3. Create sub-feature branches for each subtask
-4. Merge sub-features into feature branch
-5. Create PR from feature branch to `dev`
+1. Break down task into subtasks
+1. Create sub-feature branches for each subtask
+1. Merge sub-features into feature branch
+1. Create PR from feature branch to `dev`
 
 ### Sub-Feature Branches
 
@@ -68,6 +72,7 @@ Work branches are for individual work items or bug fixes within a subtask.
 ### Supporting Branches
 
 #### Hotfix Branches
+
 - **Purpose**: Critical bug fixes for production
 - **Source**: Created from `main`
 - **Target**: Merge into both `main` and `dev`
@@ -75,6 +80,7 @@ Work branches are for individual work items or bug fixes within a subtask.
 - **Lifespan**: Very short-lived
 
 #### Release Branches
+
 - **Purpose**: Prepare release from dev to main
 - **Source**: Created from `dev`
 - **Target**: Merge into `main` (and back-merge into `dev`)
@@ -99,24 +105,26 @@ main
 ### Workflow Steps
 
 1. **Task Identification**: Identify the next task from `TASK_TRACKER.md`.
-2. **Feature Branch Creation**: Create a parent feature branch from `dev`.
+1. **Feature Branch Creation**: Create a parent feature branch from `dev`.
    ```bash
    git checkout dev
    git pull origin dev
    git checkout -b feature/<task-name>
    ```
-3. **Sub-Feature Branching**: For each subtask, create a branch from the parent feature branch.
+1. **Sub-Feature Branching**: For each subtask, create a branch from the parent feature branch.
    ```bash
    git checkout feature/<task-name>
    git checkout -b feature/<task-name>/<subtask-name>
    ```
-4. **Development and Local Integration**:
+1. **Development and Local Integration**:
    - Complete work in the sub-feature branch.
    - Merge sub-feature branch back into the parent feature branch.
    - Delete the sub-feature branch locally and remotely.
-5. **Final Integration**: Once all subtasks are merged into the parent feature branch and validated, create a PR from the parent feature branch to `dev`.
+1. **Final Integration**: Once all subtasks are merged into the parent feature branch and validated,
+   create a PR from the parent feature branch to `dev`.
 
-> **Note**: This hierarchical approach ensures that `dev` remains clean and that complex features are fully integrated and tested as a unit before being merged into the main development line.
+> **Note**: This hierarchical approach ensures that `dev` remains clean and that complex features
+> are fully integrated and tested as a unit before being merged into the main development line.
 
 ### Dev to Main Release
 
@@ -138,6 +146,7 @@ git push origin dev
 ## Branch Protection Rules
 
 ### `main` Branch
+
 - Require pull request reviews (2 approvals)
 - Require status checks to pass
 - Require branches to be up to date
@@ -146,6 +155,7 @@ git push origin dev
 - Require signed commits
 
 ### `dev` Branch
+
 - Require pull request reviews (1 approval)
 - Require status checks to pass
 - Require branches to be up to date
@@ -153,6 +163,7 @@ git push origin dev
 - No deletions
 
 ### Feature Branches
+
 - Require pull request reviews (1 approval)
 - Require status checks to pass
 - Allow force pushes (for rebasing)
@@ -163,6 +174,7 @@ git push origin dev
 ### PR Types and Templates
 
 #### 1. Feature to Dev PR
+
 - **Title**: `feat: [Feature Name] - [Brief Description]`
 - **Template**: Feature PR template
 - **Requirements**:
@@ -172,6 +184,7 @@ git push origin dev
   - All sub-features merged
 
 #### 2. Sub-Feature to Feature PR
+
 - **Title**: `feat(<feature>): [Subtask Name] - [Brief Description]`
 - **Template**: Sub-feature PR template
 - **Requirements**:
@@ -180,6 +193,7 @@ git push origin dev
   - All work branches merged
 
 #### 3. Work to Sub-Feature PR
+
 - **Title**: `fix/feat(<subtask>): [Work Item Description]`
 - **Template**: Work PR template
 - **Requirements**:
@@ -187,6 +201,7 @@ git push origin dev
   - Code review approval
 
 #### 4. Dev to Main PR
+
 - **Title**: `release: v[X.Y.Z] - [Release Name]`
 - **Template**: Release PR template
 - **Requirements**:
@@ -199,13 +214,14 @@ git push origin dev
 ### PR Description Requirements
 
 All PRs must include:
+
 1. **Summary**: What changes are included
-2. **Motivation**: Why these changes are needed
-3. **Testing**: How changes were tested
-4. **Documentation**: What docs were updated
-5. **Breaking Changes**: Any breaking changes
-6. **Dependencies**: New dependencies added
-7. **Checklist**: Completion checklist
+1. **Motivation**: Why these changes are needed
+1. **Testing**: How changes were tested
+1. **Documentation**: What docs were updated
+1. **Breaking Changes**: Any breaking changes
+1. **Dependencies**: New dependencies added
+1. **Checklist**: Completion checklist
 
 ## Commit Message Conventions
 
@@ -220,6 +236,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 ### Types
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -231,6 +248,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `ci`: CI/CD changes
 
 ### Examples
+
 ```
 feat(gpu): add NVIDIA GPU detection service
 
@@ -252,52 +270,48 @@ Fixes #456
 ## Branch Lifecycle
 
 ### Creation
+
 1. Ensure base branch is up to date
-2. Create branch with proper naming convention
-3. Push to remote immediately
-4. Create tracking issue/card
+1. Create branch with proper naming convention
+1. Push to remote immediately
+1. Create tracking issue/card
 
 ### Development
+
 1. Make focused, atomic commits
-2. Push regularly to remote
-3. Keep branch up to date with base
-4. Rebase if needed (not merge)
+1. Push regularly to remote
+1. Keep branch up to date with base
+1. Rebase if needed (not merge)
 
 ### Completion
+
 1. Ensure all tests pass
-2. Update documentation
-3. Create pull request
-4. Address review comments
-5. Merge when approved
-6. Delete branch after merge
+1. Update documentation
+1. Create pull request
+1. Address review comments
+1. Merge when approved
+1. Delete branch after merge
 
 ## Best Practices
 
 ### Do's
-✅ Keep branches short-lived (< 2 weeks)
-✅ Make small, focused commits
-✅ Write descriptive commit messages
-✅ Keep branches up to date with base
-✅ Delete branches after merging
-✅ Use draft PRs for work in progress
-✅ Tag reviewers appropriately
-✅ Update CHANGELOG for features
+
+✅ Keep branches short-lived (< 2 weeks) ✅ Make small, focused commits ✅ Write descriptive commit
+messages ✅ Keep branches up to date with base ✅ Delete branches after merging ✅ Use draft PRs for
+work in progress ✅ Tag reviewers appropriately ✅ Update CHANGELOG for features
 
 ### Don'ts
-❌ Don't commit directly to main or dev
-❌ Don't create long-lived feature branches
-❌ Don't mix unrelated changes
-❌ Don't force push to shared branches
-❌ Don't merge without review
-❌ Don't leave stale branches
-❌ Don't merge with failing tests
-❌ Don't skip documentation updates
+
+❌ Don't commit directly to main or dev ❌ Don't create long-lived feature branches ❌ Don't mix
+unrelated changes ❌ Don't force push to shared branches ❌ Don't merge without review ❌ Don't leave
+stale branches ❌ Don't merge with failing tests ❌ Don't skip documentation updates
 
 ## Automation
 
 ### GitHub Actions
 
 We use GitHub Actions to automate:
+
 - Branch protection enforcement
 - Automated testing on PRs
 - Code quality checks
@@ -309,6 +323,7 @@ We use GitHub Actions to automate:
 ### Scripts
 
 Helper scripts available in `/scripts/`:
+
 - `create-feature-branch.sh` - Create feature branch structure
 - `sync-branches.sh` - Keep branches in sync
 - `cleanup-merged-branches.sh` - Remove merged branches
@@ -317,20 +332,23 @@ Helper scripts available in `/scripts/`:
 ## Troubleshooting
 
 ### Merge Conflicts
+
 1. Update your branch from base
-2. Resolve conflicts locally
-3. Test thoroughly
-4. Push resolved changes
+1. Resolve conflicts locally
+1. Test thoroughly
+1. Push resolved changes
 
 ### Diverged Branches
+
 1. Fetch latest from remote
-2. Rebase onto base branch
-3. Force push if needed (careful!)
+1. Rebase onto base branch
+1. Force push if needed (careful!)
 
 ### Accidental Commits to Wrong Branch
+
 1. Create correct branch from current position
-2. Reset original branch to proper state
-3. Cherry-pick commits to correct branch
+1. Reset original branch to proper state
+1. Cherry-pick commits to correct branch
 
 ## References
 
@@ -344,6 +362,7 @@ Helper scripts available in `/scripts/`:
 - **2025-12-21**: Initial branching strategy documented
 - **YYYY-MM-DD**: [Future updates]
 
----
+______________________________________________________________________
 
-*For questions about branching strategy, see [CONTRIBUTING.md](../CONTRIBUTING.md) or open a discussion.*
+*For questions about branching strategy, see [CONTRIBUTING.md](../CONTRIBUTING.md) or open a
+discussion.*

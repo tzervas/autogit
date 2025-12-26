@@ -7,4 +7,5 @@ Run with: python -m tools.tasker or ./tools/tasker.py
 
 if __name__ == "__main__":
     from tools.tasker.cli import main
+
     main()

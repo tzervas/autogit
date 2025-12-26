@@ -1,15 +1,11 @@
----
-name: Work PR (Work → Sub-Feature)
-about: Merge a work item into its parent sub-feature branch
-title: 'fix/feat([subtask]): [Work Item Description]'
-labels: work-item
----
+______________________________________________________________________
+
+## name: Work PR (Work → Sub-Feature) about: Merge a work item into its parent sub-feature branch title: 'fix/feat([subtask]): [Work Item Description]' labels: work-item
 
 ## 🎯 Work Item Overview
 
-**Parent Sub-Feature**: [Sub-feature name]
-**Work Item**: [Work item description]
-**Type**: [fix/feat/refactor/docs/test]
+**Parent Sub-Feature**: [Sub-feature name] **Work Item**: [Work item description] **Type**:
+[fix/feat/refactor/docs/test]
 
 ## 📝 What Changed
 
@@ -40,5 +36,4 @@ labels: work-item
 
 ## 🔗 Related
 
-Part of: [Sub-feature branch]
-Closes: #[issue] (if applicable)
+Part of: [Sub-feature branch] Closes: #[issue] (if applicable)

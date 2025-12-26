@@ -77,15 +77,15 @@ services:
         ]
 
     ports:
-      - "8080:80"    # HTTP (non-privileged port for rootless Docker)
-      - "8443:443"   # HTTPS (non-privileged port for rootless Docker)
-      - "2222:22"    # SSH (already non-privileged)
+    - "8080:80"      # HTTP (non-privileged port for rootless Docker)
+    - "8443:443"     # HTTPS (non-privileged port for rootless Docker)
+    - "2222:22"      # SSH (already non-privileged)
     volumes:
-      - ./data/gitlab/config:/etc/gitlab
-      - ./data/gitlab/logs:/var/log/gitlab
-      - ./data/gitlab/data:/var/opt/gitlab
+    - ./data/gitlab/config:/etc/gitlab
+    - ./data/gitlab/logs:/var/log/gitlab
+    - ./data/gitlab/data:/var/opt/gitlab
     networks:
-      - gitlab-network
+    - gitlab-network
     # Resource limits - RIGHT-SIZED: Based on actual usage patterns
     # Peak observed: 1-2 cores during migrations, 3-4GB RAM during initialization
     # Allocating 3x peak for safety margin
@@ -110,12 +110,12 @@ services:
     container_name: autogit-runner
     restart: unless-stopped
     depends_on:
-      - gitlab
+    - gitlab
     volumes:
-      - ./data/gitlab-runner/config:/etc/gitlab-runner
-      - /var/run/docker.sock:/var/run/docker.sock
+    - ./data/gitlab-runner/config:/etc/gitlab-runner
+    - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - gitlab-network
+    - gitlab-network
 
 networks:
   gitlab-network:

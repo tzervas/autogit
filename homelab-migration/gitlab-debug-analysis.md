@@ -2,78 +2,88 @@
 
 ## Executive Summary
 
-**Container Status:** ✅ Running (25+ minutes uptime)  
-**Health Status:** ⚠️ **UNHEALTHY** - Rails not fully initialized  
-**Root Cause:** Puma (Rails app server) failed to load  
+**Container Status:** ✅ Running (25+ minutes uptime)\
+**Health Status:** ⚠️ **UNHEALTHY** - Rails not fully initialized\
+**Root Cause:** Puma (Rails app server) failed to load\
 **PostgreSQL Tuning:** ❌ **NOT APPLIED** - Using old docker-compose.yml
 
----
+______________________________________________________________________
 
 ## Critical Findings
 
 ### 1. **Wrong Docker Compose File in Use**
 
-The homelab is using `/home/kang/homelab-gitlab/docker-compose.yml` which **does NOT contain** our PostgreSQL tuning fixes.
+The homelab is using `/home/kang/homelab-gitlab/docker-compose.yml` which **does NOT contain** our
+PostgreSQL tuning fixes.
 
 **Evidence:**
+
 - No `postgresql['shared_buffers']` or tuning parameters found in logs
 - File timestamp: Dec 25 17:19 (before our fixes)
 - Container name: `autogit-git-server` (matches old config)
 
 **Our fixed files were deployed to:** `/home/kang/autogit-homelab/` (wrong directory!)
 
----
+______________________________________________________________________
 
 ### 2. **Puma Failed to Start**
 
 **Error Log:**
+
 ```
 2025-12-25_23:56:19.52254 bundler: failed to load command: puma (/opt/gitlab/embedded/bin/puma)
 from /opt/gitlab/embedded/lib/ruby/site_ruby/3.2.0/bundler/friendly_errors.rb:118:in `with_friendly_errors'
 ```
 
 **Symptoms:**
+
 - Workhorse repeatedly failing to connect to Rails socket
 - `dial unix /var/opt/gitlab/gitlab-rails/sockets/gitlab.socket: connect: connection refused`
 - Connection refused errors every 10 seconds
 
----
+______________________________________________________________________
 
 ### 3. **Database IS Working**
 
 **Good News:**
+
 - Database migrations running successfully
 - Background workers executing properly
 - No database timeout errors
 - PostgreSQL responsive (even without tuning)
 
 **Evidence:**
+
 ```
 "Database::BatchedBackgroundMigrationWorker JID-...: done: 0.037358 sec"
 "db_main_duration_s":0.001,"db_primary_duration_s":0.003
 ```
 
----
+______________________________________________________________________
 
 ## Root Cause Analysis
 
 ### **Problem:** Deployment used wrong directory
 
 **What happened:**
+
 1. We deployed fixed files to `/home/kang/autogit-homelab/`
-2. GitLab is actually running from `/home/kang/homelab-gitlab/`
-3. Container started with old docker-compose.yml (no PostgreSQL tuning)
-4. Puma crashed during initialization (likely resource constraints without tuning)
+1. GitLab is actually running from `/home/kang/homelab-gitlab/`
+1. Container started with old docker-compose.yml (no PostgreSQL tuning)
+1. Puma crashed during initialization (likely resource constraints without tuning)
 
 ### **Why Puma Failed:**
 
-Without PostgreSQL tuning, the database initialization likely consumed excessive memory/CPU, leaving insufficient resources for Puma to start. The exact Puma error is truncated in logs, but typical causes are:
+Without PostgreSQL tuning, the database initialization likely consumed excessive memory/CPU, leaving
+insufficient resources for Puma to start. The exact Puma error is truncated in logs, but typical
+causes are:
+
 - Out of memory
 - Config file errors
 - Missing dependencies
 - Database connection issues during boot
 
----
+______________________________________________________________________
 
 ## Fix Strategy
 
@@ -105,7 +115,7 @@ docker compose up -d
 docker compose logs -f gitlab
 ```
 
----
+______________________________________________________________________
 
 ### **Option 2: Use Rootless-Compatible Config**
 
@@ -125,7 +135,7 @@ cp docker-compose.rootless.yml docker-compose.yml
 docker compose up -d
 ```
 
----
+______________________________________________________________________
 
 ## PostgreSQL Tuning Verification
 
@@ -142,7 +152,7 @@ docker compose logs gitlab 2>&1 | grep -i "postgresql\['shared_buffers'\]"
 # ... (9 total parameters)
 ```
 
----
+______________________________________________________________________
 
 ## Expected Timeline (With Tuning)
 
@@ -152,18 +162,18 @@ docker compose logs gitlab 2>&1 | grep -i "postgresql\['shared_buffers'\]"
 - **~10 min:** Workhorse connects, health check passes
 - **~12 min:** Web UI accessible
 
----
+______________________________________________________________________
 
 ## Action Items
 
 1. ✅ **Deploy to correct directory** (`/home/kang/homelab-gitlab/`)
-2. ⏳ **Stop existing containers** (clear failed state)
-3. ⏳ **Start with fixed docker-compose.yml**
-4. ⏳ **Monitor for PostgreSQL tuning in logs**
-5. ⏳ **Verify Puma starts successfully**
-6. ⏳ **Test health endpoint:** `curl http://localhost:8080/-/health`
+1. ⏳ **Stop existing containers** (clear failed state)
+1. ⏳ **Start with fixed docker-compose.yml**
+1. ⏳ **Monitor for PostgreSQL tuning in logs**
+1. ⏳ **Verify Puma starts successfully**
+1. ⏳ **Test health endpoint:** `curl http://localhost:8080/-/health`
 
----
+______________________________________________________________________
 
 ## Files to Deploy
 
@@ -172,12 +182,13 @@ docker compose logs gitlab 2>&1 | grep -i "postgresql\['shared_buffers'\]"
 **To:** `/home/kang/homelab-gitlab/`
 
 Files:
+
 - `docker-compose.homelab.yml` → `docker-compose.yml` (main fix)
 - `docker-compose.rootless.yml` (alternative for rootless)
 - `deploy-fresh.sh` (deployment script)
 - `monitor-deployment.sh` (monitoring tool)
 
----
+______________________________________________________________________
 
 ## Success Criteria
 
@@ -188,11 +199,12 @@ Files:
 - ✅ Web UI accessible at http://localhost:8080 (or 192.168.1.170:8080)
 - ✅ PostgreSQL tuning visible in logs
 
----
+______________________________________________________________________
 
 ## Log Analysis Details
 
 **Container Info:**
+
 - ID: 5a11490dcebb
 - Image: gitlab/gitlab-ce:latest
 - Created: 25+ minutes ago
@@ -200,29 +212,32 @@ Files:
 - Ports: 2222:22, 8080:80, 8443:443
 
 **Database Activity:**
+
 - Background migrations: ✅ Running
 - DB connections: ✅ Working
 - Query performance: ✅ Fast (1-3ms)
 
 **Rails Status:**
+
 - Puma: ❌ Failed to load
 - Workhorse: ⚠️ Running but can't connect
 - Sidekiq: ✅ Running
 
 **Error Count:**
+
 - Connection refused: 100+ (repeating every 10s)
 - Puma load failure: 1 (critical)
 - No database errors
 
----
+______________________________________________________________________
 
 ## Next Steps
 
 1. Deploy fixed docker-compose.yml to `/home/kang/homelab-gitlab/`
-2. Restart containers cleanly
-3. Monitor logs for PostgreSQL tuning confirmation
-4. Wait ~10-12 minutes for full initialization
-5. Verify health endpoint
-6. Document results in SMOKE_TEST_RESULTS.md
+1. Restart containers cleanly
+1. Monitor logs for PostgreSQL tuning confirmation
+1. Wait ~10-12 minutes for full initialization
+1. Verify health endpoint
+1. Document results in SMOKE_TEST_RESULTS.md
 
 **Confidence Level:** HIGH - Database is healthy, issue is Puma startup without tuning

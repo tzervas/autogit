@@ -1,6 +1,6 @@
 # monitor-deployment.sh - DEPRECATED
 
-**Status:** Deprecated 2025-12-25  
+**Status:** Deprecated 2025-12-25
 **Replacement:** `homelab-migration/monitor-deployment.sh`
 
 This simple version (79 lines) has been replaced by the comprehensive monitoring

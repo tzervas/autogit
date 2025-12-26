@@ -44,7 +44,7 @@ scp SMOKE_TEST.md "${HOMELAB_USER}@${HOMELAB_HOST}:${HOMELAB_DIR}/"
 
 # Step 5: Check Docker Compose v2
 echo "🔍 Verifying Docker Compose v2..."
-if ! run_remote "docker compose version" 2>/dev/null; then
+if ! run_remote "docker compose version" 2> /dev/null; then
     echo "❌ Docker Compose v2 not found on homelab"
     echo "   Install: sudo apt install docker-compose-v2"
     exit 1
@@ -53,7 +53,7 @@ echo "✅ Docker Compose v2 available"
 
 # Step 6: Create deployment script on remote
 echo "📝 Creating remote deployment script..."
-ssh "${HOMELAB_USER}@${HOMELAB_HOST}" "cat > ${HOMELAB_DIR}/deploy.sh" <<'REMOTE_SCRIPT'
+ssh "${HOMELAB_USER}@${HOMELAB_HOST}" "cat > ${HOMELAB_DIR}/deploy.sh" << 'REMOTE_SCRIPT'
 #!/bin/bash
 set -euo pipefail
 

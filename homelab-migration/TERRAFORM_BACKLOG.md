@@ -1,25 +1,28 @@
 # Infrastructure as Code - Terraform/OpenTofu Implementation
 
-**Priority:** Post-MVP (After smoke test validation)  
-**Status:** Backlog  
+**Priority:** Post-MVP (After smoke test validation)\
+**Status:** Backlog\
 **Created:** 2025-12-25
 
----
+______________________________________________________________________
 
 ## Objective
 
-Convert validated homelab deployment configuration into Infrastructure as Code (IaC) using Terraform/OpenTofu for:
+Convert validated homelab deployment configuration into Infrastructure as Code (IaC) using
+Terraform/OpenTofu for:
+
 - Consistent deployments
 - Idempotent operations
 - Automated orchestration
 - Version-controlled infrastructure
 - Reproducible environments
 
----
+______________________________________________________________________
 
 ## Scope
 
 ### Phase 1: Core Infrastructure
+
 - [ ] Docker provider configuration
 - [ ] GitLab container resource definition
 - [ ] GitLab Runner container resource definition
@@ -27,6 +30,7 @@ Convert validated homelab deployment configuration into Infrastructure as Code (
 - [ ] Volume management (data persistence)
 
 ### Phase 2: Configuration Management
+
 - [ ] GitLab OMNIBUS_CONFIG as Terraform variables
 - [ ] PostgreSQL tuning parameters as variables
 - [ ] SSL certificate management (file provisioners or external data)
@@ -34,29 +38,35 @@ Convert validated homelab deployment configuration into Infrastructure as Code (
 - [ ] Port mapping configuration
 
 ### Phase 3: Monitoring & Health Checks
+
 - [ ] Container health check configuration
 - [ ] Readiness probes
 - [ ] Deployment timing outputs
 - [ ] Resource usage metrics
 
 ### Phase 4: Backup & Recovery
+
 - [ ] Automated backup schedules
 - [ ] Volume snapshot configuration
 - [ ] Restore procedures as modules
 - [ ] Data migration scripts
 
----
+______________________________________________________________________
 
 ## Design Principles
 
 ### 1. **Idempotency**
+
 All operations must be safely re-runnable:
+
 - No duplicate resource creation
 - State tracking for all components
 - Graceful handling of existing resources
 
 ### 2. **Modularity**
+
 Break into reusable modules:
+
 ```
 terraform/
 ├── modules/
@@ -73,7 +83,9 @@ terraform/
 ```
 
 ### 3. **Known-Good Configuration**
+
 Capture validated smoke test configuration:
+
 - PostgreSQL tuning (shared_buffers, work_mem, etc.)
 - Healthcheck timing (600s start_period)
 - Resource limits (from successful deployment)
@@ -81,18 +93,21 @@ Capture validated smoke test configuration:
 - Volume mounts
 
 ### 4. **Observability**
+
 Output useful information:
+
 - Container IDs
 - Network IPs
 - Volume paths
 - Health check status
 - Initialization timestamps
 
----
+______________________________________________________________________
 
 ## Implementation Tasks
 
 ### Task 1: Setup Terraform Structure
+
 ```hcl
 # main.tf
 terraform {
@@ -111,6 +126,7 @@ provider "docker" {
 ```
 
 ### Task 2: Convert docker-compose.homelab.yml to HCL
+
 ```hcl
 # modules/gitlab/main.tf
 resource "docker_image" "gitlab" {
@@ -121,15 +137,15 @@ resource "docker_image" "gitlab" {
 resource "docker_container" "gitlab" {
   name  = "autogit-git-server"
   image = docker_image.gitlab.image_id
-  
+
   restart = "unless-stopped"
-  
+
   hostname = var.gitlab_hostname
-  
+
   env = [
     "GITLAB_OMNIBUS_CONFIG=${local.omnibus_config}"
   ]
-  
+
   # PostgreSQL tuning from smoke test
   locals {
     omnibus_config = templatefile("${path.module}/omnibus_config.tpl", {
@@ -141,7 +157,7 @@ resource "docker_container" "gitlab" {
       sidekiq_concurrency = var.sidekiq_concurrency
     })
   }
-  
+
   # Health check with validated timing
   healthcheck {
     test     = ["CMD", "curl", "-f", "-k", "https://localhost/-/health"]
@@ -150,7 +166,7 @@ resource "docker_container" "gitlab" {
     retries  = 3
     start_period = "600s"  # From smoke test validation
   }
-  
+
   # Ports
   ports {
     internal = 80
@@ -164,7 +180,7 @@ resource "docker_container" "gitlab" {
     internal = 22
     external = 2222
   }
-  
+
   # Volumes
   volumes {
     host_path      = "${var.data_dir}/config"
@@ -178,7 +194,7 @@ resource "docker_container" "gitlab" {
     host_path      = "${var.data_dir}/data"
     container_path = "/var/opt/gitlab"
   }
-  
+
   networks_advanced {
     name = docker_network.gitlab_network.name
   }
@@ -186,6 +202,7 @@ resource "docker_container" "gitlab" {
 ```
 
 ### Task 3: PostgreSQL Tuning Module
+
 ```hcl
 # modules/postgresql/variables.tf
 variable "postgres_tuning" {
@@ -201,7 +218,7 @@ variable "postgres_tuning" {
     min_wal_size                = string
     random_page_cost            = number
   })
-  
+
   default = {
     # Validated from smoke test
     shared_buffers              = "256MB"
@@ -218,6 +235,7 @@ variable "postgres_tuning" {
 ```
 
 ### Task 4: Environment-Specific Variables
+
 ```hcl
 # environments/homelab/terraform.tfvars
 gitlab_hostname = "gitlab.vectorweight.com"
@@ -247,6 +265,7 @@ healthcheck_start_period = "600s"
 ```
 
 ### Task 5: Outputs for Monitoring
+
 ```hcl
 # outputs.tf
 output "gitlab_container_id" {
@@ -270,45 +289,51 @@ output "postgres_tuning_applied" {
 }
 ```
 
----
+______________________________________________________________________
 
 ## Migration Strategy
 
 ### Step 1: Validate Current Deployment
+
 - [ ] Complete smoke test with docker-compose.homelab.yml
 - [ ] Document successful configuration
 - [ ] Record initialization times
 - [ ] Capture resource usage
 
 ### Step 2: Create Terraform Equivalent
+
 - [ ] Convert docker-compose.homelab.yml to Terraform HCL
 - [ ] Preserve all tuning parameters
 - [ ] Test in isolated environment
 
 ### Step 3: Parallel Run
+
 - [ ] Deploy with Terraform alongside docker-compose
 - [ ] Compare configurations
 - [ ] Validate identical behavior
 
 ### Step 4: Cutover
+
 - [ ] Transition from docker-compose to Terraform
 - [ ] Update documentation
 - [ ] Archive docker-compose.homelab.yml as reference
 
----
+______________________________________________________________________
 
 ## OpenTofu Compatibility
 
 All code should be compatible with both:
+
 - **Terraform** (HashiCorp)
 - **OpenTofu** (CNCF/Linux Foundation fork)
 
 Use OpenTofu-compatible syntax:
+
 - Standard HCL features only
 - No proprietary Terraform Cloud features
 - Open-source provider ecosystem
 
----
+______________________________________________________________________
 
 ## Success Metrics
 
@@ -319,19 +344,19 @@ Use OpenTofu-compatible syntax:
 - [ ] All PostgreSQL tuning applied correctly
 - [ ] Health checks passing consistently
 
----
+______________________________________________________________________
 
 ## Benefits
 
 1. **Consistency:** Same deployment every time
-2. **Version Control:** Infrastructure changes tracked in git
-3. **Rollback:** Easy revert to previous configurations
-4. **Documentation:** Code is documentation
-5. **Scalability:** Easy to add new environments
-6. **Automation:** CI/CD integration ready
-7. **Drift Detection:** Terraform state tracks actual vs desired
+1. **Version Control:** Infrastructure changes tracked in git
+1. **Rollback:** Easy revert to previous configurations
+1. **Documentation:** Code is documentation
+1. **Scalability:** Easy to add new environments
+1. **Automation:** CI/CD integration ready
+1. **Drift Detection:** Terraform state tracks actual vs desired
 
----
+______________________________________________________________________
 
 ## Dependencies
 
@@ -340,7 +365,7 @@ Use OpenTofu-compatible syntax:
 - Resource requirements documented
 - Timing parameters confirmed
 
----
+______________________________________________________________________
 
 ## Future Enhancements
 
@@ -352,6 +377,6 @@ Use OpenTofu-compatible syntax:
 - [ ] Blue-green deployment support
 - [ ] Canary deployment capability
 
----
+______________________________________________________________________
 
 **Next Step:** Complete smoke test, validate configuration, then begin Terraform conversion.

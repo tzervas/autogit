@@ -1,15 +1,16 @@
 # Performance Optimization - v2
 
-**Date:** December 25, 2025  
+**Date:** December 25, 2025\
 **Version:** High-Performance Configuration
 
----
+______________________________________________________________________
 
 ## 🚀 Optimization Changes
 
 ### CPU & Memory Resources
 
 **Added Docker resource limits:**
+
 ```yaml
 deploy:
   resources:
@@ -24,11 +25,12 @@ shm_size: '2gb'        # Increased shared memory for PostgreSQL
 
 **Impact:** Ensures GitLab can use sufficient resources during initialization
 
----
+______________________________________________________________________
 
 ### Application Workers (4x Increase)
 
 **Before:**
+
 ```yaml
 gitlab_rails['db_pool'] = 10
 unicorn['worker_processes'] = 1
@@ -36,6 +38,7 @@ sidekiq['concurrency'] = 2
 ```
 
 **After:**
+
 ```yaml
 gitlab_rails['db_pool'] = 20           # 2x more DB connections
 unicorn['worker_processes'] = 4        # 4x more unicorn workers
@@ -45,11 +48,12 @@ puma['worker_processes'] = 4           # 4 puma workers (new)
 
 **Impact:** Faster request handling, faster background job processing
 
----
+______________________________________________________________________
 
 ### PostgreSQL Tuning (2-4x Increase)
 
 **Before:**
+
 ```yaml
 shared_buffers = "256MB"
 effective_cache_size = "1GB"
@@ -59,6 +63,7 @@ max_wal_size = "1GB"
 ```
 
 **After:**
+
 ```yaml
 shared_buffers = "512MB"                        # 2x - More data cached in memory
 effective_cache_size = "2GB"                    # 2x - Better query planning
@@ -74,18 +79,20 @@ max_parallel_workers_per_gather = 4             # 4 workers per query
 max_parallel_maintenance_workers = 4            # Parallel index builds
 ```
 
-**Impact:** 
+**Impact:**
+
 - Database migrations: **3-5x faster**
 - Index creation: **4x faster** (parallel workers)
 - Query execution: **2-3x faster** (more cache)
 
----
+______________________________________________________________________
 
 ## 📊 Expected Performance Improvements
 
 ### Initialization Timeline
 
 **V1 (Original):**
+
 - PostgreSQL ready: ~5 minutes
 - Migrations complete: ~8 minutes
 - Puma ready: ~10 minutes
@@ -93,6 +100,7 @@ max_parallel_maintenance_workers = 4            # Parallel index builds
 - **Total: 12-15 minutes**
 
 **V2 (Optimized):**
+
 - PostgreSQL ready: ~2 minutes (2.5x faster)
 - Migrations complete: ~4 minutes (2x faster)
 - Puma ready: ~5 minutes (2x faster)
@@ -101,23 +109,25 @@ max_parallel_maintenance_workers = 4            # Parallel index builds
 
 **Expected speedup: 50% faster initialization!**
 
----
+______________________________________________________________________
 
 ## 🔧 Resource Requirements
 
 **Minimum System:**
+
 - CPU: 4 cores (reserved)
 - RAM: 4GB (reserved)
 - Disk: 10GB
 
 **Recommended System:**
+
 - CPU: 8+ cores (can use up to 8)
 - RAM: 8GB+ (can use up to 8GB)
 - Disk: 20GB+ (for data growth)
 
 **Your Homelab:** 125.7GB RAM available - ✅ Plenty of headroom!
 
----
+______________________________________________________________________
 
 ## 🎯 Files Updated
 
@@ -125,12 +135,13 @@ max_parallel_maintenance_workers = 4            # Parallel index builds
 - ✅ `docker-compose.homelab.yml` - Standard version
 
 Both files now have:
+
 - Resource limits/reservations
 - Increased worker counts
 - Aggressive PostgreSQL tuning
 - Parallel processing enabled
 
----
+______________________________________________________________________
 
 ## 🚀 Deployment Commands
 
@@ -165,52 +176,58 @@ scp docker-compose.rootless.yml kang@192.168.1.170:/home/kang/homelab-gitlab/doc
 ssh homelab "export DOCKER_HOST=unix:///run/user/1000/docker.sock && cd /home/kang/homelab-gitlab && docker compose down && docker compose up -d"
 ```
 
----
+______________________________________________________________________
 
 ## 📈 Monitoring Performance
 
 ### Check Resource Usage:
+
 ```bash
 docker stats autogit-git-server
 ```
 
 **Expect to see:**
+
 - CPU: 200-400% during init (multiple cores!)
 - Memory: 4-6GB during init
 - Memory: 2-3GB after stable
 
 ### Check PostgreSQL Tuning:
+
 ```bash
 docker logs autogit-git-server 2>&1 | grep "shared_buffers\|parallel"
 ```
 
 **Should show:**
+
 ```
 +shared_buffers = 512MB
 +max_parallel_workers = 8
 ```
 
----
+______________________________________________________________________
 
 ## ⚠️ Notes
 
 1. **Shared Memory:** Set to 2GB to support PostgreSQL's increased buffers
-2. **Parallel Workers:** Requires PostgreSQL 9.6+ (GitLab CE latest has 13+) ✅
-3. **CPU Reservation:** Guarantees 4 cores minimum, uses up to 8
-4. **Memory Limit:** Hard cap at 8GB to prevent OOM on shared systems
+1. **Parallel Workers:** Requires PostgreSQL 9.6+ (GitLab CE latest has 13+) ✅
+1. **CPU Reservation:** Guarantees 4 cores minimum, uses up to 8
+1. **Memory Limit:** Hard cap at 8GB to prevent OOM on shared systems
 
----
+______________________________________________________________________
 
 ## 🎓 Performance Tuning Lessons
 
 ### Why These Numbers?
 
 **Maintenance Work Mem (256MB):**
+
 - Database migrations create/rebuild indexes
 - More memory = faster index operations
 - 4x increase = 4x faster migrations
 
 **Parallel Workers (8):**
+
 - Modern CPUs have 4-8+ cores
 - PostgreSQL can parallelize:
   - Index creation (maintenance workers)
@@ -218,17 +235,19 @@ docker logs autogit-git-server 2>&1 | grep "shared_buffers\|parallel"
   - Background tasks (worker processes)
 
 **Puma Workers (4):**
+
 - One worker per CPU core is optimal
 - 4 workers = handle 4 requests simultaneously
 - Faster web UI response during init
 
 **Sidekiq Concurrency (10):**
+
 - Background job processing
 - GitLab queues 100+ jobs during init
 - 10 threads = process 10 jobs at once
 - 5x increase = much faster job completion
 
----
+______________________________________________________________________
 
 ## ✅ Validation Checklist
 
@@ -242,6 +261,6 @@ After redeployment:
 - [ ] Health check passes
 - [ ] Web UI responsive
 
----
+______________________________________________________________________
 
 **Ready to deploy the optimized configuration!** 🚀

@@ -4,8 +4,13 @@
 
 set -euo pipefail
 
+# Configuration
+HOMELAB_USER="${HOMELAB_USER:-kang}"
+HOMELAB_HOST="${HOMELAB_HOST:-192.168.1.170}"
+NON_INTERACTIVE="${NON_INTERACTIVE:-false}"
+
 # Set Docker socket for rootless
-export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+export DOCKER_HOST="${DOCKER_HOST:-unix:///run/user/$(id -u)/docker.sock}"
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="gitlab-debug-${TIMESTAMP}.log"
@@ -32,6 +37,9 @@ docker compose logs --tail=500 gitlab 2>&1 | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 echo "✅ Logs saved to: $LOG_FILE"
 echo "📦 File size: $(du -h "$LOG_FILE" | cut -f1)"
-echo ""
-echo "To download to your local machine:"
-echo "scp kang@192.168.1.170:/home/kang/homelab-gitlab/$LOG_FILE ."
+
+if [[ "$NON_INTERACTIVE" != "true" ]]; then
+    echo ""
+    echo "To download to your local machine:"
+    echo "scp ${HOMELAB_USER}@${HOMELAB_HOST}:$(pwd)/$LOG_FILE ."
+fi

@@ -237,7 +237,7 @@ echo "   grep 'pattern' $LOG_DIR/gitlab-full.log"
 echo ""
 
 # Offer to view summary
-if [[ $NON_INTERACTIVE != "true" ]] && [[ -t 0 ]]; then
+if [[ "$NON_INTERACTIVE" != "true" ]] && [[ -t 0 ]]; then
     read -p "View ANALYSIS_SUMMARY.md now? (y/n): " -n 1 -r
     echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then

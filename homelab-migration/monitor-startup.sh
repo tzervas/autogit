@@ -6,6 +6,7 @@ set -euo pipefail
 
 # Configuration
 CONTAINER_NAME="${CONTAINER_NAME:-autogit-git-server}"
+HOMELAB_HOST="${HOMELAB_HOST:-192.168.1.170}"
 export DOCKER_HOST="${DOCKER_HOST:-unix:///run/user/1000/docker.sock}"
 
 echo "🚀 GitLab Startup Monitor"
@@ -65,7 +66,7 @@ while true; do
         echo ""
         echo "Test with:"
         echo "  curl http://localhost:8080/-/health"
-        echo "  curl http://192.168.1.170:8080/-/health"
+        echo "  curl http://${HOMELAB_HOST}:8080/-/health"
         break
     fi
 

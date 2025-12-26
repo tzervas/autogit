@@ -1,5 +1,7 @@
 # Branch Index & Cleanup Guide
 
+**Last Updated**: 2025-12-25
+
 ## Active Development Branches
 
 ### 🟢 KEEP - Core Branches
@@ -8,12 +10,16 @@
 | `main` | Production stable | Protected |
 | `dev` | Integration branch | Protected |
 
-### 🟢 KEEP - Feature Branches (Active Work)
+### 🟢 KEEP - New Feature Branches (Ready for PR)
 
-| Branch | Purpose | Key Files | Status | Action |
-|--------|---------|-----------|--------|--------|
-| `feature/autogit-core-cli-v0.1.0` | Rust CLI rewrite | `autogit-core/` | ✅ Complete | → PR to dev |
-| `feature/homelab-migration-recovery` | GitLab homelab deployment | `homelab-migration/` | 🔄 Active | Split work |
+| Branch | Purpose | Key Files | Status |
+|--------|---------|-----------|--------|
+| `feature/autogit-core-cli-v0.1.0` | Rust CLI rewrite | `autogit-core/` | ✅ Ready for PR |
+| `feature/homelab-gitlab-deployment` | GitLab CE deployment | `homelab-migration/` compose & deploy | ✅ Ready for PR |
+| `feature/observability-stack` | Monitoring & logging | `observability/` | ✅ Ready for PR |
+| `feature/docs-architecture` | Architecture docs | `docs/architecture/`, `docs/development/` | ✅ Ready for PR |
+| `feature/dev-tooling` | Dev environment | `.editorconfig`, `Makefile`, etc | ✅ Ready for PR |
+| `feature/github-workflows` | CI organization | `.github/chatmodes/`, `.github/workflows/archive/` | ✅ Ready for PR |
 
 ### 🟡 REVIEW - May Have Useful Work
 
@@ -23,6 +29,7 @@
 | `feature/homelab-deployment-terraform-config` | Terraform setup | `infrastructure/terraform/` | Review, likely merge |
 | `feature/multi-arch-support` | Multi-arch images | Docker configs | Review |
 | `feature/multi-arch-support-arm64-native` | ARM64 support | Dockerfile changes | Review |
+| `feature/homelab-migration-recovery` | Recovery session | Superseded by new branches | Archive |
 
 ### 🔴 PRUNE - Stale/Superseded
 

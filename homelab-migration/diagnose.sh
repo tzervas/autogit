@@ -3,10 +3,11 @@
 # Captures all information needed to diagnose initialization vs. real issues
 # shellcheck disable=SC2129  # Multiple heredocs to same file is intentional for report generation
 
-HOMELAB_USER="kang"
-HOMELAB_HOST="192.168.1.170"
-DOCKER_SOCK="unix:///run/user/1000/docker.sock"
-CONTAINER_NAME="autogit-git-server"
+# Configuration - can be overridden via environment variables
+HOMELAB_USER="${HOMELAB_USER:-kang}"
+HOMELAB_HOST="${HOMELAB_HOST:-192.168.1.170}"
+DOCKER_SOCK="${DOCKER_SOCK:-unix:///run/user/1000/docker.sock}"
+CONTAINER_NAME="${CONTAINER_NAME:-autogit-git-server}"
 OUTPUT_DIR="./debug-$(date +%Y%m%d-%H%M%S)"
 
 echo "🔍 GitLab Deployment Diagnostics"
@@ -24,7 +25,7 @@ run_diagnostic() {
     local command=$3
 
     echo "📊 $description..."
-    ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && $command" >"$OUTPUT_DIR/$name.txt" 2>&1
+    ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && $command" > "$OUTPUT_DIR/$name.txt" 2>&1
     echo "   ✅ Saved to $name.txt"
 }
 
@@ -121,7 +122,7 @@ echo ""
 
 SUMMARY_FILE="$OUTPUT_DIR/00-ANALYSIS-SUMMARY.md"
 
-cat >"$SUMMARY_FILE" <<'EOF'
+cat > "$SUMMARY_FILE" << EOF
 # GitLab Deployment Diagnostic Analysis
 
 **Date:** $(date)
@@ -139,7 +140,7 @@ UPTIME=$(ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} 
 CPU_MEM=$(ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && docker stats --no-stream ${CONTAINER_NAME} --format 'CPU: {{.CPUPerc}} | Memory: {{.MemUsage}}'")
 RESTART_COUNT=$(ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && docker inspect ${CONTAINER_NAME} --format='{{.RestartCount}}'")
 
-cat >>"$SUMMARY_FILE" <<EOF
+cat >> "$SUMMARY_FILE" << EOF
 - **Uptime:** $UPTIME
 - **Resources:** $CPU_MEM
 - **Restart Count:** $RESTART_COUNT
@@ -150,30 +151,30 @@ EOF
 
 # Check for PostgreSQL ready
 if ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && docker logs ${CONTAINER_NAME} 2>&1 | grep -q 'database system is ready to accept connections'"; then
-    echo "- ✅ PostgreSQL is ready" >>"$SUMMARY_FILE"
+    echo "- ✅ PostgreSQL is ready" >> "$SUMMARY_FILE"
 else
-    echo "- ⏳ PostgreSQL is initializing" >>"$SUMMARY_FILE"
+    echo "- ⏳ PostgreSQL is initializing" >> "$SUMMARY_FILE"
 fi
 
 # Check for Puma
 if ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && docker exec ${CONTAINER_NAME} test -S /var/opt/gitlab/gitlab-rails/sockets/gitlab.socket 2>/dev/null"; then
-    echo "- ✅ Puma socket exists" >>"$SUMMARY_FILE"
+    echo "- ✅ Puma socket exists" >> "$SUMMARY_FILE"
 else
-    echo "- ⏳ Puma socket not created yet (Rails app still loading)" >>"$SUMMARY_FILE"
+    echo "- ⏳ Puma socket not created yet (Rails app still loading)" >> "$SUMMARY_FILE"
 fi
 
 # Check for errors
 ERROR_COUNT=$(ssh ${HOMELAB_USER}@${HOMELAB_HOST} "export DOCKER_HOST=${DOCKER_SOCK} && docker logs --tail=500 ${CONTAINER_NAME} 2>&1 | grep -iE 'fatal|exception' | grep -v 'error.html\|\.erb\|\.rb' | wc -l")
-echo "- **Error Count (last 500 lines):** $ERROR_COUNT" >>"$SUMMARY_FILE"
+echo "- **Error Count (last 500 lines):** $ERROR_COUNT" >> "$SUMMARY_FILE"
 
 # Check health endpoint
 if ssh ${HOMELAB_USER}@${HOMELAB_HOST} "curl -s -m 2 http://localhost:8080/-/health 2>&1 | grep -q 'ok'"; then
-    echo "- ✅ Health endpoint is responding" >>"$SUMMARY_FILE"
+    echo "- ✅ Health endpoint is responding" >> "$SUMMARY_FILE"
 else
-    echo "- ⏳ Health endpoint not ready (expected during initialization)" >>"$SUMMARY_FILE"
+    echo "- ⏳ Health endpoint not ready (expected during initialization)" >> "$SUMMARY_FILE"
 fi
 
-cat >>"$SUMMARY_FILE" <<'EOF'
+cat >> "$SUMMARY_FILE" << 'EOF'
 
 ---
 
@@ -183,7 +184,7 @@ EOF
 
 # Determine status
 if [ "$RESTART_COUNT" -gt 0 ]; then
-    cat >>"$SUMMARY_FILE" <<'EOF'
+    cat >> "$SUMMARY_FILE" << 'EOF'
 ### ⚠️  Container Has Restarted
 
 The container has restarted, which indicates a potential issue.
@@ -197,7 +198,7 @@ EOF
 else
     # Check uptime
     if echo "$UPTIME" | grep -qE "seconds|minute"; then
-        cat >>"$SUMMARY_FILE" <<'EOF'
+        cat >> "$SUMMARY_FILE" << 'EOF'
 ### ⏳ Early Initialization (< 2 minutes)
 
 Container is in early initialization phase.
@@ -211,7 +212,7 @@ Container is in early initialization phase.
 
 EOF
     elif echo "$UPTIME" | grep -qE "2.*minute|3.*minute"; then
-        cat >>"$SUMMARY_FILE" <<'EOF'
+        cat >> "$SUMMARY_FILE" << 'EOF'
 ### ⏳ Mid Initialization (2-3 minutes)
 
 Container is in mid-initialization phase.
@@ -226,7 +227,7 @@ Container is in mid-initialization phase.
 
 EOF
     elif echo "$UPTIME" | grep -qE "[4-9].*minute"; then
-        cat >>"$SUMMARY_FILE" <<'EOF'
+        cat >> "$SUMMARY_FILE" << 'EOF'
 ### ⏳ Late Initialization (4+ minutes)
 
 Container should be nearly ready or experiencing issues.
@@ -240,7 +241,7 @@ EOF
     fi
 fi
 
-cat >>"$SUMMARY_FILE" <<'EOF'
+cat >> "$SUMMARY_FILE" << 'EOF'
 
 ---
 
@@ -264,9 +265,9 @@ Check `02-resource-usage.txt` for current resource consumption.
 
 EOF
 
-echo "- **Current:** $CPU_MEM" >>"$SUMMARY_FILE"
+echo "- **Current:** $CPU_MEM" >> "$SUMMARY_FILE"
 
-cat >>"$SUMMARY_FILE" <<'EOF'
+cat >> "$SUMMARY_FILE" << 'EOF'
 
 ---
 

@@ -4,12 +4,14 @@
 
 set -euo pipefail
 
-export DOCKER_HOST=unix:///run/user/1000/docker.sock
+# Configuration
+CONTAINER_NAME="${CONTAINER_NAME:-autogit-git-server}"
+export DOCKER_HOST="${DOCKER_HOST:-unix:///run/user/1000/docker.sock}"
 
 echo "🚀 GitLab Startup Monitor"
 echo "========================="
 echo ""
-echo "Monitoring container: autogit-git-server"
+echo "Monitoring container: $CONTAINER_NAME"
 echo "Expected milestones:"
 echo "  ~2 min: PostgreSQL ready"
 echo "  ~5 min: Database migrations"
@@ -31,11 +33,11 @@ while true; do
     echo "⏱️  $(printf '%02d:%02d' $MINUTES $SECONDS) - Checking status..."
 
     # Check container health
-    HEALTH=$(docker inspect --format='{{.State.Health.Status}}' autogit-git-server 2>/dev/null || echo "no-healthcheck")
+    HEALTH=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME" 2> /dev/null || echo "no-healthcheck")
     echo "   Health: $HEALTH"
 
     # Check for key milestones in logs
-    RECENT_LOGS=$(docker logs --tail=50 autogit-git-server 2>&1)
+    RECENT_LOGS=$(docker logs --tail=50 "$CONTAINER_NAME" 2>&1)
 
     if echo "$RECENT_LOGS" | grep -q "database system is ready to accept connections"; then
         echo "   ✅ PostgreSQL is ready!"

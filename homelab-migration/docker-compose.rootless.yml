@@ -1,0 +1,128 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: autogit-git-server
+    restart: unless-stopped
+    hostname: 'gitlab.vectorweight.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # External URL - Use standard port 80 internally, Docker maps to 8080 externally
+        external_url 'http://gitlab.vectorweight.com'
+
+        # Configure Puma to use unix socket only (not TCP port)
+        puma['bind'] = 'unix:///var/opt/gitlab/gitlab-rails/sockets/gitlab.socket'
+        puma['port'] = nil
+
+        # SSL Configuration (optional - can enable after testing)
+        # nginx['ssl_certificate'] = "/etc/gitlab/ssl/gitlab.vectorweight.com.crt"
+        # nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.vectorweight.com.key"
+        # nginx['ssl_protocols'] = "TLSv1.2 TLSv1.3"
+
+        # Disable HTTPS redirect for testing
+        nginx['redirect_http_to_https'] = false
+
+        # Disable unnecessary services for homelab
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        gitlab_rails['time_zone'] = 'UTC'
+
+        # Performance optimizations - RIGHT-SIZED: Based on 12 core allocation
+        gitlab_rails['db_pool'] = 30             # 2.5x cores
+        unicorn['worker_processes'] = 4          # ~1 per 3 cores
+        sidekiq['concurrency'] = 12              # 1 per core
+        puma['worker_processes'] = 4             # ~1 per 3 cores
+        puma['max_threads'] = 8                  # 2 threads per worker
+
+        # Storage optimization
+        gitlab_rails['shared_path'] = '/var/opt/gitlab/gitlab-rails/shared'
+        gitlab_rails['uploads_storage_path'] = '/var/opt/gitlab/gitlab-rails/shared'
+        gitlab_rails['artifacts_enabled'] = false
+        gitlab_rails['lfs_enabled'] = true
+
+        # Security settings
+        gitlab_rails['session_expire_delay'] = 604800  # 7 days
+        gitlab_rails['password_authentication_enabled_for_web'] = true
+        gitlab_rails['password_authentication_enabled_for_git'] = true
+
+        # Registry settings (disabled for now)
+        registry['enable'] = false
+
+        # Monitoring (disabled for homelab)
+        prometheus_monitoring['enable'] = false
+        gitlab_exporter['enable'] = false
+
+        # Email (disabled)
+        gitlab_rails['smtp_enable'] = false
+
+        # PostgreSQL Performance Tuning - RIGHT-SIZED for 12GB allocation
+        postgresql['shared_buffers'] = "2GB"             # 16% of allocation (standard ratio)
+        postgresql['effective_cache_size'] = "8GB"       # 66% of allocation
+        postgresql['work_mem'] = "32MB"                  # Per-operation memory
+        postgresql['maintenance_work_mem'] = "1GB"       # Large for fast migrations
+        postgresql['checkpoint_completion_target'] = 0.9
+        postgresql['wal_buffers'] = "64MB"               # WAL buffer size
+        postgresql['max_wal_size'] = "4GB"               # Minimize checkpoints
+        postgresql['min_wal_size'] = "1GB"               # Higher minimum
+        postgresql['random_page_cost'] = 1.1
+        postgresql['max_worker_processes'] = 12          # Match CPU allocation
+        postgresql['max_parallel_workers'] = 8           # Parallel query workers
+        postgresql['max_parallel_workers_per_gather'] = 4  # Workers per query
+        postgresql['max_parallel_maintenance_workers'] = 4  # Parallel index builds
+        postgresql['effective_io_concurrency'] = 200     # SSD optimization
+
+        # Git settings
+        gitlab_shell['git_timeout'] = 800
+        gitaly['concurrency'] = [
+          { 'rpc' => "/gitaly.SmartHTTPService/PostReceivePack", 'max_concurrency' => 20 },
+          { 'rpc' => "/gitaly.SmartHTTPService/PostUploadPack", 'max_concurrency' => 20 }
+        ]
+
+    ports:
+      - "8080:80"    # HTTP (non-privileged port for rootless Docker)
+      - "8443:443"   # HTTPS (non-privileged port for rootless Docker)
+      - "2222:22"    # SSH (already non-privileged)
+    volumes:
+      - ./data/gitlab/config:/etc/gitlab
+      - ./data/gitlab/logs:/var/log/gitlab
+      - ./data/gitlab/data:/var/opt/gitlab
+    networks:
+      - gitlab-network
+    # Resource limits - RIGHT-SIZED: Based on actual usage patterns
+    # Peak observed: 1-2 cores during migrations, 3-4GB RAM during initialization
+    # Allocating 3x peak for safety margin
+    deploy:
+      resources:
+        limits:
+          cpus: '12.0'     # 3x observed peak (plenty for parallel migrations)
+          memory: 12G      # 3x observed peak (plenty for initialization)
+        reservations:
+          cpus: '4.0'      # Minimum guarantee
+          memory: 4G       # Minimum guarantee
+    shm_size: '4gb'        # Shared memory for PostgreSQL (2x shared_buffers)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/-/health"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 600s  # 10 minutes for DB initialization on first boot
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: autogit-runner
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    volumes:
+      - ./data/gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab-network
+
+networks:
+  gitlab-network:
+    driver: bridge
+
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+  gitlab-runner-config:

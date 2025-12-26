@@ -22,7 +22,7 @@ echo "Press Ctrl+C to stop."
 # Function to cleanup background processes
 cleanup() {
     echo "Stopping monitor..."
-    kill "$(jobs -p)" 2>/dev/null || true
+    kill "$(jobs -p)" 2> /dev/null || true
     exit
 }
 
@@ -35,8 +35,8 @@ echo "--- Triggering Deployment (Terraform) ---"
     terraform apply -auto-approve \
         -var="ssh_user=$USER" \
         -var="ssh_key_path=$HOMELAB_SSH_KEY_PATH" \
-        >>terraform.log 2>&1
-    echo "[$(date)] Terraform apply finished." >>../../deploy.log
+        >> terraform.log 2>&1
+    echo "[$(date)] Terraform apply finished." >> ../../deploy.log
 ) &
 
 # 1. Tail the deployment log in the background
@@ -68,7 +68,7 @@ while true; do
         echo ""
         echo "========================================================================"
         echo " (Log output continues below...)"
-    } >"$STATUS_TMP"
+    } > "$STATUS_TMP"
 
     # Clear screen and show status
     clear

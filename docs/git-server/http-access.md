@@ -1,8 +1,7 @@
 # HTTP/HTTPS Access Configuration Guide
 
-**Component**: Git Server (GitLab CE) - HTTP/HTTPS Access
-**Status**: Implementation
-**Last Updated**: 2025-12-23
+**Component**: Git Server (GitLab CE) - HTTP/HTTPS Access **Status**: Implementation **Last
+Updated**: 2025-12-23
 
 ## Overview
 
@@ -53,7 +52,8 @@ services:
 
 ## 3. Reverse Proxy Configuration
 
-If you are running AutoGit behind a reverse proxy (like Nginx or Traefik), ensure you pass the correct headers:
+If you are running AutoGit behind a reverse proxy (like Nginx or Traefik), ensure you pass the
+correct headers:
 
 ```nginx
 proxy_set_header Host $http_host;
@@ -65,36 +65,46 @@ proxy_set_header X-Forwarded-Proto $scheme;
 ## Troubleshooting
 
 ### SSL Certificate Warning
+
 Since we use self-signed certificates, your browser and Git client will show a warning.
 
 #### Option 1: Trust the Certificate (Recommended)
+
 The safest way to handle self-signed certificates is to add them to your system or Git trust store.
 
 **For Git (Per-Repository)**:
+
 ```bash
 git config http.sslCAInfo /path/to/your/gitlab.autogit.local.crt
 ```
 
 **For Linux (System-wide)**:
+
 ```bash
 sudo cp services/git-server/config/ssl/gitlab.autogit.local.crt /usr/local/share/ca-certificates/
 sudo update-ca-certificates
 ```
 
 #### Option 2: Disable SSL Verification (Last Resort)
-> **Security Warning**: Disabling SSL verification globally is highly discouraged as it exposes you to man-in-the-middle attacks. Only use the following commands for local development and with full awareness of the risks.
+
+> **Security Warning**: Disabling SSL verification globally is highly discouraged as it exposes you
+> to man-in-the-middle attacks. Only use the following commands for local development and with full
+> awareness of the risks.
 
 **For Git (Per-Repository)**:
+
 ```bash
 git config http.sslVerify false
 ```
 
 **For Git (Global - Use with Caution)**:
+
 ```bash
 git config --global http.sslVerify false
 ```
 
 ### Port Conflicts
+
 If port 3000 or 3443 is already in use, change the mapping in your `.env` file:
 
 ```bash

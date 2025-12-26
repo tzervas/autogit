@@ -1,7 +1,8 @@
-import docker
-from typing import Dict, Any, Optional
 import logging
 import os
+from typing import Any, Dict, Optional
+
+import docker
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,7 @@ DEFAULT_NETWORK = os.environ.get("RUNNER_NETWORK", "autogit-network")
 # Docker socket path - for rootless Docker this will be different
 # The coordinator sees DOCKER_HOST, but runners need the actual host socket path
 DOCKER_SOCKET_PATH = os.environ.get("RUNNER_DOCKER_SOCKET", "/var/run/docker.sock")
+
 
 class DockerDriver:
     """
@@ -45,7 +47,7 @@ class DockerDriver:
 
             # Look for docker-compose prefixed version
             for net in networks:
-                if 'autogit' in net.name.lower() and net.name != 'bridge':
+                if "autogit" in net.name.lower() and net.name != "bridge":
                     logger.info(f"Found autogit network (prefixed): {net.name}")
                     return net.name
 
@@ -69,7 +71,7 @@ class DockerDriver:
         environment: Optional[Dict[str, str]] = None,
         platform: Optional[str] = None,
         gpu_vendor: Optional[str] = None,
-        userns_mode: str = "host" # Default to host, but can be overridden for isolation
+        userns_mode: str = "host",  # Default to host, but can be overridden for isolation
     ) -> Dict[str, Any]:
         """
         Spawn a new runner container.
@@ -82,7 +84,7 @@ class DockerDriver:
         devices = []
 
         if gpu_vendor == "nvidia":
-            device_requests = [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])]
+            device_requests = [docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])]
         elif gpu_vendor == "amd":
             devices = ["/dev/kfd:/dev/kfd", "/dev/dri:/dev/dri"]
         elif gpu_vendor == "intel":
@@ -106,15 +108,15 @@ class DockerDriver:
                 device_requests=device_requests,
                 devices=devices,
                 userns_mode=userns_mode,
-                cap_drop=["ALL"], # Drop all capabilities by default
-                cap_add=["CHOWN", "SETGID", "SETUID"], # Add only necessary ones
+                cap_drop=["ALL"],  # Drop all capabilities by default
+                cap_add=["CHOWN", "SETGID", "SETUID"],  # Add only necessary ones
                 security_opt=["no-new-privileges:true"],
                 restart_policy={"Name": "unless-stopped"},
                 volumes={
                     # Mount host's docker socket into runner container
                     # Use configured path (rootless: /run/user/1000/docker.sock)
                     DOCKER_SOCKET_PATH: {"bind": "/var/run/docker.sock", "mode": "rw"}
-                }
+                },
             )
 
             # Reload to get networking info
@@ -125,7 +127,9 @@ class DockerDriver:
                 "short_id": container.short_id,
                 "name": container.name,
                 "status": container.status,
-                "ip_address": container.attrs['NetworkSettings']['Networks'].get(network, {}).get('IPAddress')
+                "ip_address": container.attrs["NetworkSettings"]["Networks"]
+                .get(network, {})
+                .get("IPAddress"),
             }
         except Exception as e:
             logger.error(f"Failed to spawn runner {name}: {e}")
@@ -177,7 +181,7 @@ class DockerDriver:
         tags: str,
         executor: str = "docker",
         docker_image: str = "python:3.11-slim",
-        clone_url: str = None
+        clone_url: str = None,
     ) -> Dict[str, Any]:
         """
         Register a GitLab runner inside an already running container.
@@ -194,15 +198,23 @@ class DockerDriver:
                 "gitlab-runner",
                 "register",
                 "--non-interactive",
-                "--url", gitlab_url,
-                "--registration-token", registration_token,
-                "--executor", executor,
-                "--description", description,
-                "--tag-list", tags,
-                "--docker-image", docker_image,
+                "--url",
+                gitlab_url,
+                "--registration-token",
+                registration_token,
+                "--executor",
+                executor,
+                "--description",
+                description,
+                "--tag-list",
+                tags,
+                "--docker-image",
+                docker_image,
                 "--docker-privileged=false",
-                "--docker-volumes", "/var/run/docker.sock:/var/run/docker.sock",
-                "--docker-network-mode", self.get_network_name()
+                "--docker-volumes",
+                "/var/run/docker.sock:/var/run/docker.sock",
+                "--docker-network-mode",
+                self.get_network_name(),
             ]
 
             # Add clone URL if specified (for internal network access)
@@ -210,10 +222,7 @@ class DockerDriver:
                 register_cmd.extend(["--clone-url", clone_url])
 
             # Execute the registration command
-            exit_code, output = container.exec_run(
-                cmd=register_cmd,
-                detach=False
-            )
+            exit_code, output = container.exec_run(cmd=register_cmd, detach=False)
 
             if exit_code != 0:
                 logger.error(f"Runner registration failed: {output.decode('utf-8')}")
@@ -223,7 +232,7 @@ class DockerDriver:
             return {
                 "status": "registered",
                 "container_id": container.short_id,
-                "output": output.decode('utf-8')
+                "output": output.decode("utf-8"),
             }
 
         except Exception as e:

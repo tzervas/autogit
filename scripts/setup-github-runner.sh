@@ -25,7 +25,7 @@ apt-get update
 apt-get install -y curl jq
 
 # Create runner user
-if ! id -u github-runner >/dev/null 2>&1; then
+if ! id -u github-runner > /dev/null 2>&1; then
     echo "👤 Creating github-runner user..."
     useradd --create-home --shell /bin/bash github-runner
 fi
@@ -62,7 +62,7 @@ echo ""
 
 # Create systemd service
 echo "🔧 Creating systemd service..."
-cat >/etc/systemd/system/github-runner.service <<EOF
+cat > /etc/systemd/system/github-runner.service << EOF
 [Unit]
 Description=GitHub Actions Runner
 After=network.target

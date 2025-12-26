@@ -1,10 +1,12 @@
 # Tasker - Task Tracker Work Item Identification and Execution
 
-Tasker is a command-line tool that parses `TASK_TRACKER.md`, identifies the next actionable work item, and automates task execution workflows.
+Tasker is a command-line tool that parses `TASK_TRACKER.md`, identifies the next actionable work
+item, and automates task execution workflows.
 
 ## Features
 
-- **Task Identification**: Automatically identifies the next actionable work item based on priority and dependencies
+- **Task Identification**: Automatically identifies the next actionable work item based on priority
+  and dependencies
 - **Task Parsing**: Parses TASK_TRACKER.md into structured data models
 - **Task Listing**: Lists all milestones and tasks with status and progress
 - **Task Status**: Shows detailed information about specific tasks or milestones
@@ -36,6 +38,7 @@ python3 -m tools.tasker next
 ```
 
 Output:
+
 ```
 🎯 Next Work Item Identified
 ============================================================
@@ -74,10 +77,11 @@ python3 -m tools.tasker execute --base-branch main
 ```
 
 This will:
+
 1. Identify the task (next or specified)
-2. Create a git branch for the task (unless `--no-branch`)
-3. Generate a task summary document (unless `--no-summary`)
-4. Provide next steps guidance
+1. Create a git branch for the task (unless `--no-branch`)
+1. Generate a task summary document (unless `--no-summary`)
+1. Provide next steps guidance
 
 ### List All Tasks
 
@@ -92,6 +96,7 @@ python3 -m tools.tasker list -v
 ```
 
 Output:
+
 ```
 📊 Task Tracker Overview
 ============================================================
@@ -132,27 +137,34 @@ python3 -m tools.tasker status milestone-2-subtask-1
 ## Commands
 
 ### `next`
+
 Show the next actionable work item based on priority and dependencies.
 
 ### `execute`
+
 Execute the workflow for starting work on a task.
 
 **Options:**
+
 - `--task-id ID`: Execute a specific task (default: next actionable task)
 - `--no-branch`: Don't create a git branch
 - `--no-summary`: Don't generate a task summary file
 - `--base-branch BRANCH`: Base branch to branch from (default: dev)
 
 ### `list`
+
 List all milestones and tasks.
 
 **Options:**
+
 - `-v, --verbose`: Show detailed information including subtasks
 
 ### `status`
+
 Show status of a specific task or milestone.
 
 **Arguments:**
+
 - `id`: ID of the milestone or task (e.g., `milestone-2`, `milestone-2-subtask-1`)
 
 ## Task Identification Logic
@@ -160,25 +172,30 @@ Show status of a specific task or milestone.
 The tool identifies the next actionable work item using the following logic:
 
 1. **Filter by Status**: Only considers tasks with status `READY` or `QUEUED`
-2. **Priority Sorting**: Sorts milestones by priority (HIGH > MEDIUM > LOW)
-3. **Sequential Selection**: Selects the first ready task from the highest priority milestone
-4. **Dependency Awareness**: Considers task dependencies (though dependency resolution is basic)
+1. **Priority Sorting**: Sorts milestones by priority (HIGH > MEDIUM > LOW)
+1. **Sequential Selection**: Selects the first ready task from the highest priority milestone
+1. **Dependency Awareness**: Considers task dependencies (though dependency resolution is basic)
 
 ## Data Models
 
 ### Task
+
 Represents a task or subtask with:
+
 - ID, title, status, priority
 - Branch name, estimated effort, assigned team
 - Dependencies, tasks, deliverables, acceptance criteria
 
 ### Milestone
+
 Represents a milestone containing multiple tasks with:
+
 - ID, title, status, priority, target date
 - Collection of subtasks
 - Progress calculation
 
 ### TaskTracker
+
 Root object containing all milestones and providing query methods.
 
 ## File Structure
@@ -199,18 +216,21 @@ tools/tasker/
 ### Example Workflow
 
 1. Check what task is next:
+
    ```bash
    python3 -m tools.tasker next
    ```
 
-2. Execute the task workflow:
+1. Execute the task workflow:
+
    ```bash
    python3 -m tools.tasker execute
    ```
 
-3. Start working on the task (branch is created, summary is generated)
+1. Start working on the task (branch is created, summary is generated)
 
-4. Check task status later:
+1. Check task status later:
+
    ```bash
    python3 -m tools.tasker status milestone-2-subtask-1
    ```
@@ -237,9 +257,9 @@ The tool can be integrated into CI/CD pipelines:
 To add new features to the tasker tool:
 
 1. Update data models in `models.py` if needed
-2. Update parser in `parser.py` to extract new data
-3. Add new commands to `cli.py`
-4. Add execution logic to `executor.py`
+1. Update parser in `parser.py` to extract new data
+1. Add new commands to `cli.py`
+1. Add execution logic to `executor.py`
 
 ### Testing
 
@@ -260,7 +280,8 @@ python3 -m tools.tasker execute --no-branch --no-summary
 ## Limitations
 
 - **Basic Dependency Resolution**: Dependencies are parsed but not deeply validated
-- **Status Updates**: The tool doesn't update task status in TASK_TRACKER.md (manual update required)
+- **Status Updates**: The tool doesn't update task status in TASK_TRACKER.md (manual update
+  required)
 - **Markdown Parsing**: Parser assumes specific markdown format; deviations may cause issues
 - **Git Operations**: Requires git to be installed and repository to be initialized
 

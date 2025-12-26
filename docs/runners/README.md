@@ -4,7 +4,8 @@ This guide covers AutoGit's dynamic runner management system.
 
 ## Overview
 
-AutoGit automatically manages GitLab runners across multiple architectures with intelligent scaling based on job demand.
+AutoGit automatically manages GitLab runners across multiple architectures with intelligent scaling
+based on job demand.
 
 ## Features
 
@@ -16,10 +17,12 @@ AutoGit automatically manages GitLab runners across multiple architectures with 
 ## Architecture Support
 
 ### Native Architectures
+
 - **amd64** - x86_64 processors (Intel, AMD)
 - **arm64** - ARM 64-bit processors (Apple Silicon, AWS Graviton, etc.)
 
 ### Emulated Architectures
+
 - **RISC-V** - Via QEMU emulation
 
 See [Multi-Architecture Guide](multi-architecture.md) for details.
@@ -27,6 +30,7 @@ See [Multi-Architecture Guide](multi-architecture.md) for details.
 ## GPU Support
 
 AutoGit supports GPU-aware scheduling for:
+
 - NVIDIA GPUs
 - AMD GPUs
 - Intel GPUs
@@ -52,6 +56,7 @@ See [Runner Configuration Guide](configuration.md) for detailed options.
 AutoGit uses a custom fleeting plugin for dynamic runner scaling.
 
 Key concepts:
+
 - **Scale-up triggers** - Job queue depth, wait time
 - **Scale-down triggers** - Idle time, resource utilization
 - **Resource limits** - Maximum runners, CPU, memory

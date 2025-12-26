@@ -1,6 +1,6 @@
 # Release CI Workflow Update Summary
 
-**Date**: 2024-12-24  
+**Date**: 2024-12-24
 **Branch**: copilot/update-ci-release-process
 
 ## Problem Statement
@@ -21,7 +21,7 @@ The workflow now supports four trigger types:
 
 #### a) Automatic Release on PR Merge (dev → main)
 - Trigger: `pull_request.types: [closed]` on main branch
-- Validation: Checks `github.event.pull_request.merged == true` 
+- Validation: Checks `github.event.pull_request.merged == true`
 - **Critical**: Only merged PRs trigger releases, not closed/cancelled PRs
 - Auto-extracts version from PR title (e.g., "Release v0.3.0")
 - Generates release notes from PR description

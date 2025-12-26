@@ -21,7 +21,8 @@ log_error() { echo -e "${RED}❌ $1${NC}"; }
 # Backup existing .env if it exists
 backup_existing_env() {
     if [[ -f ".env" ]]; then
-        local backup=".env.backup.$(date +%Y%m%d_%H%M%S)"
+        local backup
+        backup=".env.backup.$(date +%Y%m%d_%H%M%S)"
         cp .env "$backup"
         log_info "Backed up existing .env to $backup"
     fi

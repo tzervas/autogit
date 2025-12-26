@@ -1,0 +1,170 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# autogit-core Development Environment
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Usage:
+#   docker compose up -d rust-dev       # Start dev container
+#   docker compose exec rust-dev bash   # Shell into container
+#   docker compose run --rm build       # One-shot release build
+#
+# Cache Strategy:
+#   - cargo-registry: Crates.io index + downloaded crates
+#   - cargo-git: Git dependencies
+#   - cargo-target: Incremental build artifacts
+#
+# All caches persist across container restarts for fast rebuilds.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Development Container - Long-running with cargo-watch
+  # ─────────────────────────────────────────────────────────────────────────────
+  rust-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        RUST_VERSION: "1.83"
+    container_name: autogit-rust-dev
+    hostname: rust-dev
+
+    # Resource limits - tune for your server
+    deploy:
+      resources:
+        limits:
+          cpus: "${RUST_BUILD_CPUS:-4}"
+          memory: "${RUST_BUILD_MEM:-4g}"
+        reservations:
+          cpus: "1"
+          memory: "1g"
+
+    volumes:
+      # Source code (read-write for development)
+      - .:/workspace:rw
+      # Persistent caches
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - cargo-target:/workspace/target
+
+    environment:
+      - RUST_BACKTRACE=1
+      - RUST_LOG=${RUST_LOG:-info}
+      - CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS:-0}
+      - CARGO_INCREMENTAL=1
+      # GitLab connection (for testing)
+      - GITLAB_URL=${GITLAB_URL:-http://host.docker.internal:8080}
+      - GITLAB_TOKEN=${GITLAB_TOKEN:-}
+
+    # Allow access to host network for GitLab connection
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    working_dir: /workspace
+
+    # Keep running for exec access
+    command: ["sleep", "infinity"]
+
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Release Builder - One-shot optimized build
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        RUST_VERSION: "1.83"
+        CARGO_BUILD_JOBS: "${CARGO_BUILD_JOBS:-0}"
+        RUSTFLAGS: "-C target-cpu=native -C link-arg=-fuse-ld=lld"
+
+    volumes:
+      - .:/app/src-mount:ro
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - ./target:/app/target-out
+
+    deploy:
+      resources:
+        limits:
+          cpus: "${RUST_BUILD_CPUS:-4}"
+          memory: "${RUST_BUILD_MEM:-8g}"
+
+    command: >
+      sh -c "
+        cp -r /app/src-mount/* /app/ 2>/dev/null || true &&
+        cargo build --release &&
+        cp target/release/bootstrap /app/target-out/ 2>/dev/null || echo 'No bootstrap binary'
+      "
+
+    profiles:
+      - build
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Test Runner - Parallel test execution
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+
+    volumes:
+      - .:/workspace:ro
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - cargo-target:/workspace/target
+
+    deploy:
+      resources:
+        limits:
+          cpus: "${RUST_BUILD_CPUS:-4}"
+          memory: "${RUST_BUILD_MEM:-4g}"
+
+    working_dir: /workspace
+
+    command: ["cargo", "nextest", "run", "--all-features"]
+
+    profiles:
+      - test
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Watch Mode - Auto-rebuild on changes
+  # ─────────────────────────────────────────────────────────────────────────────
+  watch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+
+    volumes:
+      - .:/workspace:rw
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - cargo-target:/workspace/target
+
+    deploy:
+      resources:
+        limits:
+          cpus: "${RUST_BUILD_CPUS:-2}"
+          memory: "${RUST_BUILD_MEM:-2g}"
+
+    working_dir: /workspace
+
+    command: ["cargo", "watch", "-x", "check", "-x", "test"]
+
+    profiles:
+      - watch
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Persistent Volumes for Caching
+# ═══════════════════════════════════════════════════════════════════════════════
+volumes:
+  cargo-registry:
+    name: autogit-cargo-registry
+  cargo-git:
+    name: autogit-cargo-git
+  cargo-target:
+    name: autogit-cargo-target

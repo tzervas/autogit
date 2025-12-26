@@ -27,36 +27,36 @@ while true; do
     ELAPSED=$((CURRENT_TIME - START_TIME))
     MINUTES=$((ELAPSED / 60))
     SECONDS=$((ELAPSED % 60))
-    
+
     echo "⏱️  $(printf '%02d:%02d' $MINUTES $SECONDS) - Checking status..."
-    
+
     # Check container health
     HEALTH=$(docker inspect --format='{{.State.Health.Status}}' autogit-git-server 2>/dev/null || echo "no-healthcheck")
     echo "   Health: $HEALTH"
-    
+
     # Check for key milestones in logs
     RECENT_LOGS=$(docker logs --tail=50 autogit-git-server 2>&1)
-    
+
     if echo "$RECENT_LOGS" | grep -q "database system is ready to accept connections"; then
         echo "   ✅ PostgreSQL is ready!"
     fi
-    
+
     if echo "$RECENT_LOGS" | grep -q "postgresql\['shared_buffers'\]"; then
         echo "   ✅ PostgreSQL tuning applied!"
     fi
-    
+
     if echo "$RECENT_LOGS" | grep -q "Database Migration"; then
         echo "   ✅ Database migrations running..."
     fi
-    
+
     if echo "$RECENT_LOGS" | grep -q "Puma starting\|puma.*Listening"; then
         echo "   ✅ Puma started!"
     fi
-    
+
     if echo "$RECENT_LOGS" | grep -q "Workhorse.*started"; then
         echo "   ✅ Workhorse connected!"
     fi
-    
+
     if [ "$HEALTH" = "healthy" ]; then
         echo ""
         echo "🎉 GitLab is HEALTHY!"
@@ -66,7 +66,7 @@ while true; do
         echo "  curl http://192.168.1.170:8080/-/health"
         break
     fi
-    
+
     echo ""
     sleep 15
 done

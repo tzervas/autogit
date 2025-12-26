@@ -136,7 +136,7 @@ jobs:
           echo "[View Pipeline](http://192.168.1.170:3000/root/autogit/pipelines)" >> report.md
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: self-hosted-ci-report
           path: report.md

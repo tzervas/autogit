@@ -5,7 +5,7 @@ name: Automated Versioning
 # It runs when:
 # 1. PR is merged into main (production releases)
 # 2. PR is merged into dev (development pre-releases)
-# 
+#
 # Only triggers if there are actual code changes (excludes docs-only changes)
 
 on:
@@ -36,15 +36,15 @@ jobs:
         run: |
           # Get list of changed files in the PR
           PR_NUMBER="${{ github.event.pull_request.number }}"
-          
+
           echo "Checking files changed in PR #$PR_NUMBER..."
-          
+
           # Get changed files using GitHub API
           CHANGED_FILES=$(gh pr view "$PR_NUMBER" --json files --jq '.files[].path')
-          
+
           echo "Changed files:"
           echo "$CHANGED_FILES"
-          
+
           # Define patterns for non-code files (documentation, CI configs, etc.)
           # These patterns won't trigger versioning
           NON_CODE_PATTERNS=(
@@ -57,15 +57,15 @@ jobs:
             "README.md"
             "*.txt"
           )
-          
+
           HAS_CODE_CHANGES="false"
-          
+
           # Check each changed file
           while IFS= read -r file; do
             [ -z "$file" ] && continue
-            
+
             IS_CODE_FILE="true"
-            
+
             # Check if file matches any non-code pattern
             for pattern in "${NON_CODE_PATTERNS[@]}"; do
               if [[ "$file" == $pattern ]]; then
@@ -74,20 +74,20 @@ jobs:
                 break
               fi
             done
-            
+
             if [ "$IS_CODE_FILE" = "true" ]; then
               echo "  ✅ Code file found: $file"
               HAS_CODE_CHANGES="true"
               break
             fi
           done <<< "$CHANGED_FILES"
-          
+
           if [ "$HAS_CODE_CHANGES" = "true" ]; then
             echo "✅ Code changes detected - versioning will proceed"
           else
             echo "ℹ️  No code changes detected - skipping versioning"
           fi
-          
+
           echo "has_code_changes=$HAS_CODE_CHANGES" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -116,11 +116,11 @@ jobs:
         run: |
           TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
           echo "Creating version tag for branch: $TARGET_BRANCH"
-          
+
           # Checkout the target branch
           git checkout "$TARGET_BRANCH"
           git pull origin "$TARGET_BRANCH"
-          
+
           # Run the versioning script
           ./scripts/automate-version.sh
         env:

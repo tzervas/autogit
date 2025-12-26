@@ -24,7 +24,7 @@ else
     GITLAB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-32)
 
     # Save to secure file
-    echo "${GITLAB_ROOT_PASSWORD}" >"${PASSWORD_FILE}"
+    echo "${GITLAB_ROOT_PASSWORD}" > "${PASSWORD_FILE}"
     chmod 600 "${PASSWORD_FILE}"
 
     echo "✓ Password generated and saved to: ${PASSWORD_FILE}"
@@ -43,12 +43,12 @@ if [ -f "${ENV_FILE}" ]; then
             echo ""
             echo "# GitLab root user password (auto-generated)"
             echo "GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}"
-        } >>"${ENV_FILE}"
+        } >> "${ENV_FILE}"
         echo "✓ Added GITLAB_ROOT_PASSWORD to ${ENV_FILE}"
     fi
 else
     # Create new .env file
-    cat >"${ENV_FILE}" <<EOF
+    cat > "${ENV_FILE}" << EOF
 # AutoGit Environment Configuration
 # Generated: $(date)
 

@@ -1,52 +1,52 @@
 # Smoke Test Deployment - Ready to Execute
 
-**Status:** ✅ All pre-flight checks PASSED
-**Date:** December 25, 2025
-**Target:** kang@192.168.1.170
+**Status:** ✅ All pre-flight checks PASSED **Date:** December 25, 2025 **Target:**
+kang@192.168.1.170
 
----
+______________________________________________________________________
 
 ## Pre-Flight Validation Results
 
-✅ **Docker Compose v2 Syntax:** Valid
-✅ **PostgreSQL Tuning:** Present (shared_buffers=256MB + 8 other params)
-✅ **Healthcheck Period:** 600s (10 minutes)
-✅ **Homelab Connectivity:** Reachable
-✅ **SSH Access:** Configured
-✅ **Required Files:** All present
+✅ **Docker Compose v2 Syntax:** Valid ✅ **PostgreSQL Tuning:** Present (shared_buffers=256MB + 8
+other params) ✅ **Healthcheck Period:** 600s (10 minutes) ✅ **Homelab Connectivity:** Reachable ✅
+**SSH Access:** Configured ✅ **Required Files:** All present
 
----
+______________________________________________________________________
 
 ## Deployment Command
 
 From your current directory:
+
 ```bash
 cd /home/spooky/Documents/projects/autogit/homelab-migration
 ./run-smoke-test.sh
 ```
 
 This will:
-1. Create remote directory on homelab
-2. Copy `docker-compose.homelab.yml` → `docker-compose.yml`
-3. Copy SSL certs (if available)
-4. Copy smoke test checklist
-5. Verify Docker Compose v2 on homelab
-6. Create remote deployment script
 
----
+1. Create remote directory on homelab
+1. Copy `docker-compose.homelab.yml` → `docker-compose.yml`
+1. Copy SSL certs (if available)
+1. Copy smoke test checklist
+1. Verify Docker Compose v2 on homelab
+1. Create remote deployment script
+
+______________________________________________________________________
 
 ## What Happens on Homelab
 
 The script creates `deploy.sh` on homelab that:
+
 - Pulls latest GitLab CE image
 - Starts services with `docker compose up -d`
 - Provides monitoring commands
 
----
+______________________________________________________________________
 
 ## Monitoring Steps (After Deployment)
 
 **Terminal 1:** Main deployment
+
 ```bash
 ssh kang@192.168.1.170
 cd /home/kang/autogit-homelab
@@ -54,41 +54,47 @@ cd /home/kang/autogit-homelab
 ```
 
 **Terminal 2:** Live log monitoring
+
 ```bash
 ssh kang@192.168.1.170
 cd /home/kang/autogit-homelab
 docker compose logs -f gitlab
 ```
 
----
+______________________________________________________________________
 
 ## Key Milestones to Watch
 
 1. **PostgreSQL Init** (~2-3 min)
+
    - Look for: `database system is ready to accept connections`
    - Verify tuning: `shared_buffers = 256MB` in logs
 
-2. **GitLab DB Migration** (~3-5 min)
+1. **GitLab DB Migration** (~3-5 min)
+
    - Look for: `Migrating to ...` (multiple lines)
    - Should complete without timeouts
 
-3. **Services Ready** (~5-8 min)
+1. **Services Ready** (~5-8 min)
+
    - Look for: `Gitlab Workhorse successfully started`
    - Look for: `gitlab Listening on`
 
-4. **Health Check** (~8-10 min)
+1. **Health Check** (~8-10 min)
+
    ```bash
    curl -k https://localhost/-/health
    # Expected: {"status":"ok"}
    ```
 
-5. **Container Stability**
+1. **Container Stability**
+
    ```bash
    docker compose ps
    # Expected: gitlab status "healthy", no restarts
    ```
 
----
+______________________________________________________________________
 
 ## Success Criteria
 
@@ -99,11 +105,12 @@ docker compose logs -f gitlab
 - [ ] Web UI accessible at https://gitlab.vectorweight.com
 - [ ] No memory/resource exhaustion
 
----
+______________________________________________________________________
 
 ## If Issues Occur
 
 ### DB Still Hangs:
+
 ```bash
 # Check logs for DB errors
 docker compose logs gitlab | grep -i "postgres\|database"
@@ -116,6 +123,7 @@ free -h
 ```
 
 ### Container Restarts:
+
 ```bash
 # Check restart count
 docker compose ps
@@ -125,6 +133,7 @@ docker compose events --since 10m
 ```
 
 ### Health Check Fails:
+
 ```bash
 # Exec into container
 docker compose exec gitlab bash
@@ -136,38 +145,38 @@ gitlab-rake gitlab:check
 gitlab-psql -c "SELECT 1;"
 ```
 
----
+______________________________________________________________________
 
 ## Expected Timeline
 
-| Time | Event |
-|------|-------|
-| 0:00 | Container start |
-| 0:30 | PostgreSQL initialization begins |
-| 2:00 | PostgreSQL ready (with tuning) |
-| 2:30 | GitLab Rails DB setup begins |
-| 5:00 | DB migrations running |
-| 8:00 | Services starting |
-| 10:00 | Health checks passing |
+| Time  | Event                            |
+| ----- | -------------------------------- |
+| 0:00  | Container start                  |
+| 0:30  | PostgreSQL initialization begins |
+| 2:00  | PostgreSQL ready (with tuning)   |
+| 2:30  | GitLab Rails DB setup begins     |
+| 5:00  | DB migrations running            |
+| 8:00  | Services starting                |
+| 10:00 | Health checks passing            |
 
 **With DB fixes, should complete in 8-12 minutes total.**
 
----
+______________________________________________________________________
 
 ## Reporting Results
 
 After test completion, document:
 
-1. **Total init time:** _______ minutes
-2. **PostgreSQL ready:** _______ minutes
-3. **Container restarts:** _______
-4. **Health check status:** [ ] PASS [ ] FAIL
-5. **Memory usage:** _______ GB
-6. **Any errors:** _______________________
+1. **Total init time:** \_\_\_\_\_\_\_ minutes
+1. **PostgreSQL ready:** \_\_\_\_\_\_\_ minutes
+1. **Container restarts:** \_\_\_\_\_\_\_
+1. **Health check status:** [ ] PASS [ ] FAIL
+1. **Memory usage:** \_\_\_\_\_\_\_ GB
+1. **Any errors:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 **Report results back before proceeding to task #5 (stage & commit)!**
 
----
+______________________________________________________________________
 
 ## Quick Commands Reference
 
@@ -192,6 +201,6 @@ docker compose down -v
 rm -rf data/gitlab/
 ```
 
----
+______________________________________________________________________
 
 **Ready to execute:** Run `./run-smoke-test.sh` now! 🚀

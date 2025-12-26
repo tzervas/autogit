@@ -31,4 +31,3 @@ See `.github/MERGE_PLAN.md` for complete merge sequence.
 ---
 
 **All agent work is captured, documented, and ready for review. Let's do it!** 🚀
-

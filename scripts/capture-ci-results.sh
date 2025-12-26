@@ -34,8 +34,8 @@ echo "Branch: ${PIPELINE_REF}"
 echo ""
 echo "📋 Fetching pipeline details..."
 curl -s -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
-    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}" |
-    jq '.' >"${OUTPUT_DIR}/pipeline-${PIPELINE_ID}.json"
+    "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}" \
+    | jq '.' > "${OUTPUT_DIR}/pipeline-${PIPELINE_ID}.json"
 
 # Get all jobs in the pipeline
 echo ""
@@ -43,14 +43,14 @@ echo "🔧 Fetching job information..."
 JOBS_JSON=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
     "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/pipelines/${PIPELINE_ID}/jobs")
 
-echo "$JOBS_JSON" | jq '.' >"${OUTPUT_DIR}/jobs-${PIPELINE_ID}.json"
+echo "$JOBS_JSON" | jq '.' > "${OUTPUT_DIR}/jobs-${PIPELINE_ID}.json"
 
 # Extract job details
 JOB_COUNT=$(echo "$JOBS_JSON" | jq '. | length')
 echo "Total jobs: ${JOB_COUNT}"
 
 # Create summary report
-cat >"${OUTPUT_DIR}/pipeline-summary-${PIPELINE_ID}.md" <<EOF
+cat > "${OUTPUT_DIR}/pipeline-summary-${PIPELINE_ID}.md" << EOF
 # AutoGit CI Pipeline Results
 
 ## Pipeline Overview
@@ -70,7 +70,7 @@ cat >"${OUTPUT_DIR}/pipeline-summary-${PIPELINE_ID}.md" <<EOF
 EOF
 
 # Append job details
-echo "$JOBS_JSON" | jq -r '.[] | "### \(.name)\n- **Stage**: \(.stage)\n- **Status**: \(.status)\n- **Duration**: \(.duration)s\n- **Runner**: \(.runner.description // "N/A")\n"' >>"${OUTPUT_DIR}/pipeline-summary-${PIPELINE_ID}.md"
+echo "$JOBS_JSON" | jq -r '.[] | "### \(.name)\n- **Stage**: \(.stage)\n- **Status**: \(.status)\n- **Duration**: \(.duration)s\n- **Runner**: \(.runner.description // "N/A")\n"' >> "${OUTPUT_DIR}/pipeline-summary-${PIPELINE_ID}.md"
 
 # Fetch job logs for each job
 echo ""
@@ -81,13 +81,13 @@ echo "$JOBS_JSON" | jq -r '.[].id' | while read -r JOB_ID; do
 
     curl -s -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
         "${GITLAB_URL}/api/v4/projects/${PROJECT_ID}/jobs/${JOB_ID}/trace" \
-        >"${OUTPUT_DIR}/job-${JOB_ID}-${JOB_NAME}.log"
+        > "${OUTPUT_DIR}/job-${JOB_ID}-${JOB_NAME}.log"
 done
 
 # Generate performance metrics
 echo ""
 echo "📊 Generating performance metrics..."
-cat >"${OUTPUT_DIR}/performance-metrics-${PIPELINE_ID}.md" <<EOF
+cat > "${OUTPUT_DIR}/performance-metrics-${PIPELINE_ID}.md" << EOF
 # Performance Metrics - Pipeline ${PIPELINE_ID}
 
 ## Job Execution Times
@@ -114,7 +114,7 @@ EOF
 # Get runner metrics from the homelab
 echo ""
 echo "💻 Capturing runner metrics..."
-ssh homelab "export DOCKER_HOST=unix:///run/user/1000/docker.sock && docker stats --no-stream" >"${OUTPUT_DIR}/runner-stats-${PIPELINE_ID}.txt"
+ssh homelab "export DOCKER_HOST=unix:///run/user/1000/docker.sock && docker stats --no-stream" > "${OUTPUT_DIR}/runner-stats-${PIPELINE_ID}.txt"
 
 echo ""
 echo "✅ Results captured successfully!"

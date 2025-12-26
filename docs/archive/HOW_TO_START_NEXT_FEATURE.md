@@ -1,15 +1,17 @@
 # How to Start the Next Feature: Git Server Implementation
 
-This guide demonstrates how to use the new branching strategy to begin work on the Git Server Implementation feature.
+This guide demonstrates how to use the new branching strategy to begin work on the Git Server
+Implementation feature.
 
 ## Overview
 
 Following the problem statement requirements, we now have:
+
 1. ✅ A comprehensive PR summary for Dev → Main (see `DEV_TO_MAIN_PR_SUMMARY.md`)
-2. ✅ Complete branching strategy documentation
-3. ✅ PR templates for all branch types
-4. ✅ Helper scripts for branch management
-5. ✅ A detailed feature plan for the next task
+1. ✅ Complete branching strategy documentation
+1. ✅ PR templates for all branch types
+1. ✅ Helper scripts for branch management
+1. ✅ A detailed feature plan for the next task
 
 ## Next Steps: Start Git Server Implementation
 
@@ -18,6 +20,7 @@ Following the problem statement requirements, we now have:
 Read the complete feature plan: `GIT_SERVER_FEATURE_PLAN.md`
 
 This document outlines:
+
 - 8 subtasks with clear deliverables
 - Success criteria
 - Testing strategy
@@ -45,6 +48,7 @@ cd /home/runner/work/autogit/autogit
 ```
 
 This will create:
+
 ```
 dev
  └─ feature/git-server-implementation
@@ -82,25 +86,25 @@ git checkout -b feature/git-server-implementation/docker-setup/compose-config
 For each subtask:
 
 1. **Start**: Checkout the sub-feature branch
-2. **Plan**: Break down into smaller work items if needed
-3. **Develop**: Create work branches for each item
-4. **Test**: Ensure tests pass
-5. **Document**: Update relevant documentation
-6. **PR**: Create PR from work branch to sub-feature branch
-7. **Review**: Get approval and merge
-8. **Complete**: When all work items are done, PR sub-feature to feature
+1. **Plan**: Break down into smaller work items if needed
+1. **Develop**: Create work branches for each item
+1. **Test**: Ensure tests pass
+1. **Document**: Update relevant documentation
+1. **PR**: Create PR from work branch to sub-feature branch
+1. **Review**: Get approval and merge
+1. **Complete**: When all work items are done, PR sub-feature to feature
 
 ### 5. Integration and Release
 
 After all subtasks are complete:
 
 1. **Test**: Run full integration tests on feature branch
-2. **Document**: Ensure all documentation is complete
-3. **PR to Dev**: Create PR from feature branch to dev
-4. **Review**: Get thorough review
-5. **Merge**: Merge to dev when approved
-6. **Test**: Verify everything works in dev
-7. **Release**: Eventually PR from dev to main
+1. **Document**: Ensure all documentation is complete
+1. **PR to Dev**: Create PR from feature branch to dev
+1. **Review**: Get thorough review
+1. **Merge**: Merge to dev when approved
+1. **Test**: Verify everything works in dev
+1. **Release**: Eventually PR from dev to main
 
 ## Example: Complete Docker Setup Subtask
 
@@ -129,6 +133,7 @@ git push -u origin feature/git-server-implementation/docker-setup/gitlab-dockerf
 ### Step 3: Create PR
 
 Create PR using the work template:
+
 - **From**: `feature/git-server-implementation/docker-setup/gitlab-dockerfile`
 - **To**: `feature/git-server-implementation/docker-setup`
 - **Template**: `work_template.md`
@@ -197,28 +202,32 @@ git checkout feature/git-server-implementation/authentication
 Use the appropriate template for each PR:
 
 1. **Work → Sub-Feature**: `.github/PULL_REQUEST_TEMPLATE/work_template.md`
-2. **Sub-Feature → Feature**: `.github/PULL_REQUEST_TEMPLATE/sub_feature_template.md`
-3. **Feature → Dev**: `.github/PULL_REQUEST_TEMPLATE/feature_template.md`
-4. **Dev → Main**: `.github/PULL_REQUEST_TEMPLATE/release_template.md`
+1. **Sub-Feature → Feature**: `.github/PULL_REQUEST_TEMPLATE/sub_feature_template.md`
+1. **Feature → Dev**: `.github/PULL_REQUEST_TEMPLATE/feature_template.md`
+1. **Dev → Main**: `.github/PULL_REQUEST_TEMPLATE/release_template.md`
 
 ## Benefits of This Approach
 
 ### Focused Work
+
 - Each PR is small and focused on one task
 - Easier to review and test
 - Faster feedback cycles
 
 ### Parallel Development
+
 - Multiple developers can work on different subtasks
 - No conflicts between different feature areas
 - Clear ownership of components
 
 ### Quality Control
+
 - Multiple review points (work → sub-feature → feature → dev)
 - Integration testing at each level
 - Documentation updated incrementally
 
 ### Progress Tracking
+
 - Clear visibility into feature progress
 - Easy to identify bottlenecks
 - Simple to manage dependencies
@@ -226,26 +235,31 @@ Use the appropriate template for each PR:
 ## Tips for Success
 
 ### 1. Keep PRs Small
+
 - One PR per work item
 - Focus on single responsibility
 - Easier to review and merge
 
 ### 2. Test Early and Often
+
 - Test each work item before PR
 - Run integration tests on sub-features
 - Full E2E tests on feature branch
 
 ### 3. Document as You Go
+
 - Update docs with each change
 - Add code comments
 - Update API documentation
 
 ### 4. Communicate
+
 - Comment on PRs
 - Update feature plan status
 - Ask questions early
 
 ### 5. Stay Synced
+
 - Regularly pull from base branches
 - Use sync-branches.sh script
 - Resolve conflicts early
@@ -266,6 +280,6 @@ Use the appropriate template for each PR:
 - See [GIT_SERVER_FEATURE_PLAN.md](GIT_SERVER_FEATURE_PLAN.md) for feature details
 - Open an issue or discussion for questions
 
----
+______________________________________________________________________
 
 **Ready to start?** Run the branch creation script and begin with the docker-setup subtask!

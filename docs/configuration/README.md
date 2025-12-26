@@ -5,6 +5,7 @@ This guide covers configuration options for AutoGit.
 ## Overview
 
 AutoGit uses a combination of:
+
 - Environment variables for secrets and deployment-specific settings
 - YAML configuration files for structural configuration
 - Runtime configuration through the web interface

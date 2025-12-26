@@ -2,16 +2,19 @@
 
 ## System Overview
 
-Autogit is designed as a containerized platform for self-hosted version control with automated runner management.
+Autogit is designed as a containerized platform for self-hosted version control with automated
+runner management.
 
 ## Components
 
 ### Git Server
+
 - Handles repository operations
 - Provides SSH and HTTP interfaces
 - Manages repository lifecycle
 
 ### Runner Coordinator
+
 - Orchestrates compute/GPU runners
 - Manages runner lifecycle (spawn, monitor, cleanup)
 - Interfaces with Docker daemon for container management
@@ -19,6 +22,7 @@ Autogit is designed as a containerized platform for self-hosted version control 
 ## Communication
 
 Services communicate via:
+
 - Docker network (`autogit-network`)
 - REST APIs between services
 - Shared volumes for data persistence
@@ -26,6 +30,7 @@ Services communicate via:
 ## Deployment
 
 Uses Docker Compose for app-level coordination:
+
 - Service dependencies managed automatically
 - Network isolation
 - Volume persistence

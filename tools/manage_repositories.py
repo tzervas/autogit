@@ -1,6 +1,8 @@
 import os
 import sys
+
 from tools.gitlab_client import GitLabClient
+
 
 def main():
     # Configuration
@@ -18,7 +20,7 @@ def main():
         project_name = "AutoGit Test Project"
         print(f"Creating project: {project_name}...")
         project = client.create_project(name=project_name)
-        project_id = project['id']
+        project_id = project["id"]
         print(f"✅ Project created with ID: {project_id}")
 
         # 2. Create a README file
@@ -28,7 +30,7 @@ def main():
             file_path="README.md",
             branch="main",
             content="# AutoGit Test Project\n\nThis project was created via the AutoGit API client.",
-            commit_message="Initial commit"
+            commit_message="Initial commit",
         )
         print("✅ README.md created.")
 
@@ -40,13 +42,13 @@ def main():
         # 4. Add a webhook (example)
         print("Adding webhook...")
         client.add_project_webhook(
-            project_id=project_id,
-            url="http://runner-coordinator:8080/webhook"
+            project_id=project_id, url="http://runner-coordinator:8080/webhook"
         )
         print("✅ Webhook added.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

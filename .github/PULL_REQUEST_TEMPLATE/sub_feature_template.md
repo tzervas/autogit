@@ -1,15 +1,10 @@
----
-name: Sub-Feature PR (Sub-Feature → Feature)
-about: Merge a sub-feature into its parent feature branch
-title: 'feat([feature]): [Sub-Feature Name]'
-labels: sub-feature
----
+______________________________________________________________________
+
+## name: Sub-Feature PR (Sub-Feature → Feature) about: Merge a sub-feature into its parent feature branch title: 'feat([feature]): [Sub-Feature Name]' labels: sub-feature
 
 ## 🎯 Sub-Feature Overview
 
-**Parent Feature**: [Feature name]
-**Sub-Feature**: [Sub-feature name]
-**Related Issue**: #[issue]
+**Parent Feature**: [Feature name] **Sub-Feature**: [Sub-feature name] **Related Issue**: #[issue]
 
 ## 📝 Description
 
@@ -28,15 +23,18 @@ Why is this sub-feature needed as part of the larger feature?
 ## 🧪 Testing
 
 ### Tests Added
+
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Component tests
 
 ### Test Coverage
+
 - Coverage: [XX]%
 - All tests pass: [ ]
 
 ### Test Results
+
 ```
 [Paste test output]
 ```
@@ -65,6 +63,7 @@ Why is this sub-feature needed as part of the larger feature?
 ## 🔄 Merge Status
 
 All work branches merged:
+
 - [ ] Work item 1
 - [ ] Work item 2
 
@@ -77,9 +76,9 @@ All work branches merged:
 
 ## 🔗 Related
 
-Related PRs: [Links]
-Closes: #[issue]
+Related PRs: [Links] Closes: #[issue]
 
----
+______________________________________________________________________
 
-**Integration Note**: This sub-feature is part of [parent feature]. It will be tested in full context when the feature PR is created.
+**Integration Note**: This sub-feature is part of [parent feature]. It will be tested in full
+context when the feature PR is created.

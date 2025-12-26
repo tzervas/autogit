@@ -1,28 +1,33 @@
 # Contributing to AutoGit
 
-Thank you for your interest in contributing to AutoGit! This guide will help you get started with the development workflow.
+Thank you for your interest in contributing to AutoGit! This guide will help you get started with
+the development workflow.
 
 ## Quick Start
 
 1. Fork the repository
-2. Clone your fork
-3. Run `./scripts/setup.sh`
-4. Create a feature branch (see [Branching Strategy](#branching-strategy) below)
-5. Make your changes
-6. Test with `docker-compose up`
-7. Submit a pull request
+1. Clone your fork
+1. Run `./scripts/setup.sh`
+1. Create a feature branch (see [Branching Strategy](#branching-strategy) below)
+1. Make your changes
+1. Test with `docker-compose up`
+1. Submit a pull request
 
 ## Branching Strategy
 
-AutoGit follows a structured branching model to maintain code quality and enable parallel development. Please read our complete [Branching Strategy Guide](development/branching-strategy.md) for detailed information.
+AutoGit follows a structured branching model to maintain code quality and enable parallel
+development. Please read our complete [Branching Strategy Guide](development/branching-strategy.md)
+for detailed information.
 
 ### Quick Reference
 
 #### Main Branches
+
 - **`main`** - Production-ready code (protected)
 - **`dev`** - Integration branch for features (protected)
 
 #### Feature Development
+
 ```
 dev
  └─ feature/<task-name>
@@ -33,6 +38,7 @@ dev
 #### Creating a Feature Branch
 
 Use our helper script:
+
 ```bash
 # Create feature with sub-features
 ./scripts/create-feature-branch.sh gpu-scheduling detection-service scheduler-logic
@@ -45,6 +51,7 @@ git push -u origin feature/gpu-scheduling
 ```
 
 #### Branch Naming Conventions
+
 - Feature: `feature/<name>`
 - Sub-feature: `feature/<name>/<subtask>`
 - Work item: `feature/<name>/<subtask>/<work-item>`
@@ -54,10 +61,11 @@ git push -u origin feature/gpu-scheduling
 **Use lowercase letters, numbers, and hyphens only.**
 
 #### Workflow
+
 1. Create feature branch from `dev`
-2. Break work into sub-features
-3. Create work branches for specific changes
-4. Merge work → sub-feature → feature → dev
+1. Break work into sub-features
+1. Create work branches for specific changes
+1. Merge work → sub-feature → feature → dev
 
 See [Branching Strategy](development/branching-strategy.md) for complete workflow.
 
@@ -74,6 +82,7 @@ See [Branching Strategy](development/branching-strategy.md) for complete workflo
 ## Service Development
 
 Each service should:
+
 - Have its own Dockerfile
 - Include a README in its directory
 - Expose health check endpoints
@@ -95,6 +104,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`
 
 **Examples**:
+
 ```
 feat(gpu): add NVIDIA GPU detection service
 fix(auth): resolve token expiration issue
@@ -106,6 +116,7 @@ docs: update branching strategy guide
 ### PR Templates
 
 We provide templates for different PR types:
+
 - **Release PR** (dev → main): Use `release_template.md`
 - **Feature PR** (feature → dev): Use `feature_template.md`
 - **Sub-Feature PR** (sub-feature → feature): Use `sub_feature_template.md`
@@ -114,6 +125,7 @@ We provide templates for different PR types:
 ### PR Requirements
 
 All PRs must include:
+
 - Clear description of changes
 - Tests (unit, integration, E2E as appropriate)
 - Updated documentation
@@ -137,6 +149,7 @@ See [Testing Guide](development/testing.md) for comprehensive testing guidelines
 ## Code Review
 
 All PRs require:
+
 - At least 1 approval
 - Passing CI/CD checks
 - No unresolved comments
@@ -154,6 +167,7 @@ We provide several helper scripts in `/scripts/`:
 ## Documentation
 
 Documentation is as important as code:
+
 - Update relevant docs with code changes
 - Follow markdown best practices
 - Include code examples

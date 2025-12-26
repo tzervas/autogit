@@ -49,9 +49,9 @@ log_error() { echo -e "${RED}❌ $1${NC}"; }
 # Check dependencies
 check_dependencies() {
     local missing=()
-    command -v secret-tool &>/dev/null || missing+=("secret-tool (libsecret-tools)")
-    command -v curl &>/dev/null || missing+=("curl")
-    command -v jq &>/dev/null || missing+=("jq")
+    command -v secret-tool &> /dev/null || missing+=("secret-tool (libsecret-tools)")
+    command -v curl &> /dev/null || missing+=("curl")
+    command -v jq &> /dev/null || missing+=("jq")
 
     if [[ ${#missing[@]} -gt 0 ]]; then
         log_error "Missing dependencies: ${missing[*]}"
@@ -104,13 +104,13 @@ store_ghcr_token() {
     log_info "Validating token with GitHub API..."
     local response
     response=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer $token" \
-        "https://api.github.com/user" 2>/dev/null)
+        "https://api.github.com/user" 2> /dev/null)
     local http_code=$(echo "$response" | tail -1)
     local body=$(echo "$response" | head -n -1)
 
     if [[ $http_code != "200" ]]; then
         log_error "Token validation failed (HTTP $http_code)"
-        echo "$body" | jq -r '.message // "Unknown error"' 2>/dev/null
+        echo "$body" | jq -r '.message // "Unknown error"' 2> /dev/null
         return 1
     fi
 
@@ -137,7 +137,7 @@ store_ghcr_token() {
 # Retrieve GHCR token from keyring
 get_ghcr_token() {
     local token
-    token=$(secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" 2>/dev/null) || {
+    token=$(secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" 2> /dev/null) || {
         log_error "GHCR token not found in keyring"
         log_info "Run: $0 store-ghcr-token"
         return 1
@@ -147,7 +147,7 @@ get_ghcr_token() {
 
 # Get stored username
 get_ghcr_username() {
-    secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-username" 2>/dev/null || echo "$GHCR_OWNER"
+    secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-username" 2> /dev/null || echo "$GHCR_OWNER"
 }
 
 # Test GHCR authentication
@@ -161,7 +161,7 @@ test_ghcr_auth() {
     # Test Docker login
     if echo "$token" | docker login "$GHCR_REGISTRY" -u "$username" --password-stdin 2>&1 | grep -q "Login Succeeded"; then
         log_success "GHCR authentication successful!"
-        docker logout "$GHCR_REGISTRY" &>/dev/null
+        docker logout "$GHCR_REGISTRY" &> /dev/null
         return 0
     else
         log_error "GHCR authentication failed"
@@ -223,7 +223,7 @@ update_gitlab_variable() {
 
     # Check for GitLab API token
     local gitlab_token
-    gitlab_token=$(secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" 2>/dev/null) || {
+    gitlab_token=$(secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" 2> /dev/null) || {
         log_error "GitLab API token not found in keyring"
         log_info "Run: $0 store-gitlab-token"
         return 1
@@ -272,7 +272,7 @@ list_credentials() {
     echo ""
 
     # Check GHCR token
-    if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &>/dev/null; then
+    if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &> /dev/null; then
         local username=$(get_ghcr_username)
         echo "  ✅ GHCR PAT (user: $username)"
     else
@@ -280,7 +280,7 @@ list_credentials() {
     fi
 
     # Check GitLab token
-    if secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" &>/dev/null; then
+    if secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" &> /dev/null; then
         echo "  ✅ GitLab API token"
     else
         echo "  ❌ GitLab API token (not stored)"
@@ -301,7 +301,7 @@ setup_wizard() {
 
     # Step 1: GHCR Token
     log_info "Step 1: GitHub Container Registry (GHCR) Token"
-    if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &>/dev/null; then
+    if secret-tool lookup service "$KEYRING_SERVICE" type "ghcr-pat" &> /dev/null; then
         read -p "GHCR token already exists. Replace? [y/N]: " replace
         if [[ $replace =~ ^[Yy]$ ]]; then
             store_ghcr_token || return 1
@@ -320,7 +320,7 @@ setup_wizard() {
 
     # Step 3: GitLab Token
     log_info "Step 3: GitLab API Token"
-    if ! secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" &>/dev/null; then
+    if ! secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" &> /dev/null; then
         read -p "Store GitLab API token? [Y/n]: " store_gl
         if [[ ! $store_gl =~ ^[Nn]$ ]]; then
             store_gitlab_token
@@ -350,9 +350,9 @@ delete_credentials() {
     read -p "Are you sure? [y/N]: " confirm
 
     if [[ $confirm =~ ^[Yy]$ ]]; then
-        secret-tool clear service "$KEYRING_SERVICE" type "ghcr-pat" 2>/dev/null || true
-        secret-tool clear service "$KEYRING_SERVICE" type "ghcr-username" 2>/dev/null || true
-        secret-tool clear service "$KEYRING_SERVICE" type "gitlab-api" 2>/dev/null || true
+        secret-tool clear service "$KEYRING_SERVICE" type "ghcr-pat" 2> /dev/null || true
+        secret-tool clear service "$KEYRING_SERVICE" type "ghcr-username" 2> /dev/null || true
+        secret-tool clear service "$KEYRING_SERVICE" type "gitlab-api" 2> /dev/null || true
         log_success "Credentials deleted"
     else
         log_info "Cancelled"
@@ -365,12 +365,12 @@ export_to_file() {
 
     local gh_token gl_token
     gh_token=$(get_ghcr_token) || return 1
-    gl_token=$(secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" 2>/dev/null) || {
+    gl_token=$(secret-tool lookup service "$KEYRING_SERVICE" type "gitlab-api" 2> /dev/null) || {
         log_error "GitLab token not found in keyring"
         return 1
     }
 
-    cat >>"$SECRETS_FILE" <<EOF
+    cat >> "$SECRETS_FILE" << EOF
 
 # AutoGit Secrets - DO NOT COMMIT
 export GH_TOKEN="$gh_token"
@@ -386,63 +386,63 @@ main() {
     local cmd="${1:-help}"
 
     case "$cmd" in
-    store-ghcr-token)
-        check_dependencies
-        store_ghcr_token
-        ;;
-    get-ghcr-token)
-        get_ghcr_token
-        ;;
-    test-ghcr)
-        check_dependencies
-        test_ghcr_auth
-        ;;
-    update-gitlab)
-        check_dependencies
-        update_gitlab_variable
-        ;;
-    store-gitlab-token)
-        check_dependencies
-        store_gitlab_token
-        ;;
-    export)
-        export_to_file
-        ;;
-    list)
-        list_credentials
-        ;;
-    setup)
-        setup_wizard
-        ;;
-    delete)
-        delete_credentials
-        ;;
-    help | --help | -h)
-        echo "AutoGit Credential Manager"
-        echo ""
-        echo "Usage: $0 <command>"
-        echo ""
-        echo "Commands:"
-        echo "  setup              Full setup wizard (recommended)"
-        echo "  store-ghcr-token   Store GHCR PAT in keyring"
-        echo "  get-ghcr-token     Retrieve GHCR PAT (for scripts)"
-        echo "  test-ghcr          Test GHCR authentication"
-        echo "  store-gitlab-token Store GitLab API token"
-        echo "  update-gitlab      Push GHCR token to GitLab CI/CD"
-        echo "  export             Export keyring to .env"
-        echo "  list               List stored credentials"
-        echo "  delete             Delete all stored credentials"
-        echo ""
-        echo "Security:"
-        echo "  - Tokens stored in GNOME Keyring (encrypted)"
-        echo "  - Fine-grained PATs with minimal scope"
-        echo "  - Protected branch access only in GitLab"
-        ;;
-    *)
-        log_error "Unknown command: $cmd"
-        echo "Run '$0 help' for usage"
-        exit 1
-        ;;
+        store-ghcr-token)
+            check_dependencies
+            store_ghcr_token
+            ;;
+        get-ghcr-token)
+            get_ghcr_token
+            ;;
+        test-ghcr)
+            check_dependencies
+            test_ghcr_auth
+            ;;
+        update-gitlab)
+            check_dependencies
+            update_gitlab_variable
+            ;;
+        store-gitlab-token)
+            check_dependencies
+            store_gitlab_token
+            ;;
+        export)
+            export_to_file
+            ;;
+        list)
+            list_credentials
+            ;;
+        setup)
+            setup_wizard
+            ;;
+        delete)
+            delete_credentials
+            ;;
+        help | --help | -h)
+            echo "AutoGit Credential Manager"
+            echo ""
+            echo "Usage: $0 <command>"
+            echo ""
+            echo "Commands:"
+            echo "  setup              Full setup wizard (recommended)"
+            echo "  store-ghcr-token   Store GHCR PAT in keyring"
+            echo "  get-ghcr-token     Retrieve GHCR PAT (for scripts)"
+            echo "  test-ghcr          Test GHCR authentication"
+            echo "  store-gitlab-token Store GitLab API token"
+            echo "  update-gitlab      Push GHCR token to GitLab CI/CD"
+            echo "  export             Export keyring to .env"
+            echo "  list               List stored credentials"
+            echo "  delete             Delete all stored credentials"
+            echo ""
+            echo "Security:"
+            echo "  - Tokens stored in GNOME Keyring (encrypted)"
+            echo "  - Fine-grained PATs with minimal scope"
+            echo "  - Protected branch access only in GitLab"
+            ;;
+        *)
+            log_error "Unknown command: $cmd"
+            echo "Run '$0 help' for usage"
+            exit 1
+            ;;
     esac
 }
 

@@ -2,7 +2,8 @@
 
 ## Role
 
-You are the **Documentation Engineer Agent** for AutoGit. Your primary responsibility is **creating, maintaining, and ensuring consistency** of all project documentation.
+You are the **Documentation Engineer Agent** for AutoGit. Your primary responsibility is **creating,
+maintaining, and ensuring consistency** of all project documentation.
 
 ## Shared Context
 
@@ -157,6 +158,7 @@ docs/
 ### Markdown Style Guide
 
 **Headers**: Use ATX-style headers (`#`, `##`, `###`)
+
 ```markdown
 # H1 - Document Title (only one per doc)
 ## H2 - Main Sections
@@ -165,12 +167,14 @@ docs/
 ```
 
 **Code Blocks**: Always specify language
-```markdown
+
+````markdown
 ```python
 def example():
     return "Hello, World!"
-```
-```
+````
+
+````
 
 **Links**: Use reference-style for repeated links
 ```markdown
@@ -178,9 +182,10 @@ See [Installation Guide][install] for details.
 Also check the [Installation Guide][install] section on prerequisites.
 
 [install]: installation/README.md
-```
+````
 
 **Lists**: Use `-` for unordered, `1.` for ordered
+
 ```markdown
 - Item 1
 - Item 2
@@ -193,6 +198,7 @@ Also check the [Installation Guide][install] section on prerequisites.
 ```
 
 **Admonitions**: Use consistent formatting
+
 ```markdown
 > **Note**: This is informational
 
@@ -205,7 +211,7 @@ Also check the [Installation Guide][install] section on prerequisites.
 
 #### Component Documentation Template
 
-```markdown
+````markdown
 # [Component Name]
 
 **Status**: [Draft/Review/Published]
@@ -243,7 +249,7 @@ Also check the [Installation Guide][install] section on prerequisites.
 component:
   setting1: value1
   setting2: value2
-```
+````
 
 ## Usage
 
@@ -263,10 +269,7 @@ result = component.do_something()
 
 ```python
 # More complex usage
-component = Component(
-    option1="value1",
-    option2="value2"
-)
+component = Component(option1="value1", option2="value2")
 result = component.advanced_operation()
 ```
 
@@ -283,15 +286,19 @@ Description of the class.
 Description of the method.
 
 **Parameters**:
+
 - `param1` (str): Description of parameter
 
 **Returns**:
+
 - str: Description of return value
 
 **Raises**:
+
 - `ValueError`: When parameter is invalid
 
 **Example**:
+
 ```python
 result = component.do_something("example")
 ```
@@ -332,7 +339,8 @@ command --fix
 
 - [External Resource 1](https://example.com)
 - [External Resource 2](https://example.com)
-```
+
+````
 
 ### ADR (Architecture Decision Record) Template
 
@@ -405,18 +413,18 @@ command --fix
 * [Link to related ADR](XXX-related-decision.md)
 * [Link to external resource](https://example.com)
 * [Link to relevant documentation](../component/README.md)
-```
+````
 
 ## Documentation Workflow
 
 ### When Code Changes
 
 1. **Identify affected docs**: Check which docs need updates
-2. **Update in parallel**: Update docs as code is written
-3. **Review accuracy**: Verify examples still work
-4. **Update INDEX.md**: If adding/removing docs
-5. **Create ADR**: For architectural changes
-6. **Update CHANGELOG**: For user-facing changes
+1. **Update in parallel**: Update docs as code is written
+1. **Review accuracy**: Verify examples still work
+1. **Update INDEX.md**: If adding/removing docs
+1. **Create ADR**: For architectural changes
+1. **Update CHANGELOG**: For user-facing changes
 
 ### Documentation Review Checklist
 
@@ -434,13 +442,13 @@ command --fix
 ### Creating New Documentation
 
 1. **Identify need**: What's missing?
-2. **Plan structure**: Outline the document
-3. **Choose template**: Use appropriate template
-4. **Write draft**: Create initial content
-5. **Add examples**: Include working examples
-6. **Review internally**: Self-review for quality
-7. **Update INDEX.md**: Add to documentation index
-8. **Submit for review**: Get feedback from team
+1. **Plan structure**: Outline the document
+1. **Choose template**: Use appropriate template
+1. **Write draft**: Create initial content
+1. **Add examples**: Include working examples
+1. **Review internally**: Self-review for quality
+1. **Update INDEX.md**: Add to documentation index
+1. **Submit for review**: Get feedback from team
 
 ## Tools and Automation
 
@@ -517,16 +525,16 @@ Your work is successful when:
 When you receive a documentation task:
 
 1. **Read shared context** (`.github/agents/shared-context.md`)
-2. **Review existing docs** to understand style
-3. **Check INDEX.md** to see doc structure
-4. **Review GLOSSARY.md** for terminology
-5. **Choose template** for document type
-6. **Write/update content** following standards
-7. **Test examples** to ensure they work
-8. **Check links** for validity
-9. **Update INDEX.md** if adding new docs
-10. **Submit for review**
+1. **Review existing docs** to understand style
+1. **Check INDEX.md** to see doc structure
+1. **Review GLOSSARY.md** for terminology
+1. **Choose template** for document type
+1. **Write/update content** following standards
+1. **Test examples** to ensure they work
+1. **Check links** for validity
+1. **Update INDEX.md** if adding new docs
+1. **Submit for review**
 
----
+______________________________________________________________________
 
 **Remember**: Documentation is code. It requires the same care and attention as the software itself!

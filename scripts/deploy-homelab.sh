@@ -37,22 +37,22 @@ DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-    --full)
-        FULL_REBUILD=true
-        shift
-        ;;
-    --sync-only)
-        SYNC_ONLY=true
-        shift
-        ;;
-    --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-    *)
-        echo "Unknown option: $1"
-        exit 1
-        ;;
+        --full)
+            FULL_REBUILD=true
+            shift
+            ;;
+        --sync-only)
+            SYNC_ONLY=true
+            shift
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
     esac
 done
 
@@ -150,7 +150,7 @@ check_image_needs_rebuild() {
     # Get local source hash
     local local_hash
     if [[ -d "$PROJECT_ROOT/services/$service" ]]; then
-        local_hash=$(find "$PROJECT_ROOT/services/$service" -type f \( -name "*.py" -o -name "Dockerfile" -o -name "requirements.txt" \) -exec md5sum {} \; 2>/dev/null | sort | md5sum | cut -d' ' -f1)
+        local_hash=$(find "$PROJECT_ROOT/services/$service" -type f \( -name "*.py" -o -name "Dockerfile" -o -name "requirements.txt" \) -exec md5sum {} \; 2> /dev/null | sort | md5sum | cut -d' ' -f1)
     else
         return 0 # Rebuild if we can't hash
     fi
@@ -158,7 +158,7 @@ check_image_needs_rebuild() {
     # Get remote source hash
     local remote_hash
     # shellcheck disable=SC2029 # Intentional client-side expansion for HOMELAB_PATH
-    remote_hash=$(ssh "$HOMELAB_HOST" "find $HOMELAB_PATH/services/$service -type f \( -name '*.py' -o -name 'Dockerfile' -o -name 'requirements.txt' \) -exec md5sum {} \; 2>/dev/null | sort | md5sum | cut -d' ' -f1" 2>/dev/null || echo "")
+    remote_hash=$(ssh "$HOMELAB_HOST" "find $HOMELAB_PATH/services/$service -type f \( -name '*.py' -o -name 'Dockerfile' -o -name 'requirements.txt' \) -exec md5sum {} \; 2>/dev/null | sort | md5sum | cut -d' ' -f1" 2> /dev/null || echo "")
 
     if [[ $local_hash != "$remote_hash" ]]; then
         log_info "Source changes detected for $service"
@@ -166,7 +166,7 @@ check_image_needs_rebuild() {
     fi
 
     # Check if image exists
-    if ! ssh_cmd "docker image inspect $image_name" &>/dev/null; then
+    if ! ssh_cmd "docker image inspect $image_name" &> /dev/null; then
         log_info "Image $image_name does not exist"
         return 0 # Needs rebuild
     fi
@@ -205,7 +205,7 @@ deploy_containers() {
 
     # Check current state
     local running_containers
-    running_containers=$(ssh_cmd "docker ps --filter 'name=autogit' --format '{{.Names}}'" 2>/dev/null || echo "")
+    running_containers=$(ssh_cmd "docker ps --filter 'name=autogit' --format '{{.Names}}'" 2> /dev/null || echo "")
 
     if [[ -n $running_containers ]]; then
         log_info "Running AutoGit containers: $running_containers"
@@ -249,7 +249,7 @@ health_check() {
     fi
 
     # Check coordinator API
-    if ssh "$HOMELAB_HOST" "curl -sf http://localhost:8080/health" &>/dev/null; then
+    if ssh "$HOMELAB_HOST" "curl -sf http://localhost:8080/health" &> /dev/null; then
         log_success "Coordinator API responding"
     else
         log_warning "Coordinator API not responding yet"
@@ -263,17 +263,17 @@ show_status() {
 
     # Container status
     echo "=== Containers ==="
-    ssh_cmd "docker ps -a --filter 'name=autogit' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'" 2>/dev/null || echo "Unable to get container status"
+    ssh_cmd "docker ps -a --filter 'name=autogit' --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'" 2> /dev/null || echo "Unable to get container status"
     echo ""
 
     # Network status
     echo "=== Network ==="
-    ssh_cmd "docker network ls --filter 'name=autogit'" 2>/dev/null || echo "Unable to get network status"
+    ssh_cmd "docker network ls --filter 'name=autogit'" 2> /dev/null || echo "Unable to get network status"
     echo ""
 
     # Recent coordinator logs
     echo "=== Recent Coordinator Logs ==="
-    ssh_cmd "docker logs autogit-runner-coordinator 2>&1 | tail -10" 2>/dev/null || echo "Unable to get logs"
+    ssh_cmd "docker logs autogit-runner-coordinator 2>&1 | tail -10" 2> /dev/null || echo "Unable to get logs"
 }
 
 # Main

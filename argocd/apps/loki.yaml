@@ -1,0 +1,114 @@
+# =============================================================================
+# Loki Stack Application
+# =============================================================================
+# Deploys Loki and Promtail for log aggregation
+# Part of observability stack (sync wave 3)
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-loki
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-loki
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: loki-stack
+    targetRevision: "2.10.2"
+    helm:
+      releaseName: loki
+      values: |
+        loki:
+          enabled: true
+          persistence:
+            enabled: true
+            size: 10Gi
+          config:
+            auth_enabled: false
+            server:
+              http_listen_port: 3100
+            ingester:
+              lifecycler:
+                ring:
+                  replication_factor: 1
+            schema_config:
+              configs:
+                - from: 2024-01-01
+                  store: boltdb-shipper
+                  object_store: filesystem
+                  schema: v11
+                  index:
+                    prefix: index_
+                    period: 24h
+            storage_config:
+              boltdb_shipper:
+                active_index_directory: /data/loki/boltdb-shipper-active
+                cache_location: /data/loki/boltdb-shipper-cache
+                shared_store: filesystem
+              filesystem:
+                directory: /data/loki/chunks
+            limits_config:
+              retention_period: 168h  # 7 days
+              max_entries_limit_per_query: 5000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+        
+        promtail:
+          enabled: true
+          config:
+            clients:
+              - url: http://loki:3100/loki/api/v1/push
+            positions:
+              filename: /run/promtail/positions.yaml
+            scrape_configs:
+              - job_name: kubernetes-pods
+                kubernetes_sd_configs:
+                  - role: pod
+                relabel_configs:
+                  - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+                    target_label: app
+                  - source_labels: [__meta_kubernetes_namespace]
+                    target_label: namespace
+                  - source_labels: [__meta_kubernetes_pod_name]
+                    target_label: pod
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+        
+        grafana:
+          enabled: false  # Using kube-prometheus-stack grafana
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-observability
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

@@ -1,0 +1,157 @@
+# =============================================================================
+# GitLab CE Application
+# =============================================================================
+# Deploys GitLab CE using the official Helm chart with AutoGit customizations
+# Sync wave 1: Core service
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-gitlab
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-gitlab
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: git-server
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: autogit-deploys
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://charts.gitlab.io
+    chart: gitlab
+    targetRevision: "8.7.0"  # GitLab 17.x
+    helm:
+      releaseName: gitlab
+      valueFiles:
+        - values.yaml
+      # Inline values override (can reference external values file)
+      values: |
+        global:
+          hosts:
+            domain: vectorweight.com
+            gitlab:
+              name: gitlab.vectorweight.com
+              https: true
+            registry:
+              name: registry.vectorweight.com
+              https: true
+          
+          ingress:
+            configureCertmanager: true
+            class: traefik
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+          
+          # Disable components not needed for homelab
+          grafana:
+            enabled: false
+          prometheus:
+            install: false
+          
+          # Resource optimization for homelab
+          kas:
+            enabled: false
+          
+          # GitLab Shell (SSH)
+          shell:
+            port: 22
+        
+        # GitLab Rails configuration
+        gitlab:
+          webservice:
+            replicaCount: 1
+            resources:
+              requests:
+                cpu: 1
+                memory: 2Gi
+              limits:
+                cpu: 4
+                memory: 8Gi
+            workerProcesses: 4
+          
+          sidekiq:
+            replicas: 1
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 2
+                memory: 4Gi
+            concurrency: 15
+          
+          gitaly:
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 2
+                memory: 4Gi
+        
+        # PostgreSQL configuration
+        postgresql:
+          primary:
+            resources:
+              requests:
+                cpu: 500m
+                memory: 1Gi
+              limits:
+                cpu: 2
+                memory: 4Gi
+        
+        # Redis configuration
+        redis:
+          master:
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 1Gi
+        
+        # Registry (disabled for homelab)
+        registry:
+          enabled: false
+        
+        # Certmanager issuer
+        certmanager-issuer:
+          email: tz-dev@vectorweight.com
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-gitlab
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  
+  # Ignore dynamic fields that change frequently
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: batch
+      kind: Job
+      jsonPointers:
+        - /spec/selector
+        - /spec/template/metadata/labels

@@ -1,0 +1,76 @@
+# =============================================================================
+# GitLab Runner Service Account and RBAC
+# =============================================================================
+# Service account and permissions for GitLab runners to execute in the cluster
+# =============================================================================
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-runner
+  namespace: autogit-runners
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+    app.kubernetes.io/part-of: autogit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitlab-runner
+  namespace: autogit-runners
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+    app.kubernetes.io/part-of: autogit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+rules:
+  # Pod management for CI/CD jobs
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["pods/attach"]
+    verbs: ["create"]
+  # Secrets for job configuration
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "delete", "update"]
+  # ConfigMaps for job configuration
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "create", "delete", "update"]
+  # PVCs for job storage
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "create", "delete"]
+  # Services for helper containers
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gitlab-runner
+  namespace: autogit-runners
+  labels:
+    app.kubernetes.io/name: gitlab-runner
+    app.kubernetes.io/part-of: autogit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gitlab-runner
+subjects:
+  - kind: ServiceAccount
+    name: gitlab-runner
+    namespace: autogit-runners

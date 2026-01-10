@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "runner-coordinator.fullname" . }}
+  labels:
+    {{- include "runner-coordinator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "runner-coordinator.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate  # Required for SQLite with PVC
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "runner-coordinator.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "runner-coordinator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: SERVICE_NAME
+              value: "runner-coordinator"
+            - name: GITLAB_URL
+              value: {{ .Values.config.gitlabUrl | quote }}
+            - name: RUNNER_COOLDOWN_MINUTES
+              value: {{ .Values.config.cooldownMinutes | quote }}
+            - name: MAX_IDLE_RUNNERS
+              value: {{ .Values.config.maxIdleRunners | quote }}
+            - name: RUNNER_NETWORK
+              value: {{ .Values.config.runnerNetwork | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            - name: DATABASE_URL
+              value: "sqlite:///data/runner_coordinator.db"
+            {{- if .Values.executor.kubernetes.enabled }}
+            - name: EXECUTOR_TYPE
+              value: "kubernetes"
+            - name: K8S_NAMESPACE
+              value: {{ .Values.executor.kubernetes.namespace | quote }}
+            - name: K8S_SERVICE_ACCOUNT
+              value: {{ .Values.executor.kubernetes.serviceAccount | quote }}
+            {{- else if .Values.executor.docker.enabled }}
+            - name: EXECUTOR_TYPE
+              value: "docker"
+            - name: DOCKER_HOST
+              value: "unix://{{ .Values.executor.docker.socketPath }}"
+            {{- end }}
+            - name: GITLAB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "runner-coordinator.secretName" . }}
+                  key: GITLAB_TOKEN
+            - name: GITLAB_RUNNER_REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "runner-coordinator.secretName" . }}
+                  key: GITLAB_RUNNER_REGISTRATION_TOKEN
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            {{- if and .Values.executor.docker.enabled (not .Values.executor.kubernetes.enabled) }}
+            - name: docker-socket
+              mountPath: {{ .Values.executor.docker.socketPath }}
+            {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "runner-coordinator.fullname" . }}
+        {{- end }}
+        {{- if and .Values.executor.docker.enabled (not .Values.executor.kubernetes.enabled) }}
+        - name: docker-socket
+          hostPath:
+            path: {{ .Values.executor.docker.socketPath }}
+            type: Socket
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

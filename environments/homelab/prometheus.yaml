@@ -1,0 +1,101 @@
+# =============================================================================
+# Homelab - Prometheus Stack Values
+# =============================================================================
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    retentionSize: 10GB
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    
+    additionalScrapeConfigs:
+      - job_name: 'runner-coordinator'
+        static_configs:
+          - targets: ['runner-coordinator.autogit-system:8080']
+      - job_name: 'traefik'
+        static_configs:
+          - targets: ['traefik.traefik:8080']
+
+grafana:
+  enabled: true
+  adminPassword: ""  # Set via existingSecret
+  
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    hosts:
+      - grafana.vectorweight.com
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.vectorweight.com
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki.autogit-observability:3100
+      access: proxy
+    - name: Tempo
+      type: tempo
+      url: http://tempo.autogit-observability:3200
+      access: proxy
+  
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

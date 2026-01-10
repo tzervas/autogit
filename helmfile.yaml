@@ -1,0 +1,158 @@
+# =============================================================================
+# AutoGit Helmfile Configuration
+# =============================================================================
+# Declarative specification for deploying multiple Helm charts
+#
+# Usage:
+#   helmfile sync                    # Deploy all releases
+#   helmfile diff                    # Show changes
+#   helmfile -e homelab sync         # Deploy to homelab environment
+#   helmfile destroy                 # Remove all releases
+#
+# Documentation: docs/installation/helmfile.md
+# =============================================================================
+
+helmDefaults:
+  wait: true
+  waitForJobs: true
+  timeout: 600
+  recreatePods: false
+  force: false
+  atomic: true
+  cleanupOnFail: true
+
+# =============================================================================
+# Helm Repositories
+# =============================================================================
+repositories:
+  - name: gitlab
+    url: https://charts.gitlab.io
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+# =============================================================================
+# Environments
+# =============================================================================
+environments:
+  default:
+    values:
+      - environments/default.yaml
+  homelab:
+    values:
+      - environments/homelab.yaml
+  staging:
+    values:
+      - environments/staging.yaml
+  production:
+    values:
+      - environments/production.yaml
+
+# =============================================================================
+# Releases
+# =============================================================================
+releases:
+  # ---------------------------------------------------------------------------
+  # Infrastructure Layer (Wave 0)
+  # ---------------------------------------------------------------------------
+  
+  # cert-manager - TLS certificate management
+  - name: cert-manager
+    namespace: cert-manager
+    createNamespace: true
+    chart: jetstack/cert-manager
+    version: "v1.16.2"
+    values:
+      - charts/values/cert-manager.yaml
+      - environments/{{ .Environment.Name }}/cert-manager.yaml
+    set:
+      - name: installCRDs
+        value: "true"
+    hooks:
+      - events: ["presync"]
+        showlogs: true
+        command: "kubectl"
+        args:
+          - "apply"
+          - "-f"
+          - "argocd/base/namespaces.yaml"
+  
+  # Traefik - Ingress controller
+  - name: traefik
+    namespace: traefik
+    createNamespace: true
+    chart: traefik/traefik
+    version: "32.1.0"
+    values:
+      - charts/values/traefik.yaml
+      - environments/{{ .Environment.Name }}/traefik.yaml
+    needs:
+      - cert-manager/cert-manager
+
+  # ---------------------------------------------------------------------------
+  # Core Services Layer (Wave 1)
+  # ---------------------------------------------------------------------------
+  
+  # GitLab CE - Git server
+  - name: gitlab
+    namespace: autogit-gitlab
+    createNamespace: true
+    chart: gitlab/gitlab
+    version: "8.7.0"
+    values:
+      - charts/values/gitlab.yaml
+      - environments/{{ .Environment.Name }}/gitlab.yaml
+    needs:
+      - traefik/traefik
+      - cert-manager/cert-manager
+    timeout: 1200  # GitLab takes longer to deploy
+
+  # ---------------------------------------------------------------------------
+  # Application Layer (Wave 2)
+  # ---------------------------------------------------------------------------
+  
+  # Runner Coordinator - Dynamic runner management
+  - name: runner-coordinator
+    namespace: autogit-system
+    createNamespace: true
+    chart: ./charts/runner-coordinator
+    values:
+      - charts/runner-coordinator/values.yaml
+      - environments/{{ .Environment.Name }}/runner-coordinator.yaml
+    needs:
+      - autogit-gitlab/gitlab
+
+  # ---------------------------------------------------------------------------
+  # Observability Layer (Wave 3)
+  # ---------------------------------------------------------------------------
+  
+  # Prometheus + Grafana stack
+  - name: prometheus
+    namespace: autogit-observability
+    createNamespace: true
+    chart: prometheus-community/kube-prometheus-stack
+    version: "65.1.0"
+    values:
+      - charts/values/prometheus.yaml
+      - environments/{{ .Environment.Name }}/prometheus.yaml
+    needs:
+      - autogit-system/runner-coordinator
+  
+  # Loki - Log aggregation
+  - name: loki
+    namespace: autogit-observability
+    createNamespace: true
+    chart: grafana/loki-stack
+    version: "2.10.2"
+    values:
+      - charts/values/loki.yaml
+      - environments/{{ .Environment.Name }}/loki.yaml
+    needs:
+      - autogit-observability/prometheus

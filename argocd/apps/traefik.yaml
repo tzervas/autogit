@@ -1,0 +1,121 @@
+# =============================================================================
+# Traefik Ingress Controller Application
+# =============================================================================
+# Deploys Traefik as the ingress controller with Let's Encrypt integration
+# Sync wave 0: Infrastructure
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-traefik
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-traefik
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: ingress
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://traefik.github.io/charts
+    chart: traefik
+    targetRevision: "32.1.0"
+    helm:
+      releaseName: traefik
+      values: |
+        # Deployment configuration
+        deployment:
+          replicas: 1
+        
+        # Service configuration
+        service:
+          type: LoadBalancer
+          annotations: {}
+        
+        # Ports configuration
+        ports:
+          web:
+            port: 8000
+            exposedPort: 80
+            protocol: TCP
+            redirectTo:
+              port: websecure
+          websecure:
+            port: 8443
+            exposedPort: 443
+            protocol: TCP
+            tls:
+              enabled: true
+          metrics:
+            port: 9100
+            exposedPort: 9100
+            protocol: TCP
+        
+        # Ingress class
+        ingressClass:
+          enabled: true
+          isDefaultClass: true
+        
+        # Dashboard
+        ingressRoute:
+          dashboard:
+            enabled: true
+            matchRule: Host(`traefik.vectorweight.com`)
+            entryPoints:
+              - websecure
+        
+        # Logs
+        logs:
+          general:
+            level: INFO
+          access:
+            enabled: true
+        
+        # Metrics for Prometheus
+        metrics:
+          prometheus:
+            entryPoint: metrics
+            addEntryPointsLabels: true
+            addServicesLabels: true
+        
+        # Resources
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        
+        # Additional arguments
+        additionalArguments:
+          - "--api.insecure=false"
+          - "--api.dashboard=true"
+          - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+          - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+          - "--providers.kubernetescrd.allowCrossNamespace=true"
+        
+        # RBAC
+        rbac:
+          enabled: true
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

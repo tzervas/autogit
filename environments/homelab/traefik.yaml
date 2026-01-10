@@ -1,0 +1,65 @@
+# =============================================================================
+# Homelab - Traefik Values
+# =============================================================================
+
+deployment:
+  replicas: 1
+
+service:
+  type: LoadBalancer
+
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+    redirectTo:
+      port: websecure
+  websecure:
+    port: 8443
+    exposedPort: 443
+    tls:
+      enabled: true
+  metrics:
+    port: 9100
+    exposedPort: 9100
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.vectorweight.com`)
+    entryPoints:
+      - websecure
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+metrics:
+  prometheus:
+    entryPoint: metrics
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+additionalArguments:
+  - "--api.insecure=false"
+  - "--api.dashboard=true"
+  - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+  - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+  - "--providers.kubernetescrd.allowCrossNamespace=true"
+
+rbac:
+  enabled: true

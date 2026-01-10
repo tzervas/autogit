@@ -1,0 +1,48 @@
+# =============================================================================
+# Default Values - GitLab
+# =============================================================================
+# Reference: https://artifacthub.io/packages/helm/gitlab/gitlab
+# =============================================================================
+
+global:
+  hosts:
+    domain: autogit.local
+    https: true
+  
+  ingress:
+    configureCertmanager: true
+    class: traefik
+  
+  grafana:
+    enabled: false
+  
+  prometheus:
+    install: false
+
+gitlab:
+  webservice:
+    replicaCount: 1
+    workerProcesses: 2
+  
+  sidekiq:
+    replicas: 1
+    concurrency: 10
+  
+  gitaly:
+    replicas: 1
+
+postgresql:
+  primary:
+    persistence:
+      size: 8Gi
+
+redis:
+  master:
+    persistence:
+      size: 5Gi
+
+registry:
+  enabled: false
+
+certmanager-issuer:
+  email: admin@autogit.local

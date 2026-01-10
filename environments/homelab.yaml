@@ -1,0 +1,64 @@
+# =============================================================================
+# Homelab Environment Values
+# =============================================================================
+# Configuration for homelab deployment at vectorweight.com
+# =============================================================================
+
+# Global settings
+global:
+  domain: vectorweight.com
+  clusterIssuer: letsencrypt-prod
+  storageClass: ""  # Use default storage class
+
+# Resource profiles
+resources:
+  profile: standard
+
+# Feature flags
+features:
+  monitoring: true
+  logging: true
+  tracing: false
+  registry: false
+
+# GitLab configuration
+gitlab:
+  host: gitlab.vectorweight.com
+  https: true
+  resources:
+    webservice:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 4
+        memory: 8Gi
+    sidekiq:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+# Runner coordinator configuration
+runnerCoordinator:
+  gitlabUrl: https://gitlab.vectorweight.com
+  cooldownMinutes: 5
+  maxIdleRunners: 0
+  logLevel: INFO
+
+# Traefik configuration
+traefik:
+  dashboard:
+    host: traefik.vectorweight.com
+
+# Grafana configuration
+grafana:
+  host: grafana.vectorweight.com
+  adminPassword: ""  # Set via secret
+
+# cert-manager configuration
+certManager:
+  email: tz-dev@vectorweight.com
+  solver: http01

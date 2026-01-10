@@ -1,0 +1,46 @@
+# =============================================================================
+# Runner Coordinator Private Values - Homelab Environment
+# =============================================================================
+# Copy to runner-coordinator.yaml and fill in your actual values
+# =============================================================================
+
+# GitLab connection
+gitlab:
+  url: https://gitlab.vectorweight.com
+  # Token should be stored in Kubernetes Secret
+  # tokenSecretName: gitlab-runner-token
+  # tokenSecretKey: token
+
+# Coordinator settings
+coordinator:
+  ingress:
+    enabled: true
+    className: traefik
+    hosts:
+      - host: runner-coordinator.vectorweight.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: runner-coordinator-tls
+        hosts:
+          - runner-coordinator.vectorweight.com
+
+# Runner pool configuration
+runnerPool:
+  # Minimum runners to keep warm
+  minRunners: 1
+  # Maximum runners to scale to
+  maxRunners: 10
+  # Runner idle timeout before scaling down
+  idleTimeout: 300
+
+# GPU runner configuration (if available)
+gpuRunners:
+  enabled: false
+  # nodeSelector:
+  #   nvidia.com/gpu: "true"
+  # tolerations:
+  #   - key: nvidia.com/gpu
+  #     operator: Exists
+  #     effect: NoSchedule

@@ -2,7 +2,7 @@
 # cert-manager Application
 # =============================================================================
 # Deploys cert-manager for automatic TLS certificate management
-# Sync wave 0: Infrastructure
+# Values are loaded from charts/values/ - no inline overrides
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -20,55 +20,20 @@ metadata:
 spec:
   project: default
   
-  source:
-    repoURL: https://charts.jetstack.io
-    chart: cert-manager
-    targetRevision: "v1.16.2"
-    helm:
-      releaseName: cert-manager
-      values: |
-        # Install CRDs
-        installCRDs: true
-        
-        # Replicas
-        replicaCount: 1
-        
-        # Resources
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
-        
-        # Webhook configuration
-        webhook:
-          replicaCount: 1
-          resources:
-            requests:
-              cpu: 25m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
-        
-        # CA Injector configuration
-        cainjector:
-          replicaCount: 1
-          resources:
-            requests:
-              cpu: 25m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
-        
-        # Prometheus metrics
-        prometheus:
-          enabled: true
-          servicemonitor:
-            enabled: true
+  sources:
+    # Primary source: cert-manager Helm chart
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: "v1.16.2"
+      helm:
+        releaseName: cert-manager
+        valueFiles:
+          - $values/charts/values/cert-manager.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
   
   destination:
     server: https://kubernetes.default.svc
@@ -87,7 +52,6 @@ spec:
         factor: 2
         maxDuration: 3m
   
-  # Ignore webhook CA bundle changes
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration

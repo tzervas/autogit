@@ -1,8 +1,8 @@
 # =============================================================================
 # Observability Stack Application
 # =============================================================================
-# Deploys Prometheus, Grafana, Loki, and Tempo using kube-prometheus-stack
-# Sync wave 3: Monitoring (deployed after core services)
+# Deploys Prometheus, Grafana using kube-prometheus-stack
+# Values are loaded from charts/values/ - no inline overrides
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -20,122 +20,20 @@ metadata:
 spec:
   project: default
   
-  source:
-    repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: "65.1.0"
-    helm:
-      releaseName: prometheus
-      values: |
-        # Global settings
-        global:
-          scrape_interval: 30s
-          evaluation_interval: 30s
-        
-        # Prometheus configuration
-        prometheus:
-          prometheusSpec:
-            retention: 15d
-            retentionSize: 10GB
-            resources:
-              requests:
-                cpu: 200m
-                memory: 512Mi
-              limits:
-                cpu: 1
-                memory: 2Gi
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 20Gi
-            
-            # Additional scrape configs for AutoGit services
-            additionalScrapeConfigs:
-              - job_name: 'runner-coordinator'
-                static_configs:
-                  - targets: ['runner-coordinator.autogit-system:8080']
-              - job_name: 'traefik'
-                static_configs:
-                  - targets: ['traefik.traefik:8080']
-        
-        # Grafana configuration
-        grafana:
-          enabled: true
-          adminPassword: ""  # Use existingSecret
-          adminUser: admin
-          
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            annotations:
-              traefik.ingress.kubernetes.io/router.entrypoints: websecure
-              traefik.ingress.kubernetes.io/router.tls: "true"
-              cert-manager.io/cluster-issuer: letsencrypt-prod
-            hosts:
-              - grafana.vectorweight.com
-            tls:
-              - secretName: grafana-tls
-                hosts:
-                  - grafana.vectorweight.com
-          
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          
-          # Additional datasources
-          additionalDataSources:
-            - name: Loki
-              type: loki
-              url: http://loki.autogit-observability:3100
-              access: proxy
-            - name: Tempo
-              type: tempo
-              url: http://tempo.autogit-observability:3200
-              access: proxy
-          
-          # Sidecar for dashboard provisioning
-          sidecar:
-            dashboards:
-              enabled: true
-              label: grafana_dashboard
-              folder: /tmp/dashboards
-        
-        # Alertmanager configuration
-        alertmanager:
-          enabled: true
-          alertmanagerSpec:
-            resources:
-              requests:
-                cpu: 50m
-                memory: 64Mi
-              limits:
-                cpu: 200m
-                memory: 256Mi
-        
-        # Node exporter
-        nodeExporter:
-          enabled: true
-        
-        # Kube state metrics
-        kubeStateMetrics:
-          enabled: true
-        
-        # Prometheus Operator
-        prometheusOperator:
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 200m
-              memory: 256Mi
+  sources:
+    # Primary source: kube-prometheus-stack Helm chart
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "65.1.0"
+      helm:
+        releaseName: prometheus
+        valueFiles:
+          - $values/charts/values/prometheus.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
   
   destination:
     server: https://kubernetes.default.svc

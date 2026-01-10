@@ -2,7 +2,8 @@
 # Runner Coordinator Application
 # =============================================================================
 # Deploys the AutoGit Runner Coordinator using the custom Helm chart
-# Sync wave 2: Supporting service (depends on GitLab)
+# Values are loaded from charts/runner-coordinator/values.yaml
+# Private/sensitive values should come from a separate private repository
 # =============================================================================
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -28,62 +29,6 @@ spec:
       releaseName: runner-coordinator
       valueFiles:
         - values.yaml
-      values: |
-        # Homelab-specific overrides
-        config:
-          gitlabUrl: "https://gitlab.vectorweight.com"
-          cooldownMinutes: 5
-          maxIdleRunners: 0
-          logLevel: "INFO"
-        
-        # Use existing secret for tokens
-        existingSecret: "autogit-gitlab-tokens"
-        
-        # Kubernetes executor configuration
-        executor:
-          type: kubernetes
-          kubernetes:
-            enabled: true
-            namespace: autogit-runners
-            serviceAccount: gitlab-runner
-        
-        # Resource limits for homelab
-        resources:
-          limits:
-            cpu: "2"
-            memory: 2Gi
-          requests:
-            cpu: "500m"
-            memory: 512Mi
-        
-        # Persistence for SQLite
-        persistence:
-          enabled: true
-          size: 2Gi
-        
-        # Enable metrics
-        metrics:
-          enabled: true
-          serviceMonitor:
-            enabled: true
-        
-        # Ingress for API access
-        ingress:
-          enabled: true
-          className: traefik
-          annotations:
-            traefik.ingress.kubernetes.io/router.entrypoints: websecure
-            traefik.ingress.kubernetes.io/router.tls: "true"
-            cert-manager.io/cluster-issuer: letsencrypt-prod
-          hosts:
-            - host: runner.vectorweight.com
-              paths:
-                - path: /
-                  pathType: Prefix
-          tls:
-            - secretName: runner-coordinator-tls
-              hosts:
-                - runner.vectorweight.com
   
   destination:
     server: https://kubernetes.default.svc

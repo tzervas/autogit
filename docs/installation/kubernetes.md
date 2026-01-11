@@ -24,7 +24,46 @@ management.
 
 - ArgoCD installed and accessible
 - GitHub repository access (for ArgoCD to pull manifests)
-- DNS configured for your domain (e.g., `*.vectorweight.com`)
+- DNS configured for your domain (e.g., `*.example.com`)
+
+## Configuration Overview
+
+AutoGit uses a **parameterized configuration approach** where all environment-specific values are
+defined in a single `.env.k8s` file. The provided environment files in `environments/` contain
+template values that you customize for your deployment.
+
+### Quick Setup
+
+1. **Copy the environment template:**
+   ```bash
+   cp .env.k8s.example .env.k8s
+   ```
+
+2. **Edit `.env.k8s` with your values:**
+   ```bash
+   nano .env.k8s
+   ```
+   
+   Minimum required values:
+   - `DOMAIN` - Your base domain (e.g., `example.com`)
+   - `LETSENCRYPT_EMAIL` - Email for TLS certificate notifications
+   - `GITLAB_TOKEN` - GitLab API token (after first boot)
+   - `GITLAB_RUNNER_REGISTRATION_TOKEN` - Runner token (after first boot)
+
+3. **Customize environment files:**
+   ```bash
+   ./scripts/customize-k8s-env.sh homelab
+   ```
+   
+   This script will show your configuration and optionally update all YAML files
+   with your domain and settings.
+
+4. **Create Kubernetes secrets:**
+   ```bash
+   ./scripts/create-k8s-secrets.sh
+   ```
+   
+   This creates all required secrets in your cluster from `.env.k8s` values.
 
 ## Architecture Overview
 
@@ -70,7 +109,25 @@ For environments without ArgoCD, Helmfile provides declarative Helm chart manage
 
 ## Option 1: ArgoCD Deployment
 
-### Step 1: Connect Repository to ArgoCD
+### Step 1: Configure Your Environment
+
+**Important:** Before deploying, you must customize the configuration for your domain and environment.
+
+```bash
+# 1. Copy the environment template
+cp .env.k8s.example .env.k8s
+
+# 2. Edit with your values (at minimum: DOMAIN and LETSENCRYPT_EMAIL)
+nano .env.k8s
+
+# 3. Customize environment files with your domain
+./scripts/customize-k8s-env.sh homelab
+
+# 4. Review the changes
+git diff environments/homelab
+```
+
+### Step 2: Connect Repository to ArgoCD
 
 ```bash
 # Add the AutoGit repository to ArgoCD
@@ -92,9 +149,29 @@ argocd repo add https://github.com/tzervas/autogit.git \
   --password <github-token>
 ```
 
-### Step 2: Create Required Secrets
+### Step 3: Create Required Secrets
 
-Before deploying, create the required secrets:
+Use the provided script to create all required secrets from your `.env.k8s` file:
+
+```bash
+# Create all secrets automatically
+./scripts/create-k8s-secrets.sh
+```
+
+This script creates:
+- GitLab API tokens secret in `autogit-system` namespace
+- Grafana admin password secret in `autogit-observability` namespace  
+- SMTP credentials (if `SMTP_ENABLED=true`)
+- External database credentials (if configured)
+- S3 backup credentials (if `ENABLE_BACKUPS=true`)
+
+**Note:** If you don't have GitLab tokens yet (first deployment), the script will create
+placeholder secrets that you'll update after GitLab starts.
+
+<details>
+<summary>Manual Secret Creation (alternative)</summary>
+
+If you prefer to create secrets manually:
 
 ```bash
 # Create namespace first
@@ -112,8 +189,9 @@ kubectl create secret generic grafana-admin \
   --namespace autogit-observability \
   --from-literal=admin-password="your-secure-password"
 ```
+</details>
 
-### Step 3: Deploy the Root Application
+### Step 4: Deploy the Root Application
 
 Apply the root application manifest to bootstrap the entire platform:
 
@@ -152,36 +230,64 @@ argocd app logs autogit-gitlab
 
 ### Step 5: Access Services
 
-Once deployed, services are accessible at:
+Once deployed, services are accessible at (replace `example.com` with your domain):
 
 | Service | URL | Notes |
 |---------|-----|-------|
-| GitLab | https://gitlab.vectorweight.com | Main Git server |
-| Grafana | https://grafana.vectorweight.com | Monitoring dashboards |
-| Traefik | https://traefik.vectorweight.com | Ingress dashboard |
-| Runner API | https://runner.vectorweight.com | Runner coordinator API |
+| GitLab | https://gitlab.example.com | Main Git server |
+| Grafana | https://grafana.example.com | Monitoring dashboards |
+| Traefik | https://traefik.example.com | Ingress dashboard |
+| Runner API | https://runner.example.com | Runner coordinator API |
 
 ---
 
 ## Option 2: Helmfile Deployment
 
-### Step 1: Install Helmfile
+### Step 1: Configure Your Environment
+
+Same as ArgoCD Step 1 - customize your configuration:
+
+```bash
+# 1. Copy and edit environment file
+cp .env.k8s.example .env.k8s
+nano .env.k8s
+
+# 2. Customize environment files
+./scripts/customize-k8s-env.sh homelab
+```
+
+### Step 2: Install Helmfile
 
 ```bash
 # macOS
 brew install helmfile
 
-# Linux
-curl -Lo helmfile https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64
+# Linux - Install specific version with checksum verification
+HELMFILE_VERSION="0.167.1"
+curl -LO "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz"
+curl -LO "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_checksums.txt"
+
+# Verify checksum
+sha256sum -c helmfile_${HELMFILE_VERSION}_checksums.txt --ignore-missing
+
+# Extract and install
+tar -xzf helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz
 chmod +x helmfile
 sudo mv helmfile /usr/local/bin/
+
+# Verify installation
+helmfile version
 ```
 
-### Step 2: Create Secrets
+### Step 3: Create Secrets
 
-Same as ArgoCD Step 2 above.
+Same as ArgoCD Step 3:
 
-### Step 3: Deploy with Helmfile
+```bash
+./scripts/create-k8s-secrets.sh
+```
+
+### Step 4: Deploy with Helmfile
 
 ```bash
 # Preview changes
@@ -194,7 +300,7 @@ helmfile -e homelab sync
 helmfile -e homelab -l name=gitlab sync
 ```
 
-### Step 4: Verify Deployment
+### Step 5: Verify Deployment
 
 ```bash
 # Check all pods
@@ -220,7 +326,7 @@ kubectl get ingress -A
    ```
 
 2. **Login and Change Password**:
-   - Navigate to https://gitlab.vectorweight.com
+   - Navigate to https://gitlab.example.com (replace with your domain)
    - Login as `root` with the initial password
    - Change the password immediately
 
@@ -255,11 +361,11 @@ Ensure your DNS is configured to point to the cluster's ingress IP:
 kubectl get svc -n traefik traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
-Create DNS records:
-- `gitlab.vectorweight.com` → LoadBalancer IP
-- `grafana.vectorweight.com` → LoadBalancer IP
-- `traefik.vectorweight.com` → LoadBalancer IP
-- `runner.vectorweight.com` → LoadBalancer IP
+Create DNS records (replace `example.com` with your domain):
+- `gitlab.example.com` → LoadBalancer IP
+- `grafana.example.com` → LoadBalancer IP
+- `traefik.example.com` → LoadBalancer IP
+- `runner.example.com` → LoadBalancer IP
 
 ---
 
@@ -309,7 +415,7 @@ kubectl get certificaterequests -A
 ```bash
 # Verify GitLab URL is accessible from the cluster
 kubectl run -it --rm debug --image=curlimages/curl -- \
-  curl -k https://gitlab.vectorweight.com/-/health
+  curl -k https://gitlab.example.com/-/health
 
 # Check network policies
 kubectl get networkpolicies -n autogit-system

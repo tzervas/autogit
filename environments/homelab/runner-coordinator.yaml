@@ -1,9 +1,11 @@
 # =============================================================================
 # Homelab - Runner Coordinator Values
 # =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
 
 config:
-  gitlabUrl: "https://gitlab.vectorweight.com"
+  gitlabUrl: "https://gitlab.example.com"  # CHANGEME: Set to https://gitlab.${DOMAIN}
   cooldownMinutes: 5
   maxIdleRunners: 0
   logLevel: "INFO"
@@ -52,11 +54,11 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: runner.vectorweight.com
+    - host: runner.example.com  # CHANGEME: Set to runner.${DOMAIN}
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: runner-coordinator-tls
       hosts:
-        - runner.vectorweight.com
+        - runner.example.com  # CHANGEME: Set to runner.${DOMAIN}

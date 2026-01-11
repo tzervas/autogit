@@ -1,13 +1,15 @@
 # =============================================================================
 # Homelab Environment Values
 # =============================================================================
-# Configuration for homelab deployment at vectorweight.com
+# Configuration for homelab deployment
+# IMPORTANT: This is a template with example values. Copy and customize for
+# your environment. See .env.k8s.example for all configurable parameters.
 # =============================================================================
 
 # Global settings
 global:
-  domain: vectorweight.com
-  clusterIssuer: letsencrypt-prod
+  domain: example.com  # CHANGEME: Set your domain in .env.k8s (DOMAIN)
+  clusterIssuer: letsencrypt-staging  # CHANGEME: Use letsencrypt-prod for production
   storageClass: ""  # Use default storage class
 
 # Resource profiles
@@ -23,7 +25,7 @@ features:
 
 # GitLab configuration
 gitlab:
-  host: gitlab.vectorweight.com
+  host: gitlab.example.com  # CHANGEME: Set to gitlab.${DOMAIN}
   https: true
   resources:
     webservice:
@@ -43,7 +45,7 @@ gitlab:
 
 # Runner coordinator configuration
 runnerCoordinator:
-  gitlabUrl: https://gitlab.vectorweight.com
+  gitlabUrl: https://gitlab.example.com  # CHANGEME: Set to https://gitlab.${DOMAIN}
   cooldownMinutes: 5
   maxIdleRunners: 0
   logLevel: INFO
@@ -51,14 +53,14 @@ runnerCoordinator:
 # Traefik configuration
 traefik:
   dashboard:
-    host: traefik.vectorweight.com
+    host: traefik.example.com  # CHANGEME: Set to traefik.${DOMAIN}
 
 # Grafana configuration
 grafana:
-  host: grafana.vectorweight.com
+  host: grafana.example.com  # CHANGEME: Set to grafana.${DOMAIN}
   adminPassword: ""  # Set via secret
 
 # cert-manager configuration
 certManager:
-  email: tz-dev@vectorweight.com
+  email: admin@example.com  # CHANGEME: Set your email in .env.k8s (LETSENCRYPT_EMAIL)
   solver: http01

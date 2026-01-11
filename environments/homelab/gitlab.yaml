@@ -1,15 +1,17 @@
 # =============================================================================
 # Homelab - GitLab Values
 # =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
 
 global:
   hosts:
-    domain: vectorweight.com
+    domain: example.com  # CHANGEME: Set your domain (DOMAIN)
     gitlab:
-      name: gitlab.vectorweight.com
+      name: gitlab.example.com  # CHANGEME: Set to gitlab.${DOMAIN}
       https: true
     registry:
-      name: registry.vectorweight.com
+      name: registry.example.com  # CHANGEME: Set to registry.${DOMAIN}
       https: true
   
   ingress:
@@ -87,4 +89,4 @@ registry:
   enabled: false
 
 certmanager-issuer:
-  email: tz-dev@vectorweight.com
+  email: admin@example.com  # CHANGEME: Set your email (LETSENCRYPT_EMAIL)

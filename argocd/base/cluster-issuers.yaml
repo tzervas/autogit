@@ -17,7 +17,7 @@ spec:
   acme:
     # Staging server for testing (no rate limits)
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: tz-dev@vectorweight.com
+    email: admin@example.com  # CHANGEME: Set your email in .env.k8s (LETSENCRYPT_EMAIL)
     privateKeySecretRef:
       name: letsencrypt-staging-key
     solvers:
@@ -37,7 +37,7 @@ spec:
   acme:
     # Production server (rate limited)
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: tz-dev@vectorweight.com
+    email: admin@example.com  # CHANGEME: Set your email in .env.k8s (LETSENCRYPT_EMAIL)
     privateKeySecretRef:
       name: letsencrypt-prod-key
     solvers:

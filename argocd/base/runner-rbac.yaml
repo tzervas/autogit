@@ -42,7 +42,7 @@ rules:
   # Secrets for job configuration
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "list", "create", "delete", "update"]
+    verbs: ["get", "list", "create", "delete"]
   # ConfigMaps for job configuration
   - apiGroups: [""]
     resources: ["configmaps"]

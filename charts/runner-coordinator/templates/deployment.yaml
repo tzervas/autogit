@@ -10,6 +10,12 @@ spec:
     matchLabels:
       {{- include "runner-coordinator.selectorLabels" . | nindent 6 }}
   strategy:
+    # NOTE: Using 'Recreate' will stop existing pods before starting new ones,
+    # which causes downtime during updates. This is required when using
+    # SQLite with a PersistentVolumeClaim (PVC), as concurrent writers are
+    # not supported. For production deployments requiring high availability,
+    # consider using PostgreSQL (or another external database) instead of
+    # SQLite, which then allows using a rolling update strategy.
     type: Recreate  # Required for SQLite with PVC
   template:
     metadata:

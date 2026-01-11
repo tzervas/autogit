@@ -12,6 +12,18 @@ child applications. This provides:
 - **Drift detection**: ArgoCD detects and can correct manual changes
 - **Rollback**: Easy rollback to any previous Git commit
 
+## Configuration Approach
+
+AutoGit uses a **parameterized configuration** system where all environment-specific values
+(domains, emails, etc.) are defined in `.env.k8s` and substituted into YAML files. This ensures:
+
+- **No hardcoded values**: All configuration is explicit and customizable
+- **Environment portability**: Easy to deploy to different environments
+- **Security**: Secrets managed separately via Kubernetes secrets
+- **Idempotency**: Repeatable deployments with predictable results
+
+See [Kubernetes Installation Guide](kubernetes.md) for detailed configuration instructions.
+
 ## Directory Structure
 
 ```
@@ -64,13 +76,39 @@ kubectl get pods -n argocd
 argocd login <argocd-server>
 ```
 
-### 2. Add Repository
+### 2. Configure Your Environment
+
+**Important:** Customize configuration for your domain before deploying.
+
+```bash
+# 1. Copy the environment template
+cp .env.k8s.example .env.k8s
+
+# 2. Edit with your values (minimum: DOMAIN and LETSENCRYPT_EMAIL)
+nano .env.k8s
+
+# 3. Customize environment files with your domain
+./scripts/customize-k8s-env.sh homelab
+
+# 4. Review changes
+git diff environments/homelab
+```
+
+### 3. Add Repository
 
 ```bash
 argocd repo add https://github.com/tzervas/autogit.git
 ```
 
-### 3. Create Secrets
+### 4. Create Secrets
+
+Use the provided script to create all secrets:
+
+```bash
+./scripts/create-k8s-secrets.sh
+```
+
+Or manually:
 
 ```bash
 # Create namespace
@@ -83,13 +121,13 @@ kubectl create secret generic autogit-gitlab-tokens \
   --from-literal=GITLAB_RUNNER_REGISTRATION_TOKEN="<your-runner-token>"
 ```
 
-### 4. Deploy
+### 5. Deploy
 
 ```bash
 kubectl apply -f argocd/apps/root.yaml
 ```
 
-### 5. Monitor
+### 6. Monitor
 
 ```bash
 # Watch deployment

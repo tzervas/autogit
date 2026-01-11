@@ -73,12 +73,23 @@ docker compose up -d
 
 ### Kubernetes/Helm (Production) - ✅ Available via ArgoCD
 
+**Quick Start:**
+
 ```bash
-# Option 1: ArgoCD (Recommended)
-# Add repository to ArgoCD, create secrets, then deploy:
+# 1. Configure your environment
+cp .env.k8s.example .env.k8s
+nano .env.k8s  # Set DOMAIN, LETSENCRYPT_EMAIL at minimum
+
+# 2. Customize environment files
+./scripts/customize-k8s-env.sh homelab
+
+# 3. Create Kubernetes secrets
+./scripts/create-k8s-secrets.sh
+
+# 4. Deploy via ArgoCD (Recommended)
 kubectl apply -f argocd/apps/root.yaml
 
-# Option 2: Helmfile
+# Or via Helmfile
 helmfile -e homelab sync
 ```
 

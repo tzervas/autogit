@@ -1,6 +1,8 @@
 # =============================================================================
 # Homelab - Traefik Values
 # =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
 
 deployment:
   replicas: 1
@@ -30,7 +32,7 @@ ingressClass:
 ingressRoute:
   dashboard:
     enabled: true
-    matchRule: Host(`traefik.vectorweight.com`)
+    matchRule: Host(`traefik.example.com`)  # CHANGEME: Set to traefik.${DOMAIN}
     entryPoints:
       - websecure
 

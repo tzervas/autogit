@@ -1,6 +1,8 @@
 # =============================================================================
 # Homelab - Prometheus Stack Values
 # =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
 
 global:
   scrape_interval: 30s
@@ -45,11 +47,11 @@ grafana:
       traefik.ingress.kubernetes.io/router.tls: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
-      - grafana.vectorweight.com
+      - grafana.example.com  # CHANGEME: Set to grafana.${DOMAIN}
     tls:
       - secretName: grafana-tls
         hosts:
-          - grafana.vectorweight.com
+          - grafana.example.com  # CHANGEME: Set to grafana.${DOMAIN}
   
   resources:
     requests:

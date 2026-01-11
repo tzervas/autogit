@@ -27,6 +27,9 @@ ENV/
 .autogit_secrets
 .autogit_login_info
 .env*
+!.env.example
+!.env.homelab.example
+!.env.k8s.example
 *.token
 *_password
 *_secrets

@@ -128,7 +128,7 @@ affinity: {}
 
 config:
   # -- GitLab URL for runner registration
-  gitlabUrl: "https://gitlab.vectorweight.com"
+  gitlabUrl: "https://gitlab.example.com"
   # -- Runner cooldown period in minutes before cleanup
   cooldownMinutes: 5
   # -- Maximum number of idle runners to keep

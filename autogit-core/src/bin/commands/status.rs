@@ -18,8 +18,16 @@ pub async fn run(_config_path: &str, format: OutputFormat) -> Result<()> {
                 gitlab_version: None,
                 current_user: None,
                 users: Vec::new(),
-                projects: ProjectStats { total: 0, mirrors: 0 },
-                runners: RunnerStats { total: 0, online: 0, offline: 0, paused: 0 },
+                projects: ProjectStats {
+                    total: 0,
+                    mirrors: 0,
+                },
+                runners: RunnerStats {
+                    total: 0,
+                    online: 0,
+                    offline: 0,
+                    paused: 0,
+                },
             };
             format.print(&output);
             return Ok(());
@@ -52,8 +60,16 @@ pub async fn run(_config_path: &str, format: OutputFormat) -> Result<()> {
                 gitlab_version: None,
                 current_user: None,
                 users: Vec::new(),
-                projects: ProjectStats { total: 0, mirrors: 0 },
-                runners: RunnerStats { total: 0, online: 0, offline: 0, paused: 0 },
+                projects: ProjectStats {
+                    total: 0,
+                    mirrors: 0,
+                },
+                runners: RunnerStats {
+                    total: 0,
+                    online: 0,
+                    offline: 0,
+                    paused: 0,
+                },
             };
             format.print(&output);
             return Ok(());
@@ -82,8 +98,14 @@ pub async fn run(_config_path: &str, format: OutputFormat) -> Result<()> {
     let runners = client.list_runners().await.unwrap_or_default();
     let runner_stats = RunnerStats {
         total: runners.len(),
-        online: runners.iter().filter(|r| matches!(r.status, RunnerStatus::Online)).count(),
-        offline: runners.iter().filter(|r| matches!(r.status, RunnerStatus::Offline)).count(),
+        online: runners
+            .iter()
+            .filter(|r| matches!(r.status, RunnerStatus::Online))
+            .count(),
+        offline: runners
+            .iter()
+            .filter(|r| matches!(r.status, RunnerStatus::Offline))
+            .count(),
         paused: runners.iter().filter(|r| r.paused).count(),
     };
 

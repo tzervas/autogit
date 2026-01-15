@@ -39,7 +39,7 @@ impl Config {
         // Load .env file if present (ignore errors)
         let _ = dotenvy::dotenv();
 
-        let config = config::Config::builder()
+        let _config = config::Config::builder()
             .add_source(
                 config::Environment::default()
                     .separator("_")
@@ -95,8 +95,8 @@ impl Config {
     pub fn init_tracing(&self) {
         use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
-        let filter = EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| EnvFilter::new(&self.log_level));
+        let filter =
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&self.log_level));
 
         tracing_subscriber::registry()
             .with(fmt::layer().with_target(true))

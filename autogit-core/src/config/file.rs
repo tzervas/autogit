@@ -40,13 +40,12 @@ impl AutogitConfig {
         let content = std::fs::read_to_string(path)
             .map_err(|e| Error::Config(format!("Failed to read config: {}", e)))?;
 
-        Self::from_str(&content)
+        Self::parse(&content)
     }
 
     /// Parse configuration from TOML string
-    pub fn from_str(content: &str) -> Result<Self> {
-        toml::from_str(content)
-            .map_err(|e| Error::Config(format!("Invalid TOML: {}", e)))
+    pub fn parse(content: &str) -> Result<Self> {
+        toml::from_str(content).map_err(|e| Error::Config(format!("Invalid TOML: {}", e)))
     }
 
     /// Check if config file exists at path

@@ -137,7 +137,8 @@ mod tests {
 
     #[test]
     fn token_scopes_serialization() {
-        let request = CreateTokenRequest::new("test", vec![TokenScope::Api, TokenScope::ReadRepository]);
+        let request =
+            CreateTokenRequest::new("test", vec![TokenScope::Api, TokenScope::ReadRepository]);
         let json = serde_json::to_string(&request).unwrap();
         assert!(json.contains("\"api\""));
         assert!(json.contains("\"read_repository\""));
@@ -145,8 +146,7 @@ mod tests {
 
     #[test]
     fn expires_in_days() {
-        let request = CreateTokenRequest::new("test", vec![TokenScope::Api])
-            .expires_in_days(365);
+        let request = CreateTokenRequest::new("test", vec![TokenScope::Api]).expires_in_days(365);
         assert!(request.expires_at.is_some());
     }
 }

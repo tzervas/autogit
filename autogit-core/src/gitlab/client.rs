@@ -339,7 +339,10 @@ impl GitLabClient {
     ///
     /// Note: This uses a different auth mechanism (registration token in body)
     #[instrument(skip(self, request))]
-    pub async fn register_runner(&self, request: &RegisterRunnerRequest) -> Result<RegisterRunnerResponse> {
+    pub async fn register_runner(
+        &self,
+        request: &RegisterRunnerRequest,
+    ) -> Result<RegisterRunnerResponse> {
         // Runner registration endpoint doesn't require auth header
         let url = self.base_url.join("api/v4/runners")?;
         debug!("POST {} (runner registration)", url);
@@ -361,13 +364,15 @@ impl GitLabClient {
     /// Pause a runner
     #[instrument(skip(self))]
     pub async fn pause_runner(&self, runner_id: u64) -> Result<RunnerDetail> {
-        self.update_runner(runner_id, &UpdateRunnerRequest::pause()).await
+        self.update_runner(runner_id, &UpdateRunnerRequest::pause())
+            .await
     }
 
     /// Unpause a runner
     #[instrument(skip(self))]
     pub async fn unpause_runner(&self, runner_id: u64) -> Result<RunnerDetail> {
-        self.update_runner(runner_id, &UpdateRunnerRequest::unpause()).await
+        self.update_runner(runner_id, &UpdateRunnerRequest::unpause())
+            .await
     }
 
     /// Delete/unregister a runner
@@ -436,13 +441,16 @@ impl GitLabClientBuilder {
 
     /// Build the client
     pub fn build(self) -> Result<GitLabClient> {
-        let base_url = self.base_url.ok_or(Error::Config("base_url required".into()))?;
+        let base_url = self
+            .base_url
+            .ok_or(Error::Config("base_url required".into()))?;
         let auth = self.auth.ok_or(Error::Config("auth required".into()))?;
 
         // Security check: only allow HTTP for localhost
         if base_url.scheme() == "http" {
             let host = base_url.host_str().unwrap_or("");
-            let is_localhost = host == "localhost" || host == "127.0.0.1" || host.starts_with("192.168.");
+            let is_localhost =
+                host == "localhost" || host == "127.0.0.1" || host.starts_with("192.168.");
 
             if !is_localhost && !self.allow_insecure {
                 warn!("Refusing HTTP connection to non-local host: {}", host);

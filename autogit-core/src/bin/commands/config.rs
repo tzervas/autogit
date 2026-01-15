@@ -23,7 +23,14 @@ async fn show_config(config_path: &str) -> Result<()> {
         // Show env-based config
         let config = autogit_core::config::Config::from_env()?;
         info!("  gitlab_url: {}", config.gitlab_url);
-        info!("  gitlab_token: {}", if config.gitlab_token.is_some() { "[SET]" } else { "[NOT SET]" });
+        info!(
+            "  gitlab_token: {}",
+            if config.gitlab_token.is_some() {
+                "[SET]"
+            } else {
+                "[NOT SET]"
+            }
+        );
         info!("  log_level: {}", config.log_level);
         return Ok(());
     }
@@ -86,7 +93,13 @@ async fn validate_config(config_path: &str) -> Result<()> {
     info!("  Service accounts: {}", config.bootstrap.services.len());
     info!("  GitHub mirrors: {}", config.mirrors.github.len());
     info!("  GitLab mirrors: {}", config.mirrors.gitlab.len());
-    if config.runners.gpu.as_ref().map(|g| g.enabled).unwrap_or(false) {
+    if config
+        .runners
+        .gpu
+        .as_ref()
+        .map(|g| g.enabled)
+        .unwrap_or(false)
+    {
         info!("  GPU runners: enabled");
     }
 

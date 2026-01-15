@@ -1,7 +1,7 @@
 //! Runner command - GitLab runner management
 
-use crate::RunnerCommands;
 use super::output::{OutputFormat, RunnerInfo, RunnerListOutput};
+use crate::RunnerCommands;
 use autogit_core::gitlab::{
     AuthMethod, GitLabClient, RegisterRunnerRequest, RunnerDetail, RunnerInfo as GitLabRunnerInfo,
     RunnerStatus, Token,
@@ -290,13 +290,11 @@ fn detect_nvidia_gpus() -> Vec<String> {
         .args(["--query-gpu=name", "--format=csv,noheader"])
         .output()
     {
-        Ok(output) if output.status.success() => {
-            String::from_utf8_lossy(&output.stdout)
-                .lines()
-                .map(|s| s.trim().to_string())
-                .filter(|s| !s.is_empty())
-                .collect()
-        }
+        Ok(output) if output.status.success() => String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect(),
         _ => Vec::new(),
     }
 }

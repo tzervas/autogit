@@ -39,21 +39,6 @@ impl Config {
         // Load .env file if present (ignore errors)
         let _ = dotenvy::dotenv();
 
-        let _config = config::Config::builder()
-            .add_source(
-                config::Environment::default()
-                    .separator("_")
-                    .prefix("AUTOGIT")
-                    .try_parsing(true),
-            )
-            .add_source(
-                config::Environment::default()
-                    .try_parsing(true)
-                    .prefix("GITLAB"),
-            )
-            .build()
-            .map_err(|e| Error::Config(e.to_string()))?;
-
         // Try to get individual values with fallbacks
         let gitlab_url = std::env::var("GITLAB_URL")
             .or_else(|_| std::env::var("AUTOGIT_GITLAB_URL"))

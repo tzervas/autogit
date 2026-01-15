@@ -65,7 +65,7 @@ for branch in "${BRANCHES[@]}"; do
         if [ -n "$REMAINING" ]; then
             echo ""
             echo "  ❌ Manual conflicts remain:"
-            printf '      - %s\n' $REMAINING
+            printf '%s\n' "$REMAINING" | sed 's/^/      - /'
             echo ""
             echo "  🛑 Aborting merge for $branch"
             git merge --abort

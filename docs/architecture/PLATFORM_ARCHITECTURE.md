@@ -34,7 +34,7 @@ ______________________________________________________________________
 │  ┌─────────────────────────────────▼─────────────────────────────────────────────┐  │
 │  │                         INGRESS LAYER (Traefik/Nginx)                         │  │
 │  │  ┌─────────────────────────────────────────────────────────────────────────┐  │  │
-│  │  │ • Wildcard SSL (*.vectorweight.com) via Let's Encrypt                   │  │  │
+│  │  │ • Wildcard SSL (*.example.com) via Let's Encrypt                   │  │  │
 │  │  │ • Subdomain → Service routing                                            │  │  │
 │  │  │ • Prompt Injection Filter (middleware)                                   │  │  │
 │  │  │ • Rate limiting, WAF rules                                               │  │  │
@@ -78,8 +78,8 @@ All services register via environment-driven configuration:
 
 ```yaml
 # .env - Single source of truth
-BASE_DOMAIN=vectorweight.com
-ACME_EMAIL=admin@vectorweight.com
+BASE_DOMAIN=example.com
+ACME_EMAIL=admin@example.com
 
 # Service definitions (auto-discovered)
 SERVICES_ENABLED=gitlab,grafana,loki,tempo,prometheus,meilisearch,api
@@ -117,12 +117,12 @@ PORT_ALLOCATION=dynamic  # auto-assign from pool
 
 ```
 # A Records (pointing to ingress)
-*.vectorweight.com     → 192.168.1.170
+*.example.com     → 192.168.1.170
 
 # Or per-service (if no wildcard)
-gitlab.vectorweight.com   → 192.168.1.170
-grafana.vectorweight.com  → 192.168.1.170
-api.vectorweight.com      → 192.168.1.170
+gitlab.example.com   → 192.168.1.170
+grafana.example.com  → 192.168.1.170
+api.example.com      → 192.168.1.170
 ```
 
 **Implementation:**
@@ -141,7 +141,7 @@ class CloudflareDNSProvider(DNSProvider):
 
 **Certificate Strategy:**
 
-- Wildcard certificate: `*.vectorweight.com`
+- Wildcard certificate: `*.example.com`
 - Auto-renewal via ACME (Let's Encrypt)
 - DNS-01 challenge (works for internal services)
 - Fallback to HTTP-01 for public services

@@ -82,8 +82,8 @@ autogit/
 version: "1.0"
 
 gitlab:
-  hostname: gitlab.vectorweight.com
-  external_url: http://gitlab.vectorweight.com
+  hostname: gitlab.example.com
+  external_url: http://gitlab.example.com
   ports:
     http: 8080
     https: 8443

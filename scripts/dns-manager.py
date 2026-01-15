@@ -175,8 +175,8 @@ class ManualProvider(DNSProvider):
 def load_config() -> dict:
     """Load configuration from .env file"""
     config = {
-        "BASE_DOMAIN": "vectorweight.com",
-        "TARGET_IP": "192.168.1.170",
+        "BASE_DOMAIN": "example.com",
+        "TARGET_IP": "127.0.0.1",
         "CF_DNS_API_TOKEN": "",
         "CF_ZONE_ID": "",
         "DNS_PROVIDER": "manual",
@@ -243,8 +243,8 @@ def main():
     args = parser.parse_args()
     config = load_config()
 
-    domain = args.domain or config.get("BASE_DOMAIN", "vectorweight.com")
-    target_ip = args.target_ip or config.get("TARGET_IP", "192.168.1.170")
+    domain = args.domain or config.get("BASE_DOMAIN", "example.com")
+    target_ip = args.target_ip or config.get("TARGET_IP", "127.0.0.1")
 
     print(f"🌐 DNS Manager for {domain}")
     print(f"📍 Target IP: {target_ip}")

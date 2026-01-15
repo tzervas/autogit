@@ -1,9 +1,9 @@
 //! Runner command - GitLab runner management
 
 use crate::RunnerCommands;
-use super::output::{OutputFormat, RunnerInfo, RunnerListOutput, TextOutput};
+use super::output::{OutputFormat, RunnerInfo, RunnerListOutput};
 use autogit_core::gitlab::{
-    AuthMethod, GitLabClient, RegisterRunnerRequest, Runner, RunnerDetail, RunnerInfo as GitLabRunnerInfo,
+    AuthMethod, GitLabClient, RegisterRunnerRequest, RunnerDetail, RunnerInfo as GitLabRunnerInfo,
     RunnerStatus, Token,
 };
 use autogit_core::Result;

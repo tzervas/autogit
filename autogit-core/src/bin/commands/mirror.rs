@@ -1,9 +1,9 @@
 //! Mirror command - repository mirroring management
 
 use crate::MirrorCommands;
-use super::output::{MirrorInfo, MirrorListOutput, OutputFormat, TextOutput};
+use super::output::{MirrorInfo, MirrorListOutput, OutputFormat};
 use autogit_core::gitlab::{
-    AuthMethod, CreateProjectRequest, GitLabClient, MirrorConfig, Project, Token, Visibility,
+    AuthMethod, CreateProjectRequest, GitLabClient, MirrorConfig, Token, Visibility,
 };
 use autogit_core::Result;
 use std::env;

@@ -90,7 +90,7 @@ fn generate_password() -> String {
 }
 
 pub async fn run(
-    config_path: &str,
+    _config_path: &str,
     output_path: &str,
     service_only: bool,
     dry_run: bool,

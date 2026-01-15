@@ -1,357 +1,331 @@
-# AutoGit Documentation Index
+# AutoGit Documentation
 
-**Last Updated**: [Auto-generated timestamp] This index provides a complete map of all AutoGit
-documentation. Always check this file first when looking for information.
-
-## 
-
-📚 Documentation Structure
-
-```
-docs/
-
-├── INDEX.md
-
-# This file - complete documentation map
-
-├── installation/
-
-# Installation and setup
-
-├── configuration/
-
-# Configuration references
-
-├── architecture/
-
-# Architecture and design decisions
-
-├── development/
-
-# Development guides and standards
-
-├── runners/
-
-# Runner management
-
-├── gpu/
-
-# GPU support
-
-├── security/
-
-# Security guidelines
-
-├── operations/
-
-# Operations and monitoring
-
-├── api/
-
-# API documentation
-
-├── cli/
-
-# CLI reference
-
-├── tutorials/
-
-# Step-by-step tutorials
-
-├── troubleshooting/
-
-# Common issues and solutions
-
-└── FAQ.md
-
-# Frequently asked questions
-
-```
-
-## 
-
-🚀 Getting Started
-
-New to AutoGit? Start here:
-
-1. [README.md](../README.md) - Project overview and quick start
-1. [Installation Guide](installation/README.md) - Detailed installation instructions
-1. [Quick Start Tutorial](tutorials/quickstart.md) - Your first AutoGit deployment
-1. [Configuration Basics](configuration/README.md) - Essential configuration
-
-## 
-
-📖 Core Documentation
-
-### Installation & Setup
-
-| Document                                               | Description                           | Audience   |
-| ------------------------------------------------------ | ------------------------------------- | ---------- |
-| [Installation Overview](installation/README.md)        | Complete installation guide           | All users  |
-| [Prerequisites](installation/prerequisites.md)         | System requirements and dependencies  | All users  |
-| [Docker Compose Setup](installation/docker-compose.md) | Development setup with Docker Compose | Developers |
-| [Kubernetes Setup](installation/kubernetes.md)         | Production setup with Kubernetes      | Operators  |
-| [Migration Guide](installation/migration.md)           | Docker Compose → Kubernetes migration | Operators  |
-
-### Configuration
-
-| Document                                                        | Description                         | Audience       |
-| --------------------------------------------------------------- | ----------------------------------- | -------------- |
-| [Configuration Overview](configuration/README.md)               | Configuration system overview       | All users      |
-| [GitLab Configuration](configuration/gitlab.md)                 | GitLab CE configuration             | Administrators |
-| [Runner Configuration](configuration/runners.md)                | Runner management configuration     | Administrators |
-| [DNS Configuration](configuration/dns.md)                       | CoreDNS setup and configuration     | Administrators |
-| [SSL/TLS Configuration](configuration/ssl.md)                   | cert-manager and certificate setup  | Administrators |
-| [SSO Configuration](configuration/sso.md)                       | Authelia SSO setup                  | Administrators |
-| [Ingress Configuration](configuration/ingress.md)               | Traefik ingress setup               | Administrators |
-| [Storage Configuration](configuration/storage.md)               | Persistent storage setup            | Administrators |
-| [Environment Variables](configuration/environment-variables.md) | All environment variables reference | All            |
-| users                                                           |                                     |                |
-
-### Architecture & Design
-
-| Document                                        | Description                       | Audience   |
-| ----------------------------------------------- | --------------------------------- | ---------- |
-| [Architecture Overview](architecture/README.md) | System architecture overview      | All users  |
-| [Component Design](architecture/components.md)  | Individual component designs      | Developers |
-| [Networking](architecture/networking.md)        | Network architecture and policies | Operators  |
-
-| [Data Flow](architecture/data-flow.md) | How data flows through the system | Developers | |
-[Scaling Strategy](architecture/scaling.md) | Horizontal and vertical scaling | Architects | |
-[High Availability](architecture/high-availability.md) | HA configuration | Operators | |
-[ADR Index](architecture/adr/README.md) | All architecture decisions | Architects |
-
-#### Architecture Decision Records (ADRs)
-
-| ADR                                                     | Title                         | Status   | Date       |
-| ------------------------------------------------------- | ----------------------------- | -------- | ---------- |
-| [ADR-001](architecture/adr/001-traefik-vs-nginx.md)     | Traefik vs NGINX Ingress      | Accepted | YYYY-MM-DD |
-| [ADR-002](architecture/adr/002-fleeting-plugin.md)      | Custom Fleeting Plugin Design | Accepted | YYYY-MM-DD |
-| [ADR-003](architecture/adr/003-multi-architecture.md)   | Multi-Architecture Strategy   | Accepted | YYYY-MM-DD |
-| [ADR-004](architecture/adr/004-sso-solution.md)         | SSO Solution Selection        | Accepted | YYYY-MM-DD |
-| [ADR-005](architecture/adr/005-dns-management.md)       | DNS Management Approach       | Accepted | YYYY-MM-DD |
-| [ADR-006](architecture/adr/006-storage-architecture.md) | Storage Architecture          | Accepted | YYYY-MM-DD |
-
-### Development
-
-| Document                                              | Description                      | Audience         |
-| ----------------------------------------------------- | -------------------------------- | ---------------- |
-| [Development Overview](development/README.md)         | Development environment setup    | Developers       |
-| [Setup Guide](development/setup.md)                   | Local development setup          | Developers       |
-| [Coding Standards](development/standards.md)          | Code style and standards         | Developers       |
-| [Testing Guide](development/testing.md)               | Testing strategy and guidelines  | Developers       |
-| [Agentic Workflow](development/agentic-workflow.md)   | AI-assisted development workflow | Developers       |
-| [Project Structure](development/project-structure.md) | Codebase organization            | Developers       |
-| [Common Tasks](development/common-tasks.md)           | Common development tasks         | Developers       |
-| [Licensing Guide](development/licensing.md)           | License compliance guidelines    | Developers       |
-| [Documentation Guide](development/documentation.md)   | Writing and maintaining docs     | All contributors |
-| [CI/CD Guide](development/ci-cd.md)                   | Continuous integration setup     | Developers       |
-| [Release Process](development/release-process.md)     | How to cut a release             | Maintainers      |
-
-### Runner Management
-
-| Document                                      | Description                            | Audience       |
-| --------------------------------------------- | -------------------------------------- | -------------- |
-| [Runner Overview](runners/README.md)          | Runner management overview             | All users      |
-| [Autoscaling](runners/autoscaling.md)         | Autoscaling configuration and behavior | Operators      |
-| [Multi-Architecture](runners/multi-arch.md)   | Multi-arch runner setup                | Operators      |
-| [Fleeting Plugin](runners/fleeting-plugin.md) | Custom fleeting plugin guide           | Developers     |
-| [Provisioning](runners/provisioning.md)       | Runner provisioning logic              | Developers     |
-| [Tags and Labels](runners/tags-and-labels.md) | Runner tagging strategy                | Administrators |
-| [Monitoring](runners/monitoring.md)           | Runner monitoring and metrics          | Operators      |
-| [Troubleshooting](runners/troubleshooting.md) | Runner issues and solutions            | All users      |
-
-### GPU Support
-
-| Document                                  | Description                        | Audience   |
-| ----------------------------------------- | ---------------------------------- | ---------- |
-| [GPU Overview](gpu/README.md)             | GPU support overview               | All users  |
-| [NVIDIA GPUs](gpu/nvidia.md)              | NVIDIA GPU setup and configuration | Operators  |
-| [AMD GPUs](gpu/amd.md)                    | AMD GPU setup and configuration    | Operators  |
-| [Intel GPUs](gpu/intel.md)                | Intel GPU setup and configuration  | Operators  |
-| [Detection Logic](gpu/detection.md)       | GPU detection implementation       | Developers |
-| [Scheduling](gpu/scheduling.md)           | GPU-aware job scheduling           | Developers |
-| [Troubleshooting](gpu/troubleshooting.md) | GPU-related issues                 | All users  |
-
-### Security
-
-| Document                                                         | Description                  | Audience       |
-| ---------------------------------------------------------------- | ---------------------------- | -------------- |
-| [Security Overview](security/README.md)                          | Security guidelines overview | All users      |
-| [Hardening Guide](security/hardening.md)                         | System hardening checklist   | Operators      |
-| [Secrets Management](security/secrets.md)                        | Managing secrets securely    | Developers     |
-| [Network Policies](security/network-policies.md)                 | Kubernetes network policies  | Operators      |
-| [TLS Configuration](security/tls.md)                             | TLS/SSL security             | Administrators |
-| [Access Control](security/access-control.md)                     | RBAC and permissions         | Administrators |
-| [Audit Logging](security/audit-logging.md)                       | Security audit logs          | Operators      |
-| [Vulnerability Management](security/vulnerability-management.md) | Handling vulnerabilities     | Maintainers    |
-| [Incident Response](security/incident-response.md)               | Security incident procedures | Operators      |
-
-### Operations
-
-| Document                                               | Description                  | Audience   |
-| ------------------------------------------------------ | ---------------------------- | ---------- |
-| [Operations Overview](operations/README.md)            | Operations guide overview    | Operators  |
-| [Monitoring](operations/monitoring.md)                 | Monitoring and observability | Operators  |
-| [Backup & Recovery](operations/backup.md)              | Backup strategies            | Operators  |
-| [Disaster Recovery](operations/disaster-recovery.md)   | DR procedures                | Operators  |
-| [Upgrades](operations/upgrades.md)                     | Upgrade procedures           | Operators  |
-| [Performance Tuning](operations/performance-tuning.md) | Optimization guide           | Operators  |
-| [Capacity Planning](operations/capacity-planning.md)   | Resource planning            | Architects |
-| [Health Checks](operations/health-checks.md)           | System health monitoring     | Operators  |
-
-### API Documentation
-
-| Document                                      | Description                | Audience   |
-| --------------------------------------------- | -------------------------- | ---------- |
-| [API Overview](api/README.md)                 | API documentation overview | Developers |
-| [Fleeting Plugin API](api/fleeting-plugin.md) | Fleeting plugin interface  | Developers |
-| [Runner Manager API](api/runner-manager.md)   | Runner manager interface   | Developers |
-| [GPU Detector API](api/gpu-detector.md)       | GPU detection interface    | Developers |
-| [Configuration API](api/configuration.md)     | Configuration schemas      | Developers |
-| [REST API](api/rest.md)                       | REST API endpoints         | Developers |
-
-### CLI Reference
-
-| Document                                    | Description                 | Audience  |
-| ------------------------------------------- | --------------------------- | --------- |
-| [CLI Overview](cli/README.md)               | Command-line tools overview | All users |
-| [autogit CLI](cli/autogit.md)               | Main CLI reference          | All users |
-| [runner-manager CLI](cli/runner-manager.md) | Runner management CLI       | Operators |
-| [gpu-detector CLI](cli/gpu-detector.md)     | GPU detection CLI           | Operators |
-
-### Tutorials
-
-| Document                                                  | Description                           | Audience       |
-| --------------------------------------------------------- | ------------------------------------- | -------------- |
-| [Quick Start](tutorials/quickstart.md)                    | Get started in 15 minutes             | New users      |
-| [First Pipeline](tutorials/first-pipeline.md)             | Create your first CI/CD pipeline      | New users      |
-| [Multi-Arch Builds](tutorials/multi-arch-builds.md)       | Building for multiple architectures   | Developers     |
-| [GPU Workloads](tutorials/gpu-workloads.md)               | Running GPU-accelerated jobs          | Developers     |
-| [Custom Runner](tutorials/custom-runner.md)               | Creating custom runner configurations | Advanced users |
-| [High Availability Setup](tutorials/high-availability.md) | Setting up HA deployment              | Operators      |
-
-### Troubleshooting
-
-| Document | Description | Audience |
-
-|----------|-------------|----------| | [Troubleshooting Overview](troubleshooting/README.md) |
-Common issues and solutions | All users | | [Installation Issues](troubleshooting/installation.md) |
-Installation problems | All users | | [Runner Issues](troubleshooting/runners.md) | Runner-related
-problems | Operators | | [GPU Issues](troubleshooting/gpu.md) | GPU-related problems | Operators | |
-[Network Issues](troubleshooting/network.md) | Networking problems | Operators | |
-[Performance Issues](troubleshooting/performance.md) | Performance problems | Operators | |
-[Debugging Guide](troubleshooting/debugging.md) | General debugging techniques | Developers |
-
-### Project Management
-
-| Document                                                       | Description                             | Audience         |
-| -------------------------------------------------------------- | --------------------------------------- | ---------------- |
-| [Task Tracker](../TASK_TRACKER.md)                             | Project task tracking and progress      | Project Managers |
-| [QC Workflow](../QC_WORKFLOW.md)                               | Quality control procedures              | All developers   |
-| [Manager Delegation](../MANAGER_DELEGATION.md)                 | Current task delegation and assignments | All agents       |
-| [Project Management Summary](../PROJECT_MANAGEMENT_SUMMARY.md) | Current project status summary          | All stakeholders |
-| [Git Server Feature Plan](../GIT_SERVER_FEATURE_PLAN.md)       | Detailed Git Server implementation plan | Developers       |
-| [How to Start Next Feature](../HOW_TO_START_NEXT_FEATURE.md)   | Feature workflow guide                  | Developers       |
-
-### Other
-
-| Document                           | Description                | Audience     |
-| ---------------------------------- | -------------------------- | ------------ |
-| [FAQ](FAQ.md)                      | Frequently asked questions | All users    |
-| [Glossary](GLOSSARY.md)            | Terms and definitions      | All users    |
-| [Contributing](../CONTRIBUTING.md) | How to contribute          | Contributors |
-| [License](../LICENSE)              | MIT License text           | All users    |
-| [Licenses](../LICENSES.md)         | All dependency licenses    | All users    |
-| [Changelog](../CHANGELOG.md)       | Version history            | All users    |
-| [Roadmap](../ROADMAP.md)           | Future plans               | All users    |
-
-## 
-
-🔍 Finding Documentation
-
-### By Topic
-
-- **Installation**: Start with `installation/README.md`
-- **Configuration**: Start with `configuration/README.md`
-- **Development**: Start with `development/README.md`
-- **Troubleshooting**: Start with `troubleshooting/README.md`
-- **API**: Start with `api/README.md`
-
-### By Role
-
-**New Users**:
-
-1. [README.md](../README.md)
-1. [Installation Guide](installation/README.md)
-1. [Quick Start Tutorial](tutorials/quickstart.md)
-1. [FAQ](FAQ.md) **Developers**:
-1. [Development Setup](development/setup.md)
-1. [Coding Standards](development/standards.md)
-1. [Testing Guide](development/testing.md)
-1. [API Documentation](api/README.md)
-1. [Architecture Overview](architecture/README.md) **Operators**:
-1. [Installation Guide](installation/README.md)
-1. [Configuration Overview](configuration/README.md)
-1. [Operations Guide](operations/README.md)
-1. [Monitoring](operations/monitoring.md)
-1. [Troubleshooting](troubleshooting/README.md) **Architects**:
-1. [Architecture Overview](architecture/README.md)
-1. [ADR Index](architecture/adr/README.md)
-1. [Scaling Strategy](architecture/scaling.md)
-1. [High Availability](architecture/high-availability.md)
-
-## 
-
-📝 Documentation Maintenance
-
-### For Contributors
-
-When modifying code that affects documentation:
-
-1. **Check this INDEX.md** to find relevant documentation
-1. **Update all affected documentation** in the same PR
-1. **Add new documentation** if creating new features
-1. **Update INDEX.md** if adding/removing documentation files
-1. **Follow** [Documentation Guide](development/documentation.md)
-
-### For Maintainers
-
-- Review documentation in all PRs
-- Keep INDEX.md up to date
-- Ensure all documentation links work
-- Archive outdated documentation
-- Update ADRs for architectural changes
-
-### Documentation Standards
-
-- All documentation in Markdown
-- Follow [Documentation Guide](development/documentation.md)
-- Include code examples where appropriate
-- Keep documentation current with code
-- Use consistent terminology (see [Glossary](GLOSSARY.md))
-
-## 
-
-🔗 External Resources
-
-- [GitLab Runner Official Docs](https://docs.gitlab.com/runner/)
-- [Traefik Documentation](https://doc.traefik.io/traefik/)
-- [Authelia Documentation](https://www.authelia.com/)
-- [CoreDNS Documentation](https://coredns.io/)
-- [cert-manager Documentation](https://cert-manager.io/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-
-## 
-
-📊 Documentation Statistics
-
-- Total Documents: [Auto-generated count]
-- Last Updated: [Auto-generated timestamp]
-- Contributors: [Link to contributors]
+> **Self-Hosted GitOps Platform with Dynamic Multi-Architecture Runner Management**
 
 ______________________________________________________________________
 
-**Note**: This index is automatically validated by CI/CD. All links are checked on every commit. If
-you can't find what you're looking for, check the [FAQ](FAQ.md) or
-[open an issue](https://github.com/yourusername/autogit/issues).
+## 📊 Documentation Overview
+
+```
+                              ┌──────────────────────────────────────┐
+                              │         📚 DOCUMENTATION             │
+                              │              INDEX                    │
+                              └──────────────────────────────────────┘
+                                              │
+           ┌──────────────────────────────────┼──────────────────────────────────┐
+           │                                  │                                  │
+           ▼                                  ▼                                  ▼
+┌─────────────────────┐          ┌─────────────────────┐          ┌─────────────────────┐
+│    🚀 GETTING       │          │    🏗️ ARCHITECTURE  │          │    ⚙️ CONFIGURATION │
+│       STARTED       │          │                     │          │                     │
+├─────────────────────┤          ├─────────────────────┤          ├─────────────────────┤
+│ • Installation      │          │ • System Design     │          │ • GitLab Setup      │
+│ • Quick Start       │          │ • Components        │          │ • Runner Config     │
+│ • Prerequisites     │          │ • ADRs              │          │ • Networking        │
+└─────────────────────┘          └─────────────────────┘          └─────────────────────┘
+           │                                  │                                  │
+           └──────────────────────────────────┼──────────────────────────────────┘
+                                              │
+           ┌──────────────────────────────────┼──────────────────────────────────┐
+           │                                  │                                  │
+           ▼                                  ▼                                  ▼
+┌─────────────────────┐          ┌─────────────────────┐          ┌─────────────────────┐
+│    💻 DEVELOPMENT   │          │    🔧 OPERATIONS    │          │    📖 REFERENCE     │
+│                     │          │                     │          │                     │
+├─────────────────────┤          ├─────────────────────┤          ├─────────────────────┤
+│ • Setup Guide       │          │ • Monitoring        │          │ • API Docs          │
+│ • Standards         │          │ • Backup/Recovery   │          │ • CLI Reference     │
+│ • Testing           │          │ • Troubleshooting   │          │ • Glossary          │
+└─────────────────────┘          └─────────────────────┘          └─────────────────────┘
+```
+
+______________________________________________________________________
+
+## 🚀 Quick Navigation
+
+| I want to...                       | Start here                                         |
+| ---------------------------------- | -------------------------------------------------- |
+| **Get started quickly**            | [Quick Start Tutorial](tutorials/quickstart.md)    |
+| **Install AutoGit**                | [Installation Guide](installation/README.md)       |
+| **Configure the platform**         | [Configuration Guide](configuration/README.md)     |
+| **Understand the architecture**    | [Architecture Overview](architecture/README.md)    |
+| **Set up development environment** | [Development Setup](development/setup.md)          |
+| **Debug an issue**                 | [Troubleshooting Guide](troubleshooting/README.md) |
+| **Contribute code**                | [Contributing Guide](../CONTRIBUTING.md)           |
+
+______________________________________________________________________
+
+## 📁 Documentation Structure
+
+```
+docs/
+├── 📋 INDEX.md                    # ← You are here
+├── 📜 CHANGELOG.md                # Version history
+├── 🗺️ ROADMAP.md                  # Future plans
+├── ❓ FAQ.md                       # Frequently asked questions
+├── 📖 GLOSSARY.md                 # Terms and definitions
+├── ⚖️ LICENSES.md                 # Dependency licenses
+│
+├── 🚀 installation/               # Installation guides
+│   ├── README.md                  # Installation overview
+│   ├── kubernetes.md              # Kubernetes/Helm deployment
+│   └── argocd.md                  # ArgoCD GitOps deployment
+│
+├── ⚙️ configuration/              # Configuration references
+│   ├── README.md                  # Configuration overview
+│   └── CI_CD_SECRETS.md           # CI/CD secrets management
+│
+├── 🏗️ architecture/               # Architecture documentation
+│   ├── README.md                  # Architecture overview
+│   ├── PLATFORM_ARCHITECTURE.md   # Detailed platform design
+│   ├── AUTOGIT_SPEC.md            # Technical specification
+│   └── adr/                       # Architecture Decision Records
+│       ├── README.md              # ADR index
+│       ├── template.md            # ADR template
+│       └── 001-traefik-vs-nginx.md
+│
+├── 💻 development/                # Development guides
+│   ├── README.md                  # Development overview
+│   ├── setup.md                   # Local development setup
+│   ├── standards.md               # Coding standards
+│   ├── testing.md                 # Testing guide
+│   ├── ci-cd.md                   # CI/CD configuration
+│   ├── agentic-workflow.md        # AI-assisted development
+│   ├── branching-strategy.md      # Git branching model
+│   ├── project-structure.md       # Codebase organization
+│   ├── documentation.md           # Documentation standards
+│   ├── common-tasks.md            # Common dev tasks
+│   ├── workflow-optimization.md   # Workflow tips
+│   ├── ghcr-setup.md              # GitHub Container Registry
+│   ├── chat-context.md            # AI chat context
+│   └── CODE_QUALITY.md            # Code quality standards
+│
+├── 🏃 runners/                    # Runner management
+│   ├── README.md                  # Runner overview
+│   ├── AUTONOMOUS_RUNNERS.md      # Autonomous runner system
+│   ├── MULTI_ARCH_STRATEGY.md     # Multi-architecture support
+│   └── dynamic-runner-testing.md  # Dynamic runner testing
+│
+├── 🎮 gpu/                        # GPU support
+│   └── README.md                  # GPU configuration guide
+│
+├── 🔐 security/                   # Security documentation
+│   ├── README.md                  # Security overview
+│   └── CREDENTIALS_MANAGEMENT.md  # Credentials handling
+│
+├── 🔧 operations/                 # Operations guides
+│   └── README.md                  # Operations overview
+│
+├── 📡 api/                        # API documentation
+│   └── README.md                  # API reference
+│
+├── 💻 cli/                        # CLI reference
+│   └── README.md                  # CLI commands
+│
+├── 📚 tutorials/                  # Step-by-step tutorials
+│   └── README.md                  # Tutorial index
+│
+├── 🔧 troubleshooting/            # Problem solving
+│   └── README.md                  # Troubleshooting guide
+│
+├── 🖥️ git-server/                 # Git server documentation
+│   ├── README.md                  # Git server overview
+│   ├── quickstart.md              # Quick setup guide
+│   ├── docker-setup.md            # Docker deployment
+│   ├── docker-setup-summary.md    # Setup summary
+│   ├── user-guide.md              # User documentation
+│   ├── admin-guide.md             # Administration guide
+│   ├── authentication.md          # Auth configuration
+│   ├── ssh-access.md              # SSH setup
+│   ├── http-access.md             # HTTP/HTTPS setup
+│   ├── repository-management.md   # Repo management
+│   ├── api-integration.md         # API usage
+│   ├── security-config.md         # Security settings
+│   ├── backup-recovery.md         # Backup procedures
+│   └── GIT_SERVER_FEATURE_PLAN.md # Feature roadmap
+│
+├── 🛠️ tools/                      # Tool documentation
+│   └── tasker.md                  # Task automation tool
+│
+├── 📋 workflows/                  # Workflow documentation
+│   └── RELEASE_WORKFLOW.md        # Release process
+│
+└── 📦 archive/                    # Historical documentation
+    ├── README.md                  # Archive index
+    ├── work-summaries/            # Development session logs
+    ├── branch-management/         # Branch cleanup records
+    ├── pr-documentation/          # Historical PR docs
+    └── release-history/           # Past release notes
+```
+
+______________________________________________________________________
+
+## 📖 Core Documentation
+
+### 🚀 Installation & Setup
+
+| Document                                        | Description                 | Audience  |
+| ----------------------------------------------- | --------------------------- | --------- |
+| [Installation Overview](installation/README.md) | Complete installation guide | All users |
+| [Kubernetes Setup](installation/kubernetes.md)  | Production K8s deployment   | Operators |
+| [ArgoCD Deployment](installation/argocd.md)     | GitOps deployment method    | Operators |
+
+### ⚙️ Configuration
+
+| Document                                          | Description                | Audience       |
+| ------------------------------------------------- | -------------------------- | -------------- |
+| [Configuration Overview](configuration/README.md) | System configuration guide | Administrators |
+| [CI/CD Secrets](configuration/CI_CD_SECRETS.md)   | Secrets management         | Administrators |
+
+### 🏗️ Architecture & Design
+
+| Document                                                       | Description               | Audience   |
+| -------------------------------------------------------------- | ------------------------- | ---------- |
+| [Architecture Overview](architecture/README.md)                | System design overview    | All users  |
+| [Platform Architecture](architecture/PLATFORM_ARCHITECTURE.md) | Detailed component design | Architects |
+| [AutoGit Specification](architecture/AUTOGIT_SPEC.md)          | Technical specification   | Developers |
+| [ADR Index](architecture/adr/README.md)                        | Architecture decisions    | Architects |
+
+### 💻 Development
+
+| Document                                                | Description                      | Audience         |
+| ------------------------------------------------------- | -------------------------------- | ---------------- |
+| [Development Overview](development/README.md)           | Getting started with development | Developers       |
+| [Setup Guide](development/setup.md)                     | Local environment setup          | Developers       |
+| [Coding Standards](development/standards.md)            | Code style and conventions       | Developers       |
+| [Testing Guide](development/testing.md)                 | Testing strategies               | Developers       |
+| [CI/CD Guide](development/ci-cd.md)                     | Continuous integration setup     | Developers       |
+| [Branching Strategy](development/branching-strategy.md) | Git workflow                     | All contributors |
+| [Agentic Workflow](development/agentic-workflow.md)     | AI-assisted development          | Developers       |
+| [Code Quality](development/CODE_QUALITY.md)             | Quality standards                | Developers       |
+
+### 🏃 Runner Management
+
+| Document                                             | Description                | Audience   |
+| ---------------------------------------------------- | -------------------------- | ---------- |
+| [Runner Overview](runners/README.md)                 | Runner system introduction | All users  |
+| [Autonomous Runners](runners/AUTONOMOUS_RUNNERS.md)  | Self-managing runners      | Operators  |
+| [Multi-Architecture](runners/MULTI_ARCH_STRATEGY.md) | Multi-arch support         | Operators  |
+| [Dynamic Testing](runners/dynamic-runner-testing.md) | Runner testing guide       | Developers |
+
+### 🖥️ Git Server
+
+| Document                                           | Description               | Audience       |
+| -------------------------------------------------- | ------------------------- | -------------- |
+| [Git Server Overview](git-server/README.md)        | GitLab CE setup guide     | All users      |
+| [Quick Start](git-server/quickstart.md)            | Get started in minutes    | New users      |
+| [Docker Setup](git-server/docker-setup.md)         | Docker Compose deployment | Operators      |
+| [User Guide](git-server/user-guide.md)             | Using the git server      | Users          |
+| [Admin Guide](git-server/admin-guide.md)           | Administration tasks      | Administrators |
+| [Authentication](git-server/authentication.md)     | Auth configuration        | Administrators |
+| [Backup & Recovery](git-server/backup-recovery.md) | Data protection           | Operators      |
+
+### 🔐 Security
+
+| Document                                                     | Description                | Audience  |
+| ------------------------------------------------------------ | -------------------------- | --------- |
+| [Security Overview](security/README.md)                      | Security best practices    | All users |
+| [Credentials Management](security/CREDENTIALS_MANAGEMENT.md) | Secure credential handling | Operators |
+
+### 🔧 Operations
+
+| Document                                          | Description           | Audience    |
+| ------------------------------------------------- | --------------------- | ----------- |
+| [Operations Overview](operations/README.md)       | Day-to-day operations | Operators   |
+| [Release Workflow](workflows/RELEASE_WORKFLOW.md) | Release process       | Maintainers |
+
+______________________________________________________________________
+
+## 🎯 Documentation by Role
+
+### 👋 New Users
+
+1. [README.md](../README.md) - Project overview
+1. [Quick Start](git-server/quickstart.md) - Get running in minutes
+1. [FAQ](FAQ.md) - Common questions answered
+1. [Glossary](GLOSSARY.md) - Understand the terminology
+
+### 👨‍💻 Developers
+
+1. [Development Setup](development/setup.md) - Set up your environment
+1. [Coding Standards](development/standards.md) - Follow the conventions
+1. [Testing Guide](development/testing.md) - Write effective tests
+1. [Architecture Overview](architecture/README.md) - Understand the system
+1. [API Documentation](api/README.md) - API reference
+
+### 🔧 Operators
+
+1. [Installation Guide](installation/README.md) - Deploy AutoGit
+1. [Configuration Guide](configuration/README.md) - Configure the platform
+1. [Operations Guide](operations/README.md) - Day-to-day operations
+1. [Troubleshooting](troubleshooting/README.md) - Fix common issues
+1. [Security Guide](security/README.md) - Secure your deployment
+
+### 🏛️ Architects
+
+1. [Architecture Overview](architecture/README.md) - System design
+1. [Platform Architecture](architecture/PLATFORM_ARCHITECTURE.md) - Deep dive
+1. [ADR Index](architecture/adr/README.md) - Design decisions
+1. [AutoGit Specification](architecture/AUTOGIT_SPEC.md) - Technical spec
+
+______________________________________________________________________
+
+## 📋 Project Status
+
+| Document                  | Description                 |
+| ------------------------- | --------------------------- |
+| [CHANGELOG](CHANGELOG.md) | Version history and changes |
+| [ROADMAP](ROADMAP.md)     | Future plans and milestones |
+| [LICENSES](LICENSES.md)   | Third-party licenses        |
+
+______________________________________________________________________
+
+## 🔗 Quick Links
+
+### Root Directory Files
+
+| File                                  | Description                      |
+| ------------------------------------- | -------------------------------- |
+| [README.md](../README.md)             | Project overview and quick start |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines          |
+| [LICENSE](LICENSE)                    | MIT License                      |
+
+### External Resources
+
+| Resource                                              | Description                          |
+| ----------------------------------------------------- | ------------------------------------ |
+| [GitLab Runner Docs](https://docs.gitlab.com/runner/) | Official GitLab Runner documentation |
+| [Traefik Docs](https://doc.traefik.io/traefik/)       | Traefik ingress controller           |
+| [Kubernetes Docs](https://kubernetes.io/docs/)        | Kubernetes documentation             |
+| [ArgoCD Docs](https://argo-cd.readthedocs.io/)        | ArgoCD GitOps documentation          |
+
+______________________________________________________________________
+
+## 📦 Archive
+
+Historical documentation and development artifacts are preserved in [archive/](archive/README.md):
+
+- **Work Summaries** - Development session logs and notes
+- **Branch Management** - Historical branch analysis
+- **PR Documentation** - Past pull request documentation
+- **Release History** - Previous release notes
+
+______________________________________________________________________
+
+## 🔍 Can't Find Something?
+
+1. **Search**: Use your editor's search across the `docs/` directory
+1. **Glossary**: Check [GLOSSARY.md](GLOSSARY.md) for term definitions
+1. **FAQ**: See [FAQ.md](FAQ.md) for common questions
+1. **Ask**: [Open an issue](https://github.com/tzervas/autogit/issues) if documentation is missing
+
+______________________________________________________________________
+
+<div align="center">
+
+**Last Updated**: January 2026 | **License**: MIT
+
+[Back to Top](#autogit-documentation) | [Project README](../README.md) |
+[Contributing](../CONTRIBUTING.md)
+
+</div>

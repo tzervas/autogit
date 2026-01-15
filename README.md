@@ -1,10 +1,20 @@
 # AutoGit
 
+<div align="center">
+
 **Self-Hosted GitOps Platform with Dynamic Multi-Architecture Runner Management**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](<>)
-[![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white)](<>)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![GitLab](https://img.shields.io/badge/gitlab-%23181717.svg?style=flat&logo=gitlab&logoColor=white)](https://about.gitlab.com/)
+
+[Documentation](docs/INDEX.md) • [Installation](docs/installation/README.md) •
+[Contributing](CONTRIBUTING.md) • [Roadmap](docs/ROADMAP.md)
+
+</div>
+
+______________________________________________________________________
 
 ## Overview
 
@@ -12,56 +22,56 @@ AutoGit is a fully self-hosted GitOps platform that automatically manages and sc
 across multiple architectures (amd64, arm64, RISC-V) with GPU-aware scheduling (AMD, NVIDIA, Intel).
 Built with security, lightweight performance, and ease of deployment in mind.
 
-> 🎯 **v0.2.0 Milestone**: As of December 24, 2025, all CI/CD for this project runs on a fully
-> self-hosted Homeland instance with automated, lifecycle-managed runners. While some manual tasks
-> remain, this release proves the concept and provides a functioning foundation for continued
-> refinement toward the 1.0.0 release.
+### ✨ Key Features
 
-### Key Features
+| Feature                           | Description                                            | Status         |
+| --------------------------------- | ------------------------------------------------------ | -------------- |
+| 🚀 **Dynamic Runner Autoscaling** | Auto-provisions right-sized runners based on job queue | ✅ Ready       |
+| 🏗️ **Multi-Architecture Support** | AMD64, ARM64, RISC-V via QEMU                          | 🔄 AMD64 Ready |
+| 🎮 **GPU-Aware Scheduling**       | Intelligent allocation of AMD, NVIDIA, Intel GPUs      | 📋 Planned     |
+| 🔐 **Centralized SSO**            | Unified authentication with Authelia                   | 📋 Planned     |
+| 🔒 **Automated SSL/TLS**          | Let's Encrypt integration via cert-manager             | ✅ Ready       |
+| 🌐 **Self-Hosted DNS**            | LAN-isolated access with CoreDNS                       | 📋 Planned     |
+| 📦 **Flexible Deployment**        | Docker Compose → Kubernetes/Helm                       | ✅ Ready       |
+| ⚖️ **MIT Licensed**               | Using only compatible FOSS components                  | ✅             |
 
-- 🚀 **Dynamic Runner Autoscaling** - Automatically provisions right-sized runners based on job queue
-- 🏗️ **Multi-Architecture Support** - AMD64 native (MVP), ARM64 native + QEMU emulation (planned),
-  RISC-V QEMU (future)
-- 🎮 **GPU-Aware Scheduling** - Intelligent allocation of AMD, NVIDIA, and Intel GPUs
-- 🔐 **Centralized SSO** - Unified authentication with Authelia
-- 🔒 **Automated SSL/TLS** - Let's Encrypt integration via cert-manager
-- 🌐 **Self-Hosted DNS** - LAN-isolated access with CoreDNS
-- 📦 **Flexible Deployment** - Scale from Docker Compose to Kubernetes/Helm
-- ⚖️ **MIT Licensed** - Using only compatible FOSS components
-
-**Architecture Focus**:
-
-- **MVP**: AMD64 native only (current testing)
-- **Phase 2**: ARM64 native support + QEMU fallback (post-deployment)
-- **Phase 3**: RISC-V QEMU emulation (future)
-
-## Architecture
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│         Docker Compose Orchestration         │
-├──────────────────┬──────────────────────────┤
-│   Git Server     │   Runner Coordinator     │
-│   Port: 3000     │   Port: 8080             │
-│   SSH: 2222      │   Manages: Runners       │
-└──────────────────┴──────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        AutoGit Platform                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐      │
+│  │   Git Server    │    │     Runner      │    │    Ingress      │      │
+│  │   (GitLab CE)   │◄──►│   Coordinator   │◄──►│   (Traefik)     │      │
+│  │                 │    │                 │    │                 │      │
+│  │  Port: 3000     │    │  Port: 8080     │    │  Port: 80/443   │      │
+│  │  SSH: 2222      │    │                 │    │                 │      │
+│  └────────┬────────┘    └────────┬────────┘    └─────────────────┘      │
+│           │                      │                                       │
+│           └──────────┬───────────┘                                       │
+│                      ▼                                                   │
+│           ┌─────────────────────────────────────┐                        │
+│           │        Dynamic Runners              │                        │
+│           │  ┌──────┐ ┌──────┐ ┌──────┐        │                        │
+│           │  │AMD64 │ │ARM64 │ │ GPU  │  ...   │                        │
+│           │  └──────┘ └──────┘ └──────┘        │                        │
+│           └─────────────────────────────────────┘                        │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Quick Start
-
-> ⚠️ **Important**: Please review [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) before
-> deploying to understand what features are production-ready vs. experimental.
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - Docker 24.0+ or Kubernetes 1.28+
-- Debian 12+ or Ubuntu 22.04+ (host OS)
+- Debian 12+ / Ubuntu 22.04+ (host OS)
 - Minimum 8GB RAM, 50GB storage
-- **Architecture**: AMD64 (MVP) - ✅ Production Ready
-- **ARM64/RISC-V**: Planned, not yet implemented
-- Optional: GPU for accelerated workloads (⚠️ Not yet implemented)
+- AMD64 architecture (ARM64/RISC-V planned)
 
-### Docker Compose (Development) - ✅ Validated & Production-Ready
+### Docker Compose (Development)
 
 ```bash
 git clone https://github.com/tzervas/autogit.git
@@ -71,138 +81,107 @@ cp .env.example .env
 docker compose up -d
 ```
 
-### Kubernetes/Helm (Production) - ✅ Available via ArgoCD
-
-**Quick Start:**
+### Kubernetes / ArgoCD (Production)
 
 ```bash
-# 1. Configure your environment
+# Configure environment
 cp .env.k8s.example .env.k8s
-nano .env.k8s  # Set DOMAIN, LETSENCRYPT_EMAIL at minimum
+nano .env.k8s  # Set DOMAIN, LETSENCRYPT_EMAIL
 
-# 2. Customize environment files
-./scripts/customize-k8s-env.sh homelab
-
-# 3. Create Kubernetes secrets
-./scripts/create-k8s-secrets.sh
-
-# 4. Deploy via ArgoCD (Recommended)
+# Deploy via ArgoCD
 kubectl apply -f argocd/apps/root.yaml
-
-# Or via Helmfile
-helmfile -e homelab sync
 ```
 
-### Homelab Deployment - ✅ Automated Scripts Available
+📖 See [Installation Guide](docs/installation/README.md) for detailed instructions.
 
-```bash
-cp .env.homelab.example .env.homelab
-# Edit .env.homelab with your homelab details
-./scripts/deploy-homelab.sh
-```
+______________________________________________________________________
 
-### Core Services (Rust Bootstrap)
-
-```bash
-cp .env.core.example .env.core
-# Edit .env.core with GitLab admin token and domain
-cargo run --bin bootstrap
-```
-
-See [Kubernetes Installation Guide](docs/installation/kubernetes.md) for detailed instructions.
-
-See [Installation Guide](docs/installation/README.md) and
-[DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature
-status.
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 autogit/
-├── docker-compose.yml          # Service orchestration
-├── .env.example                # Docker Compose environment template
-├── .env.homelab.example        # Homelab deployment template
-├── .env.k8s.example           # Kubernetes deployment template
-├── .env.core.example          # Core services (Rust) template
-├── services/                   # Service implementations
-│   ├── git-server/            # Git server service
-│   └── runner-coordinator/    # Runner management service
-├── config/                     # Configuration files
-├── scripts/                    # Utility scripts
-│   └── setup.sh               # Initial setup
-└── docs/                       # Documentation
+├── 📄 docker-compose.yml       # Service orchestration
+├── 📄 .env.example             # Environment template
+├── 📂 services/                # Service implementations
+│   ├── git-server/             # GitLab CE container
+│   └── runner-coordinator/     # Runner management service
+├── 📂 config/                  # Configuration files
+├── 📂 scripts/                 # Utility scripts
+├── 📂 charts/                  # Helm charts
+├── 📂 argocd/                  # ArgoCD applications
+├── 📂 autogit-core/            # Rust CLI tool
+└── 📂 docs/                    # Documentation
 ```
 
-## Services
+______________________________________________________________________
 
-### Git Server
+## 📖 Documentation
 
-- **Purpose**: Version control system
-- **Ports**: 3000 (HTTP), 2222 (SSH)
-- **Features**: Repository management, SSH access
+<div align="center">
 
-### Runner Coordinator
+| Category                                             | Description                  |
+| ---------------------------------------------------- | ---------------------------- |
+| [📚 Full Documentation](docs/INDEX.md)               | Complete documentation index |
+| [🚀 Installation](docs/installation/README.md)       | Get started with AutoGit     |
+| [⚙️ Configuration](docs/configuration/README.md)     | Configure your deployment    |
+| [🏗️ Architecture](docs/architecture/README.md)       | System design and ADRs       |
+| [💻 Development](docs/development/README.md)         | Contributing guide           |
+| [🏃 Runners](docs/runners/README.md)                 | Dynamic runner autoscaling   |
+| [🔐 Security](docs/security/README.md)               | Security best practices      |
+| [🔧 Operations](docs/operations/README.md)           | Day-to-day operations        |
+| [🐛 Troubleshooting](docs/troubleshooting/README.md) | Problem solving              |
 
-- **Purpose**: Manage automated runners
-- **Port**: 8080
-- **Features**: Runner lifecycle, GPU/compute coordination
+</div>
 
-## Documentation
+______________________________________________________________________
 
-Complete documentation available at [docs/INDEX.md](docs/INDEX.md).
+## 🤝 Contributing
 
-### Quick Links
-
-- [Installation Guide](docs/installation/README.md) - Get started with AutoGit
-- [Configuration Guide](docs/configuration/README.md) - Configure your deployment
-- [Architecture Overview](docs/architecture/README.md) - Understand the system
-- [Development Guide](docs/development/README.md) - Contributing to AutoGit
-- [Runner Management](docs/runners/README.md) - Dynamic runner autoscaling
-- [GPU Support](docs/gpu/README.md) - GPU-aware scheduling
-- [Security Guide](docs/security/README.md) - Security best practices
-- [Operations Guide](docs/operations/README.md) - Day-to-day operations
-- [API Documentation](docs/api/README.md) - Programmatic access
-- [Troubleshooting](docs/troubleshooting/README.md) - Problem solving
-
-## Development
-
-We welcome contributions! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
-
-### Development Setup
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-# Clone repository
+# Clone and setup
 git clone https://github.com/tzervas/autogit.git
 cd autogit
-
-# Run setup script
 ./scripts/setup.sh
 
 # Start development environment
-docker compose -f compose/dev/docker-compose.yml up -d
+docker compose up -d
 ```
 
-See [Development Setup](docs/development/setup.md) for detailed instructions.
+📖 See [Development Guide](docs/development/README.md) for detailed setup instructions.
 
-### Project Structure
+______________________________________________________________________
 
-- `src/` - Source code for core components
-- `services/` - Service implementations
-- `docs/` - Documentation
-- `config/` - Configuration files
-- `charts/` - Helm charts for Kubernetes
-- `scripts/` - Utility scripts
+## 📋 Project Status
 
-See [Project Structure](docs/development/project-structure.md) for details.
+| Milestone                  | Status         | Target  |
+| -------------------------- | -------------- | ------- |
+| Core Platform              | ✅ Complete    | -       |
+| Docker Compose Deployment  | ✅ Complete    | -       |
+| Kubernetes/ArgoCD          | ✅ Complete    | -       |
+| Multi-Architecture (ARM64) | 🔄 In Progress | Q1 2026 |
+| GPU Support                | 📋 Planned     | Q2 2026 |
+| SSO Integration            | 📋 Planned     | Q3 2026 |
 
-## Community
+📖 See [ROADMAP](docs/ROADMAP.md) for detailed plans.
 
-- **Issues**: [GitHub Issues](https://github.com/tzervas/autogit/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/tzervas/autogit/discussions)
-- **Contributing**: [Contributing Guide](docs/CONTRIBUTING.md)
+______________________________________________________________________
 
-## License
+## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](docs/LICENSE) for details.
 
-All dependencies are MIT-compatible. See [LICENSES.md](LICENSES.md) for dependency licenses.
+All dependencies are MIT-compatible. See [docs/LICENSES.md](docs/LICENSES.md) for dependency
+licenses.
+
+______________________________________________________________________
+
+<div align="center">
+
+**[Documentation](docs/INDEX.md)** • **[Issues](https://github.com/tzervas/autogit/issues)** •
+**[Discussions](https://github.com/tzervas/autogit/discussions)**
+
+Made with ❤️ by the AutoGit community
+
+</div>

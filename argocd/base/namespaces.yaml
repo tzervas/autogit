@@ -1,0 +1,50 @@
+# =============================================================================
+# AutoGit Namespaces
+# =============================================================================
+# Core namespaces for the AutoGit platform
+# Applied via ArgoCD sync wave -2 (first)
+# =============================================================================
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autogit-system
+  labels:
+    app.kubernetes.io/name: autogit-system
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autogit-gitlab
+  labels:
+    app.kubernetes.io/name: autogit-gitlab
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autogit-runners
+  labels:
+    app.kubernetes.io/name: autogit-runners
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autogit-observability
+  labels:
+    app.kubernetes.io/name: autogit-observability
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"

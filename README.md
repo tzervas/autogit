@@ -71,13 +71,45 @@ cp .env.example .env
 docker compose up -d
 ```
 
-### Kubernetes/Helm (Production) - ⚠️ Planned, Not Yet Implemented
+### Kubernetes/Helm (Production) - ✅ Available via ArgoCD
+
+**Quick Start:**
 
 ```bash
-# Kubernetes deployment is planned for future releases
-# Currently, use Docker Compose for all deployments
-# See DEPLOYMENT_READINESS.md for current status
+# 1. Configure your environment
+cp .env.k8s.example .env.k8s
+nano .env.k8s  # Set DOMAIN, LETSENCRYPT_EMAIL at minimum
+
+# 2. Customize environment files
+./scripts/customize-k8s-env.sh homelab
+
+# 3. Create Kubernetes secrets
+./scripts/create-k8s-secrets.sh
+
+# 4. Deploy via ArgoCD (Recommended)
+kubectl apply -f argocd/apps/root.yaml
+
+# Or via Helmfile
+helmfile -e homelab sync
 ```
+
+### Homelab Deployment - ✅ Automated Scripts Available
+
+```bash
+cp .env.homelab.example .env.homelab
+# Edit .env.homelab with your homelab details
+./scripts/deploy-homelab.sh
+```
+
+### Core Services (Rust Bootstrap)
+
+```bash
+cp .env.core.example .env.core
+# Edit .env.core with GitLab admin token and domain
+cargo run --bin bootstrap
+```
+
+See [Kubernetes Installation Guide](docs/installation/kubernetes.md) for detailed instructions.
 
 See [Installation Guide](docs/installation/README.md) and
 [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature
@@ -88,7 +120,10 @@ status.
 ```
 autogit/
 ├── docker-compose.yml          # Service orchestration
-├── .env.example                # Environment template
+├── .env.example                # Docker Compose environment template
+├── .env.homelab.example        # Homelab deployment template
+├── .env.k8s.example           # Kubernetes deployment template
+├── .env.core.example          # Core services (Rust) template
 ├── services/                   # Service implementations
 │   ├── git-server/            # Git server service
 │   └── runner-coordinator/    # Runner management service

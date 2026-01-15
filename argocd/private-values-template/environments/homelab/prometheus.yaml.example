@@ -1,0 +1,84 @@
+# =============================================================================
+# Prometheus Stack Private Values - Homelab Environment
+# =============================================================================
+# Copy to prometheus.yaml and fill in your actual values
+# =============================================================================
+
+grafana:
+  # Admin credentials - use Kubernetes Secret in production
+  # adminPassword: set-via-secret
+  
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.example.com
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.example.com
+
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+    
+    route:
+      group_by: ['alertname', 'namespace']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'default-receiver'
+      routes:
+        - match:
+            severity: critical
+          receiver: 'critical-receiver'
+    
+    receivers:
+      - name: 'default-receiver'
+        # Slack notifications (optional)
+        # slack_configs:
+        #   - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        #     channel: '#alerts'
+        #     send_resolved: true
+        
+        # Email notifications (optional)
+        # email_configs:
+        #   - to: 'alerts@example.com'
+        #     from: 'alertmanager@example.com'
+        #     smarthost: 'smtp.gmail.com:587'
+        #     auth_username: 'your-email@gmail.com'
+        #     auth_password: 'use-kubernetes-secret'
+      
+      - name: 'critical-receiver'
+        # Add PagerDuty, OpsGenie, etc. for critical alerts
+        # pagerduty_configs:
+        #   - service_key: 'your-pagerduty-key'
+
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - prometheus.example.com
+    tls:
+      - secretName: prometheus-tls
+        hosts:
+          - prometheus.example.com
+  
+  prometheusSpec:
+    # External labels for federation/remote write
+    externalLabels:
+      cluster: homelab
+      environment: homelab
+    
+    # Remote write to long-term storage (optional)
+    # remoteWrite:
+    #   - url: "https://prometheus-remote-write.example.com/api/v1/write"
+    #     basicAuth:
+    #       username:
+    #         name: remote-write-credentials
+    #         key: username
+    #       password:
+    #         name: remote-write-credentials
+    #         key: password

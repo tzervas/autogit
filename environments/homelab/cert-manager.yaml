@@ -1,0 +1,42 @@
+# =============================================================================
+# Homelab - cert-manager Values
+# =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
+
+installCRDs: true
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+webhook:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+cainjector:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true

@@ -1,0 +1,64 @@
+# =============================================================================
+# Homelab - Runner Coordinator Values
+# =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
+
+config:
+  gitlabUrl: "https://gitlab.example.com"  # CHANGEME: Set to https://gitlab.${DOMAIN}
+  cooldownMinutes: 5
+  maxIdleRunners: 0
+  logLevel: "INFO"
+
+# Use existing secret for tokens (must be created separately)
+existingSecret: "autogit-gitlab-tokens"
+
+# Kubernetes executor configuration
+executor:
+  type: kubernetes
+  kubernetes:
+    enabled: true
+    namespace: autogit-runners
+    serviceAccount: gitlab-runner
+    cpuRequest: "500m"
+    memoryRequest: "512Mi"
+    cpuLimit: "2"
+    memoryLimit: "2Gi"
+
+# Resource limits for homelab
+resources:
+  limits:
+    cpu: "2"
+    memory: 2Gi
+  requests:
+    cpu: "500m"
+    memory: 512Mi
+
+# Persistence for SQLite
+persistence:
+  enabled: true
+  size: 2Gi
+
+# Enable metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+# Ingress for API access
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: runner.example.com  # CHANGEME: Set to runner.${DOMAIN}
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: runner-coordinator-tls
+      hosts:
+        - runner.example.com  # CHANGEME: Set to runner.${DOMAIN}

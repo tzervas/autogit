@@ -1,0 +1,53 @@
+# =============================================================================
+# Loki Stack Application
+# =============================================================================
+# Deploys Loki and Promtail for log aggregation
+# Values are loaded from charts/values/ - no inline overrides
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-loki
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-loki
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  sources:
+    # Primary source: Loki stack Helm chart
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: loki-stack
+      targetRevision: "2.10.2"
+      helm:
+        releaseName: loki
+        valueFiles:
+          - $values/charts/values/loki.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-observability
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

@@ -1,0 +1,66 @@
+# =============================================================================
+# Homelab Environment Values
+# =============================================================================
+# Configuration for homelab deployment
+# IMPORTANT: This is a template with example values. Copy and customize for
+# your environment. See .env.k8s.example for all configurable parameters.
+# =============================================================================
+
+# Global settings
+global:
+  domain: example.com  # CHANGEME: Set your domain in .env.k8s (DOMAIN)
+  clusterIssuer: letsencrypt-staging  # CHANGEME: Use letsencrypt-prod for production
+  storageClass: ""  # Use default storage class
+
+# Resource profiles
+resources:
+  profile: standard
+
+# Feature flags
+features:
+  monitoring: true
+  logging: true
+  tracing: false
+  registry: false
+
+# GitLab configuration
+gitlab:
+  host: gitlab.example.com  # CHANGEME: Set to gitlab.${DOMAIN}
+  https: true
+  resources:
+    webservice:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 4
+        memory: 8Gi
+    sidekiq:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+# Runner coordinator configuration
+runnerCoordinator:
+  gitlabUrl: https://gitlab.example.com  # CHANGEME: Set to https://gitlab.${DOMAIN}
+  cooldownMinutes: 5
+  maxIdleRunners: 0
+  logLevel: INFO
+
+# Traefik configuration
+traefik:
+  dashboard:
+    host: traefik.example.com  # CHANGEME: Set to traefik.${DOMAIN}
+
+# Grafana configuration
+grafana:
+  host: grafana.example.com  # CHANGEME: Set to grafana.${DOMAIN}
+  adminPassword: ""  # Set via secret
+
+# cert-manager configuration
+certManager:
+  email: admin@example.com  # CHANGEME: Set your email in .env.k8s (LETSENCRYPT_EMAIL)
+  solver: http01

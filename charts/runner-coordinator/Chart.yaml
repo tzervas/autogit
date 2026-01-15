@@ -1,0 +1,36 @@
+# =============================================================================
+# AutoGit Runner Coordinator Helm Chart
+# =============================================================================
+# Dynamic GitLab runner lifecycle manager with auto-scaling
+# Part of the AutoGit CI/CD platform
+#
+# Documentation: https://github.com/tzervas/autogit/blob/main/docs/runners/
+# =============================================================================
+apiVersion: v2
+name: runner-coordinator
+description: Dynamic GitLab runner lifecycle manager with auto-scaling and intelligent resource allocation
+type: application
+version: 0.2.0
+appVersion: "0.2.0"
+
+keywords:
+  - gitlab
+  - runner
+  - ci/cd
+  - autoscaling
+  - kubernetes
+
+home: https://github.com/tzervas/autogit
+sources:
+  - https://github.com/tzervas/autogit
+
+maintainers:
+  - name: tzervas
+    email: maintainer@example.com
+
+annotations:
+  # Artifact Hub annotations
+  artifacthub.io/license: MIT
+  artifacthub.io/category: integration-delivery
+
+dependencies: []

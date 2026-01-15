@@ -1,0 +1,63 @@
+# =============================================================================
+# cert-manager Application
+# =============================================================================
+# Deploys cert-manager for automatic TLS certificate management
+# Values are loaded from charts/values/ - no inline overrides
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-cert-manager
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-cert-manager
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: certificates
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  sources:
+    # Primary source: cert-manager Helm chart
+    - repoURL: https://charts.jetstack.io
+      chart: cert-manager
+      targetRevision: "v1.16.2"
+      helm:
+        releaseName: cert-manager
+        valueFiles:
+          - $values/charts/values/cert-manager.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle

@@ -1,0 +1,47 @@
+# =============================================================================
+# Traefik Private Values - Homelab Environment
+# =============================================================================
+# Copy to traefik.yaml and fill in your actual values
+# =============================================================================
+
+service:
+  spec:
+    # Set your actual LoadBalancer IP (MetalLB, etc.)
+    loadBalancerIP: 192.168.1.100
+    # Or use externalIPs for bare metal
+    # externalIPs:
+    #   - 192.168.1.100
+
+# Additional entry points if needed
+ports:
+  ssh:
+    port: 2222
+    exposedPort: 22
+    protocol: TCP
+
+# Dashboard configuration
+ingressRoute:
+  dashboard:
+    enabled: true
+    # Restrict to internal network
+    matchRule: Host(`traefik.example.com`) && (ClientIP(`192.168.0.0/16`) || ClientIP(`10.0.0.0/8`))
+    entryPoints:
+      - websecure
+
+# TLS configuration
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+    cipherSuites:
+      - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+# Certificate resolvers (if using Traefik for ACME instead of cert-manager)
+# certResolvers:
+#   letsencrypt:
+#     email: your-email@example.com
+#     tlsChallenge: true
+#     httpChallenge:
+#       entryPoint: web
+#     storage: /data/acme.json

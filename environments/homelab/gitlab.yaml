@@ -1,0 +1,92 @@
+# =============================================================================
+# Homelab - GitLab Values
+# =============================================================================
+# IMPORTANT: This is a template with example values. Customize for your environment.
+# =============================================================================
+
+global:
+  hosts:
+    domain: example.com  # CHANGEME: Set your domain (DOMAIN)
+    gitlab:
+      name: gitlab.example.com  # CHANGEME: Set to gitlab.${DOMAIN}
+      https: true
+    registry:
+      name: registry.example.com  # CHANGEME: Set to registry.${DOMAIN}
+      https: true
+  
+  ingress:
+    configureCertmanager: true
+    class: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+  
+  # Disable components not needed for homelab
+  grafana:
+    enabled: false
+  prometheus:
+    install: false
+  
+  kas:
+    enabled: false
+  
+  shell:
+    port: 22
+
+gitlab:
+  webservice:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 4
+        memory: 8Gi
+    workerProcesses: 4
+  
+  sidekiq:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+    concurrency: 15
+  
+  gitaly:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+postgresql:
+  primary:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+
+redis:
+  master:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+registry:
+  enabled: false
+
+certmanager-issuer:
+  email: admin@example.com  # CHANGEME: Set your email (LETSENCRYPT_EMAIL)

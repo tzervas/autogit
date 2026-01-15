@@ -1,0 +1,68 @@
+# =============================================================================
+# GitLab CE Application
+# =============================================================================
+# Deploys GitLab CE using the official Helm chart
+# Values are loaded from charts/values/ - no inline overrides
+# Private/sensitive values should come from a separate private repository
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-gitlab
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-gitlab
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: git-server
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  sources:
+    # Primary source: GitLab Helm chart
+    - repoURL: https://charts.gitlab.io
+      chart: gitlab
+      targetRevision: "8.7.0"
+      helm:
+        releaseName: gitlab
+        valueFiles:
+          # Reference values from the Git repo source below
+          - $values/charts/values/gitlab.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-gitlab
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: batch
+      kind: Job
+      jsonPointers:
+        - /spec/selector
+        - /spec/template/metadata/labels

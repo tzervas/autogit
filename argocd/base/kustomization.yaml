@@ -1,0 +1,20 @@
+# =============================================================================
+# ArgoCD Base Resources Kustomization
+# =============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+
+resources:
+  - namespaces.yaml
+  - cluster-issuers.yaml
+  - runner-rbac.yaml
+  - network-policies.yaml
+  - resource-quotas.yaml
+  # Note: secrets-template.yaml is NOT included
+  # Secrets should be created manually or via sealed-secrets
+
+commonLabels:
+  app.kubernetes.io/part-of: autogit
+  app.kubernetes.io/managed-by: argocd

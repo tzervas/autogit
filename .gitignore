@@ -30,6 +30,7 @@ ENV/
 !.env.example
 !.env.homelab.example
 !.env.k8s.example
+!.env.core.example
 *.token
 *_password
 *_secrets
@@ -40,6 +41,9 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Rust build artifacts
+autogit-core/target/
 
 # Data
 data/

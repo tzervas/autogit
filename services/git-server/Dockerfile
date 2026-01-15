@@ -17,13 +17,14 @@ ARG VERSION=0.2.0
 ARG VCS_REF
 ARG ARCH=amd64
 ARG VARIANT=release
+ARG MAINTAINER_EMAIL=tzervas@example.com
 
 # =============================================================================
 # OCI Image Specification Labels
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md
 # =============================================================================
 LABEL org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.authors="tzervas <tz-dev@vectorweight.com>" \
+      org.opencontainers.image.authors="tzervas <${MAINTAINER_EMAIL}>" \
       org.opencontainers.image.url="https://github.com/tzervas/autogit" \
       org.opencontainers.image.documentation="https://github.com/tzervas/autogit/blob/main/docs/git-server/README.md" \
       org.opencontainers.image.source="https://github.com/tzervas/autogit" \

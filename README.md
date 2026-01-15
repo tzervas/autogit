@@ -93,6 +93,22 @@ kubectl apply -f argocd/apps/root.yaml
 helmfile -e homelab sync
 ```
 
+### Homelab Deployment - ✅ Automated Scripts Available
+
+```bash
+cp .env.homelab.example .env.homelab
+# Edit .env.homelab with your homelab details
+./scripts/deploy-homelab.sh
+```
+
+### Core Services (Rust Bootstrap)
+
+```bash
+cp .env.core.example .env.core
+# Edit .env.core with GitLab admin token and domain
+cargo run --bin bootstrap
+```
+
 See [Kubernetes Installation Guide](docs/installation/kubernetes.md) for detailed instructions.
 
 See [Installation Guide](docs/installation/README.md) and
@@ -104,7 +120,10 @@ status.
 ```
 autogit/
 ├── docker-compose.yml          # Service orchestration
-├── .env.example                # Environment template
+├── .env.example                # Docker Compose environment template
+├── .env.homelab.example        # Homelab deployment template
+├── .env.k8s.example           # Kubernetes deployment template
+├── .env.core.example          # Core services (Rust) template
 ├── services/                   # Service implementations
 │   ├── git-server/            # Git server service
 │   └── runner-coordinator/    # Runner management service

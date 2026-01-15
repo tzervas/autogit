@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from .models import Task, TaskStatus
+from .models import Task
 
 
 class TaskExecutor:
@@ -90,7 +90,7 @@ class TaskExecutor:
                 return True
 
             # Fetch latest changes
-            print(f"📥 Fetching latest changes from origin...")
+            print("📥 Fetching latest changes from origin...")
             subprocess.run(["git", "fetch", "origin"], cwd=self.repo_path, check=True)
 
             # Checkout base branch
@@ -98,7 +98,7 @@ class TaskExecutor:
             subprocess.run(["git", "checkout", base_branch], cwd=self.repo_path, check=True)
 
             # Pull latest changes
-            print(f"📥 Pulling latest changes...")
+            print("📥 Pulling latest changes...")
             subprocess.run(["git", "pull", "origin", base_branch], cwd=self.repo_path, check=True)
 
             # Create new branch

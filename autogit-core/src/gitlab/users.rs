@@ -126,57 +126,7 @@ impl serde::Serialize for CreateUserRequest {
     }
 }
 
-/// Builder for bulk user creation
-pub struct UserBootstrap {
-    users: Vec<CreateUserRequest>,
-}
 
-impl UserBootstrap {
-    pub fn new() -> Self {
-        Self { users: Vec::new() }
-    }
-
-    /// Add a human user
-    pub fn add_user(
-        mut self,
-        username: &str,
-        email: &str,
-        name: &str,
-        password: &str,
-        is_admin: bool,
-    ) -> Self {
-        self.users.push(
-            CreateUserRequest::new(username, email, name, password)
-                .admin(is_admin),
-        );
-        self
-    }
-
-    /// Add a service account
-    pub fn add_service_account(
-        mut self,
-        name: &str,
-        email: &str,
-        password: &str,
-    ) -> Self {
-        self.users.push(
-            CreateUserRequest::new(name, email, format!("{name} (Service)"), password)
-                .projects_limit(0),
-        );
-        self
-    }
-
-    /// Get all user requests
-    pub fn into_requests(self) -> Vec<CreateUserRequest> {
-        self.users
-    }
-}
-
-impl Default for UserBootstrap {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 #[cfg(test)]
 mod tests {

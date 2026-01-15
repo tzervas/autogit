@@ -5,9 +5,7 @@
 use autogit_core::{
     config::Config,
     credentials::CredentialStore,
-    gitlab::{
-        AuthMethod, CreateTokenRequest, CreateUserRequest, GitLabClient, Token, TokenScope,
-    },
+    gitlab::{CreateTokenRequest, CreateUserRequest, GitLabClient, TokenScope},
     Result,
 };
 use tracing::{error, info, warn};
@@ -18,7 +16,11 @@ const SERVICE_ACCOUNTS: &[(&str, &str, &str, &[TokenScope])] = &[
         "autogit-ci",
         "ci@vectorweight.com",
         "CI Service",
-        &[TokenScope::Api, TokenScope::ReadRepository, TokenScope::WriteRepository],
+        &[
+            TokenScope::Api,
+            TokenScope::ReadRepository,
+            TokenScope::WriteRepository,
+        ],
     ),
     (
         "autogit-api",
@@ -30,13 +32,22 @@ const SERVICE_ACCOUNTS: &[(&str, &str, &str, &[TokenScope])] = &[
         "autogit-backup",
         "backup@vectorweight.com",
         "Backup Service",
-        &[TokenScope::Api, TokenScope::ReadRepository, TokenScope::Sudo],
+        &[
+            TokenScope::Api,
+            TokenScope::ReadRepository,
+            TokenScope::Sudo,
+        ],
     ),
 ];
 
 /// Human user definitions
 const HUMAN_USERS: &[(&str, &str, &str, bool)] = &[
-    ("sysadmin", "sysadmin@vectorweight.com", "System Admin", true),
+    (
+        "sysadmin",
+        "sysadmin@vectorweight.com",
+        "System Admin",
+        true,
+    ),
     ("kang", "kang@vectorweight.com", "Kang", false),
     ("dev", "dev@vectorweight.com", "Developer", false),
 ];
@@ -107,12 +118,14 @@ async fn main() -> Result<()> {
         }
 
         let password = generate_password();
-        let request = CreateUserRequest::new(*username, *email, *name, &password)
-            .admin(*is_admin);
+        let request = CreateUserRequest::new(*username, *email, *name, &password).admin(*is_admin);
 
         match client.create_user(&request).await {
             Ok(user) => {
-                info!("  ✅ Created {} (id={}, admin={})", username, user.id, is_admin);
+                info!(
+                    "  ✅ Created {} (id={}, admin={})",
+                    username, user.id, is_admin
+                );
                 creds.set(format!("GITLAB_PASSWORD_{}", username), password);
             }
             Err(e) => {
@@ -137,7 +150,8 @@ async fn main() -> Result<()> {
         }
 
         let password = generate_password();
-        let request = CreateUserRequest::new(*username, *email, format!("{} (Service)", name), &password);
+        let request =
+            CreateUserRequest::new(*username, *email, format!("{} (Service)", name), &password);
 
         match client.create_user(&request).await {
             Ok(user) => {
@@ -148,8 +162,8 @@ async fn main() -> Result<()> {
                 );
 
                 // Create token
-                let token_request = CreateTokenRequest::new("autogit-token", scopes.to_vec())
-                    .expires_at(expiry);
+                let token_request =
+                    CreateTokenRequest::new("autogit-token", scopes.to_vec()).expires_at(expiry);
 
                 match client.create_user_token(user.id, &token_request).await {
                     Ok(pat) => {
@@ -173,7 +187,8 @@ async fn main() -> Result<()> {
     }
 
     // Save credentials
-    let creds_path = std::env::var("CREDS_FILE").unwrap_or_else(|_| "gitlab-credentials.env".into());
+    let creds_path =
+        std::env::var("CREDS_FILE").unwrap_or_else(|_| "gitlab-credentials.env".into());
     creds.save(&creds_path)?;
 
     info!("");

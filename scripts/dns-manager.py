@@ -14,13 +14,12 @@ Usage:
 """
 
 import argparse
-import json
 import os
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 try:
     import requests
@@ -152,10 +151,10 @@ class ManualProvider(DNSProvider):
 
         print("Option 1: Wildcard (recommended)")
         print("-" * 40)
-        print(f"  Type: A")
-        print(f"  Name: *")
+        print("  Type: A")
+        print("  Name: *")
         print(f"  Value: {target_ip}")
-        print(f"  TTL: 300")
+        print("  TTL: 300")
         print()
 
         print("Option 2: Individual records")
@@ -274,7 +273,7 @@ def main():
             provider.create_record(record)
 
     elif args.action == "delete":
-        print(f"🗑️  Deleting DNS records...")
+        print("🗑️  Deleting DNS records...")
         for record in records:
             provider.delete_record(record.name, record.type)
 

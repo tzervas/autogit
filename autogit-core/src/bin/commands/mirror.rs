@@ -1,9 +1,9 @@
 //! Mirror command - repository mirroring management
 
+use super::output::{MirrorInfo, MirrorListOutput, OutputFormat};
 use crate::MirrorCommands;
-use super::output::{MirrorInfo, MirrorListOutput, OutputFormat, TextOutput};
 use autogit_core::gitlab::{
-    AuthMethod, CreateProjectRequest, GitLabClient, MirrorConfig, Project, Token, Visibility,
+    AuthMethod, CreateProjectRequest, GitLabClient, MirrorConfig, Token, Visibility,
 };
 use autogit_core::Result;
 use std::env;
@@ -53,7 +53,7 @@ async fn add_mirror(
     let target_path = target
         .map(|t| t.to_string())
         .unwrap_or_else(|| format!("mirrors/{}-{}", owner, repo));
-    let project_name = target_path.split('/').last().unwrap_or(repo);
+    let project_name = target_path.split('/').next_back().unwrap_or(repo);
 
     info!("  Provider: {}", provider);
     info!("  Source: {}/{}", owner, repo);
@@ -73,7 +73,10 @@ async fn add_mirror(
 
     // Check if project already exists
     if let Some(existing) = client.get_project(&target_path).await? {
-        info!("  ℹ️  Project already exists: {}", existing.path_with_namespace);
+        info!(
+            "  ℹ️  Project already exists: {}",
+            existing.path_with_namespace
+        );
 
         if existing.mirror {
             info!("  ✓ Mirror already configured");
@@ -107,7 +110,7 @@ async fn add_mirror(
 
     // Set path if target includes a group prefix
     if target_path.contains('/') {
-        let path_only = target_path.split('/').last().unwrap();
+        let path_only = target_path.split('/').next_back().unwrap();
         create_req = create_req.path(path_only.to_string());
     }
 
@@ -158,9 +161,10 @@ async fn sync_mirror(repo: &str, dry_run: bool) -> Result<()> {
     let client = create_client()?;
 
     // Get project by path
-    let project = client.get_project(repo).await?.ok_or_else(|| {
-        autogit_core::Error::Config(format!("Project not found: {}", repo))
-    })?;
+    let project = client
+        .get_project(repo)
+        .await?
+        .ok_or_else(|| autogit_core::Error::Config(format!("Project not found: {}", repo)))?;
 
     if !project.mirror {
         return Err(autogit_core::Error::Config(format!(
@@ -213,15 +217,22 @@ async fn remove_mirror(repo: &str, confirmed: bool, purge: bool, dry_run: bool) 
 
     let client = create_client()?;
 
-    let project = client.get_project(repo).await?.ok_or_else(|| {
-        autogit_core::Error::Config(format!("Project not found: {}", repo))
-    })?;
+    let project = client
+        .get_project(repo)
+        .await?
+        .ok_or_else(|| autogit_core::Error::Config(format!("Project not found: {}", repo)))?;
 
     if purge {
         // DESTRUCTIVE: Delete the entire project
-        info!("  Deleting project {} (ID: {})...", project.path_with_namespace, project.id);
+        info!(
+            "  Deleting project {} (ID: {})...",
+            project.path_with_namespace, project.id
+        );
         client.delete_project(project.id).await?;
-        info!("  ✓ Project PERMANENTLY DELETED: {}", project.path_with_namespace);
+        info!(
+            "  ✓ Project PERMANENTLY DELETED: {}",
+            project.path_with_namespace
+        );
         info!("  ℹ️  This action cannot be undone");
     } else {
         // Safe: Just disable mirroring, keep the project

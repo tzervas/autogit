@@ -64,7 +64,8 @@ async def lifespan(app: FastAPI):
         logger.warning("⚠ GITLAB_RUNNER_REGISTRATION_TOKEN not set")
     else:
         logger.info(
-            f"✓ GITLAB_RUNNER_REGISTRATION_TOKEN configured ({GITLAB_RUNNER_REGISTRATION_TOKEN[:20]}...)"
+            f"✓ GITLAB_RUNNER_REGISTRATION_TOKEN configured "
+            f"({GITLAB_RUNNER_REGISTRATION_TOKEN[:20]}...)"
         )
 
     # Start the lifecycle manager in the background

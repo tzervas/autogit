@@ -54,9 +54,7 @@ impl Error {
     /// Check if error is retryable (rate limit, server error)
     pub fn is_retryable(&self) -> bool {
         match self {
-            Self::GitLabApi { status, .. } => {
-                *status == 429 || *status >= 500
-            }
+            Self::GitLabApi { status, .. } => *status == 429 || *status >= 500,
             Self::Http(e) => e.is_timeout() || e.is_connect(),
             _ => false,
         }

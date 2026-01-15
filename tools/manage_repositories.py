@@ -29,7 +29,8 @@ def main():
             project_id=project_id,
             file_path="README.md",
             branch="main",
-            content="# AutoGit Test Project\n\nThis project was created via the AutoGit API client.",
+            content="# AutoGit Test Project\n\n"
+            "This project was created via the AutoGit API client.",
             commit_message="Initial commit",
         )
         print("✅ README.md created.")

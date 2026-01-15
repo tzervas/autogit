@@ -50,7 +50,11 @@ const USERS: &[UserDef] = &[
         name: "CI Service",
         is_admin: false,
         is_service: true,
-        scopes: Some(&[TokenScope::Api, TokenScope::ReadRepository, TokenScope::WriteRepository]),
+        scopes: Some(&[
+            TokenScope::Api,
+            TokenScope::ReadRepository,
+            TokenScope::WriteRepository,
+        ]),
     },
     UserDef {
         username: "autogit-api",
@@ -66,7 +70,11 @@ const USERS: &[UserDef] = &[
         name: "Backup Service",
         is_admin: true,
         is_service: true,
-        scopes: Some(&[TokenScope::Api, TokenScope::ReadRepository, TokenScope::Sudo]),
+        scopes: Some(&[
+            TokenScope::Api,
+            TokenScope::ReadRepository,
+            TokenScope::Sudo,
+        ]),
     },
 ];
 
@@ -90,7 +98,7 @@ fn generate_password() -> String {
 }
 
 pub async fn run(
-    config_path: &str,
+    _config_path: &str,
     output_path: &str,
     service_only: bool,
     dry_run: bool,
@@ -169,9 +177,8 @@ pub async fn run(
 
                 // Create token for service accounts
                 if let Some(scopes) = user.scopes {
-                    let token_request =
-                        CreateTokenRequest::new("autogit-token", scopes.to_vec())
-                            .expires_at(expiry);
+                    let token_request = CreateTokenRequest::new("autogit-token", scopes.to_vec())
+                        .expires_at(expiry);
 
                     match client.create_user_token(created.id, &token_request).await {
                         Ok(pat) => {

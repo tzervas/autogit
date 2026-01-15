@@ -36,18 +36,13 @@ pub struct ProjectNamespace {
 }
 
 /// Project visibility level
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
+    #[default]
     Private,
     Internal,
     Public,
-}
-
-impl Default for Visibility {
-    fn default() -> Self {
-        Self::Private
-    }
 }
 
 /// Request to create a new project
@@ -140,91 +135,4 @@ pub struct MirrorConfig {
     /// Keep divergent refs (push mirrors)
     #[serde(default)]
     pub keep_divergent_refs: bool,
-}
-
-/// Pull mirror settings update
-#[derive(Debug, Clone, Serialize)]
-pub struct UpdatePullMirrorRequest {
-    pub mirror: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub import_url: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mirror_user_id: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mirror_trigger_builds: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub only_mirror_protected_branches: Option<bool>,
-}
-
-impl UpdatePullMirrorRequest {
-    pub fn enable(import_url: impl Into<String>) -> Self {
-        Self {
-            mirror: true,
-            import_url: Some(import_url.into()),
-            mirror_user_id: None,
-            mirror_trigger_builds: Some(true),
-            only_mirror_protected_branches: Some(false),
-        }
-    }
-
-    pub fn disable() -> Self {
-        Self {
-            mirror: false,
-            import_url: None,
-            mirror_user_id: None,
-            mirror_trigger_builds: None,
-            only_mirror_protected_branches: None,
-        }
-    }
-}
-
-/// Namespace/Group info
-#[derive(Debug, Clone, Deserialize)]
-pub struct Namespace {
-    pub id: u64,
-    pub name: String,
-    pub path: String,
-    pub kind: String,
-    pub full_path: String,
-    #[serde(default)]
-    pub parent_id: Option<u64>,
-}
-
-/// Request to create a group
-#[derive(Debug, Clone, Serialize)]
-pub struct CreateGroupRequest {
-    pub name: String,
-    pub path: String,
-    pub visibility: Visibility,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub parent_id: Option<u64>,
-}
-
-impl CreateGroupRequest {
-    pub fn new(name: impl Into<String>, path: impl Into<String>) -> Self {
-        Self {
-            name: name.into(),
-            path: path.into(),
-            visibility: Visibility::Private,
-            description: None,
-            parent_id: None,
-        }
-    }
-
-    pub fn visibility(mut self, vis: Visibility) -> Self {
-        self.visibility = vis;
-        self
-    }
-
-    pub fn description(mut self, desc: impl Into<String>) -> Self {
-        self.description = Some(desc.into());
-        self
-    }
-
-    pub fn parent(mut self, parent_id: u64) -> Self {
-        self.parent_id = Some(parent_id);
-        self
-    }
 }

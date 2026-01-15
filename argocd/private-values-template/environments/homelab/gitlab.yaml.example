@@ -7,14 +7,14 @@
 global:
   hosts:
     # Your actual domain
-    domain: vectorweight.com
+    domain: example.com
     https: true
     gitlab:
-      name: gitlab.vectorweight.com
+      name: gitlab.example.com
     registry:
-      name: registry.vectorweight.com
+      name: registry.example.com
     minio:
-      name: minio.vectorweight.com
+      name: minio.example.com
   
   # SMTP configuration for email notifications
   smtp:
@@ -29,9 +29,9 @@ global:
   
   # Email settings
   email:
-    from: gitlab@vectorweight.com
+    from: gitlab@example.com
     display_name: GitLab
-    reply_to: noreply@vectorweight.com
+    reply_to: noreply@example.com
 
   # OAuth providers (optional)
   appConfig:

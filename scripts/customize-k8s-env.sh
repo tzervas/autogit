@@ -208,33 +208,53 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     
     log_info "Updating files..."
     
+    # Detect OS for sed compatibility
+    SED_INPLACE="-i"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        # macOS requires backup extension
+        SED_INPLACE="-i.bak"
+    fi
+    
     # Function to update a file
     update_file() {
         local file=$1
         log_info "  Updating $(basename "${file}")..."
         
-        sed -i "s/example\.com/${DOMAIN}/g" "${file}"
-        sed -i "s/gitlab\.example\.com/${GITLAB_FQDN}/g" "${file}"
-        sed -i "s/grafana\.example\.com/${GRAFANA_FQDN}/g" "${file}"
-        sed -i "s/traefik\.example\.com/${TRAEFIK_FQDN}/g" "${file}"
-        sed -i "s/runner\.example\.com/${RUNNER_API_FQDN}/g" "${file}"
-        sed -i "s/registry\.example\.com/${REGISTRY_FQDN}/g" "${file}"
-        sed -i "s/admin@example\.com/${LETSENCRYPT_EMAIL}/g" "${file}"
+        # Use sed with cross-platform compatibility
+        sed $SED_INPLACE "s/example\.com/${DOMAIN}/g" "${file}"
+        sed $SED_INPLACE "s/gitlab\.example\.com/${GITLAB_FQDN}/g" "${file}"
+        sed $SED_INPLACE "s/grafana\.example\.com/${GRAFANA_FQDN}/g" "${file}"
+        sed $SED_INPLACE "s/traefik\.example\.com/${TRAEFIK_FQDN}/g" "${file}"
+        sed $SED_INPLACE "s/runner\.example\.com/${RUNNER_API_FQDN}/g" "${file}"
+        sed $SED_INPLACE "s/registry\.example\.com/${REGISTRY_FQDN}/g" "${file}"
+        sed $SED_INPLACE "s/admin@example\.com/${LETSENCRYPT_EMAIL}/g" "${file}"
         
         # Update cluster issuer if not default
         if [[ -n "${CLUSTER_ISSUER:-}" ]] && [[ "${CLUSTER_ISSUER}" != "letsencrypt-staging" ]]; then
-            sed -i "s/letsencrypt-staging/${CLUSTER_ISSUER}/g" "${file}"
+            sed $SED_INPLACE "s/letsencrypt-staging/${CLUSTER_ISSUER}/g" "${file}"
+        fi
+        
+        # Clean up .bak files on macOS
+        if [[ "$(uname)" == "Darwin" ]] && [[ -f "${file}.bak" ]]; then
+            rm "${file}.bak"
         fi
     }
+    
+    # Export function for use in subshells
+    export -f update_file
+    export -f log_info
+    export DOMAIN GITLAB_FQDN GRAFANA_FQDN TRAEFIK_FQDN RUNNER_API_FQDN REGISTRY_FQDN LETSENCRYPT_EMAIL CLUSTER_ISSUER SED_INPLACE
     
     # Update base file
     if [[ -f "${ENV_BASE_FILE}" ]]; then
         update_file "${ENV_BASE_FILE}"
     fi
     
-    # Update environment files
+    # Update environment files using while loop instead of bash -c
     if [[ -d "${ENV_DIR}" ]]; then
-        find "${ENV_DIR}" -type f -name "*.yaml" -exec bash -c 'update_file "$0"' {} \;
+        while IFS= read -r -d '' file; do
+            update_file "${file}"
+        done < <(find "${ENV_DIR}" -type f -name "*.yaml" -print0)
     fi
     
     log_success "Files updated successfully!"

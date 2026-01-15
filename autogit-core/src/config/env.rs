@@ -39,21 +39,6 @@ impl Config {
         // Load .env file if present (ignore errors)
         let _ = dotenvy::dotenv();
 
-        let config = config::Config::builder()
-            .add_source(
-                config::Environment::default()
-                    .separator("_")
-                    .prefix("AUTOGIT")
-                    .try_parsing(true),
-            )
-            .add_source(
-                config::Environment::default()
-                    .try_parsing(true)
-                    .prefix("GITLAB"),
-            )
-            .build()
-            .map_err(|e| Error::Config(e.to_string()))?;
-
         // Try to get individual values with fallbacks
         let gitlab_url = std::env::var("GITLAB_URL")
             .or_else(|_| std::env::var("AUTOGIT_GITLAB_URL"))
@@ -95,8 +80,8 @@ impl Config {
     pub fn init_tracing(&self) {
         use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
-        let filter = EnvFilter::try_from_default_env()
-            .unwrap_or_else(|_| EnvFilter::new(&self.log_level));
+        let filter =
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&self.log_level));
 
         tracing_subscriber::registry()
             .with(fmt::layer().with_target(true))

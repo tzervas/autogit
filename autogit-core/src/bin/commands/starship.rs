@@ -27,10 +27,10 @@
 //!
 //! Example: `⬡ M:3 R:2` = connected, 3 mirrors, 2 runners
 
-use std::env;
-use std::time::{Duration, SystemTime};
 use autogit_core::gitlab::{AuthMethod, GitLabClient, Token};
 use autogit_core::Result;
+use std::env;
+use std::time::{Duration, SystemTime};
 
 /// Cache file for starship status (avoids hammering GitLab API on every prompt)
 const CACHE_FILE: &str = "/tmp/autogit-starship-cache";
@@ -80,10 +80,7 @@ async fn fetch_status() -> String {
     }
 
     // Gather stats (parallel)
-    let (mirrors, runners) = tokio::join!(
-        count_mirrors(&client),
-        count_runners(&client),
-    );
+    let (mirrors, runners) = tokio::join!(count_mirrors(&client), count_runners(&client),);
 
     let mut parts = vec!["⬡".to_string()];
 
@@ -98,11 +95,17 @@ async fn fetch_status() -> String {
 }
 
 async fn count_mirrors(client: &GitLabClient) -> usize {
-    client.list_mirror_projects().await.map(|p| p.len()).unwrap_or(0)
+    client
+        .list_mirror_projects()
+        .await
+        .map(|p| p.len())
+        .unwrap_or(0)
 }
 
 async fn count_runners(client: &GitLabClient) -> usize {
-    client.list_runners().await
+    client
+        .list_runners()
+        .await
         .map(|r| r.iter().filter(|r| r.active).count())
         .unwrap_or(0)
 }

@@ -3,10 +3,10 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
+from gitlab_client import GitLabApiError, GitLabClient
+
 # Add tools directory to path to import GitLabClient
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../tools")))
-
-from gitlab_client import GitLabApiError, GitLabClient
 
 
 class TestGitLabClient(unittest.TestCase):

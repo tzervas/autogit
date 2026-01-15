@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     hostname: 'gitlab.vectorweight.com'
     environment:
-      GITLAB_OMNIBUS_CONFIG: |
+      GITLAB_OMNIBUS_CONFIG: | # pragma: allowlist secret
         # External URL - Use standard port 80 internally, Docker maps to 8080 externally
         external_url 'http://gitlab.vectorweight.com'
 

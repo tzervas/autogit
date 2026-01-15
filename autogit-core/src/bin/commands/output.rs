@@ -28,11 +28,6 @@ impl OutputFormat {
         }
     }
 
-    /// Check if this is quiet mode
-    pub fn is_quiet(&self) -> bool {
-        matches!(self, OutputFormat::Quiet)
-    }
-
     /// Check if this is JSON mode
     pub fn is_json(&self) -> bool {
         matches!(self, OutputFormat::Json)
@@ -94,7 +89,11 @@ impl TextOutput for StatusOutput {
         }
 
         if let Some(user) = &self.current_user {
-            info!("   Authenticated as: {} ({})", user.username, if user.admin { "admin" } else { "user" });
+            info!(
+                "   Authenticated as: {} ({})",
+                user.username,
+                if user.admin { "admin" } else { "user" }
+            );
         }
 
         info!("");
@@ -105,7 +104,10 @@ impl TextOutput for StatusOutput {
         }
 
         info!("");
-        info!("📦 Projects: {} ({} mirrors)", self.projects.total, self.projects.mirrors);
+        info!(
+            "📦 Projects: {} ({} mirrors)",
+            self.projects.total, self.projects.mirrors
+        );
 
         info!("");
         info!("🏃 Runners: {} total", self.runners.total);
@@ -183,11 +185,7 @@ impl TextOutput for RunnerListOutput {
 
         info!("Found {} runner(s):\n", self.runners.len());
         for runner in &self.runners {
-            let status_icon = if runner.online {
-                "🟢"
-            } else {
-                "🔴"
-            };
+            let status_icon = if runner.online { "🟢" } else { "🔴" };
 
             info!(
                 "  {} {} (ID: {})",

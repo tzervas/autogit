@@ -52,17 +52,12 @@ impl CredentialStore {
                 let value = value
                     .strip_prefix('\'')
                     .and_then(|s| s.strip_suffix('\''))
-                    .or_else(|| {
-                        value
-                            .strip_prefix('"')
-                            .and_then(|s| s.strip_suffix('"'))
-                    })
+                    .or_else(|| value.strip_prefix('"').and_then(|s| s.strip_suffix('"')))
                     .unwrap_or(value);
 
-                store.credentials.insert(
-                    key.to_string(),
-                    SecretString::from(value.to_string()),
-                );
+                store
+                    .credentials
+                    .insert(key.to_string(), SecretString::from(value.to_string()));
             }
         }
 
@@ -76,15 +71,15 @@ impl CredentialStore {
 
     /// Get a credential and expose it (use carefully)
     pub fn get_exposed(&self, key: &str) -> Option<String> {
-        self.credentials.get(key).map(|s| s.expose_secret().to_string())
+        self.credentials
+            .get(key)
+            .map(|s| s.expose_secret().to_string())
     }
 
     /// Set a credential
     pub fn set(&mut self, key: impl Into<String>, value: impl Into<String>) {
-        self.credentials.insert(
-            key.into(),
-            SecretString::from(value.into()),
-        );
+        self.credentials
+            .insert(key.into(), SecretString::from(value.into()));
     }
 
     /// Remove a credential
@@ -107,7 +102,10 @@ impl CredentialStore {
         let path = path.as_ref();
 
         let mut content = String::from("# Autogit credentials - KEEP SECURE\n");
-        content.push_str(&format!("# Generated: {}\n\n", chrono::Utc::now().to_rfc3339()));
+        content.push_str(&format!(
+            "# Generated: {}\n\n",
+            chrono::Utc::now().to_rfc3339()
+        ));
 
         for (key, value) in &self.credentials {
             // Escape single quotes in value

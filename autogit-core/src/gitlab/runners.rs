@@ -220,11 +220,3 @@ impl UpdateRunnerRequest {
         }
     }
 }
-
-/// Runner registration token (from instance/group/project settings)
-#[derive(Debug, Clone, Deserialize)]
-pub struct RegistrationToken {
-    pub token: String,
-    #[serde(default)]
-    pub token_expires_at: Option<DateTime<Utc>>,
-}

@@ -133,11 +133,13 @@ class TaskerCLI:
             if milestone.target:
                 print(f"   Target: {milestone.target}")
             print(
-                f"   Progress: {progress:.0f}% ({sum(1 for t in milestone.subtasks if t.is_complete())}/{len(milestone.subtasks)} subtasks)"
+                f"   Progress: {progress:.0f}% "
+                f"({sum(1 for t in milestone.subtasks if t.is_complete())}/"
+                f"{len(milestone.subtasks)} subtasks)"
             )
 
             if args.verbose and milestone.subtasks:
-                print(f"   Subtasks:")
+                print("   Subtasks:")
                 for task in milestone.subtasks:
                     task_emoji = self._get_status_emoji(task.status)
                     print(f"      {task_emoji} {task.title} ({task.status.value})")
@@ -307,7 +309,7 @@ Examples:
         subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
         # next command
-        next_parser = subparsers.add_parser("next", help="Show the next actionable work item")
+        subparsers.add_parser("next", help="Show the next actionable work item")
 
         # list command
         list_parser = subparsers.add_parser("list", help="List all milestones and tasks")

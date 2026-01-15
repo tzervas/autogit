@@ -57,3 +57,6 @@ homelab-migration/data/
 homelab-migration/ssl/
 homelab-migration/*.log
 deployment-logs/
+
+# Rust build artifacts
+autogit-core/target/

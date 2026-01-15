@@ -2,6 +2,23 @@
 
 All notable changes to autogit-core will be documented in this file.
 
+## [0.2.0] - 2025-12-31
+
+### Added
+
+#### Port Management
+
+- New `port_manager.rs` module for managing service ports
+- Type-safe port allocation and conflict detection
+
+#### Infrastructure Enhancements
+
+- Extended GitLab deployment with Grafana monitoring stack
+- Enabled Prometheus external access and advanced monitoring
+- Added Grafana with community dashboards (Omnibus, CI, Runner, Gitaly, Workhorse)
+- Integrated container registry and GitLab Pages
+- Optimized resource limits for dual-stack homelab operation
+
 ## [0.1.0] - 2025-12-25
 
 ### Added

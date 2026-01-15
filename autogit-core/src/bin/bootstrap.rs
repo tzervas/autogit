@@ -6,7 +6,7 @@ use autogit_core::{
     config::Config,
     credentials::CredentialStore,
     gitlab::{
-        AuthMethod, CreateTokenRequest, CreateUserRequest, GitLabClient, Token, TokenScope,
+        CreateTokenRequest, CreateUserRequest, GitLabClient, TokenScope,
     },
     Result,
 };

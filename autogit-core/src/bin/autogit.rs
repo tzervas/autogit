@@ -9,8 +9,8 @@ use tracing::{info, Level};
 
 mod commands;
 
-use commands::OutputFormat;
 use autogit_core::Result;
+use commands::OutputFormat;
 
 /// Supported shells for completion generation
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -229,35 +229,41 @@ async fn main() -> Result<()> {
     }
 
     match cli.command {
-        Commands::Bootstrap { service_only, output } => {
-            commands::bootstrap::run(&cli.config, &output, service_only, cli.dry_run).await
-        }
-        Commands::Mirror { action } => {
-            commands::mirror::run(action, cli.dry_run, cli.format).await
-        }
-        Commands::Runner { action } => {
-            commands::runner::run(action, cli.dry_run, cli.format).await
-        }
-        Commands::Config { action } => {
-            commands::config::run(action, &cli.config).await
-        }
-        Commands::Status => {
-            commands::status::run(&cli.config, cli.format).await
-        }
+        Commands::Bootstrap {
+            service_only,
+            output,
+        } => commands::bootstrap::run(&cli.config, &output, service_only, cli.dry_run).await,
+        Commands::Mirror { action } => commands::mirror::run(action, cli.dry_run, cli.format).await,
+        Commands::Runner { action } => commands::runner::run(action, cli.dry_run, cli.format).await,
+        Commands::Config { action } => commands::config::run(action, &cli.config).await,
+        Commands::Status => commands::status::run(&cli.config, cli.format).await,
         Commands::Completions { shell } => {
             let mut cmd = Cli::command();
             match shell {
-                CompletionShell::Bash => generate(Shell::Bash, &mut cmd, "autogit", &mut std::io::stdout()),
-                CompletionShell::Zsh => generate(Shell::Zsh, &mut cmd, "autogit", &mut std::io::stdout()),
-                CompletionShell::Fish => generate(Shell::Fish, &mut cmd, "autogit", &mut std::io::stdout()),
-                CompletionShell::PowerShell => generate(Shell::PowerShell, &mut cmd, "autogit", &mut std::io::stdout()),
-                CompletionShell::Elvish => generate(Shell::Elvish, &mut cmd, "autogit", &mut std::io::stdout()),
-                CompletionShell::Nushell => generate(Nushell, &mut cmd, "autogit", &mut std::io::stdout()),
+                CompletionShell::Bash => {
+                    generate(Shell::Bash, &mut cmd, "autogit", &mut std::io::stdout())
+                }
+                CompletionShell::Zsh => {
+                    generate(Shell::Zsh, &mut cmd, "autogit", &mut std::io::stdout())
+                }
+                CompletionShell::Fish => {
+                    generate(Shell::Fish, &mut cmd, "autogit", &mut std::io::stdout())
+                }
+                CompletionShell::PowerShell => generate(
+                    Shell::PowerShell,
+                    &mut cmd,
+                    "autogit",
+                    &mut std::io::stdout(),
+                ),
+                CompletionShell::Elvish => {
+                    generate(Shell::Elvish, &mut cmd, "autogit", &mut std::io::stdout())
+                }
+                CompletionShell::Nushell => {
+                    generate(Nushell, &mut cmd, "autogit", &mut std::io::stdout())
+                }
             }
             Ok(())
         }
-        Commands::Starship => {
-            commands::starship::run().await
-        }
+        Commands::Starship => commands::starship::run().await,
     }
 }

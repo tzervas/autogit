@@ -12,11 +12,11 @@ grafana:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - grafana.vectorweight.com
+      - grafana.example.com
     tls:
       - secretName: grafana-tls
         hosts:
-          - grafana.vectorweight.com
+          - grafana.example.com
 
 alertmanager:
   config:
@@ -44,8 +44,8 @@ alertmanager:
         
         # Email notifications (optional)
         # email_configs:
-        #   - to: 'alerts@vectorweight.com'
-        #     from: 'alertmanager@vectorweight.com'
+        #   - to: 'alerts@example.com'
+        #     from: 'alertmanager@example.com'
         #     smarthost: 'smtp.gmail.com:587'
         #     auth_username: 'your-email@gmail.com'
         #     auth_password: 'use-kubernetes-secret'
@@ -60,11 +60,11 @@ prometheus:
     enabled: true
     ingressClassName: traefik
     hosts:
-      - prometheus.vectorweight.com
+      - prometheus.example.com
     tls:
       - secretName: prometheus-tls
         hosts:
-          - prometheus.vectorweight.com
+          - prometheus.example.com
   
   prometheusSpec:
     # External labels for federation/remote write

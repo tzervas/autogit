@@ -24,7 +24,7 @@ ingressRoute:
   dashboard:
     enabled: true
     # Restrict to internal network
-    matchRule: Host(`traefik.vectorweight.com`) && (ClientIP(`192.168.0.0/16`) || ClientIP(`10.0.0.0/8`))
+    matchRule: Host(`traefik.example.com`) && (ClientIP(`192.168.0.0/16`) || ClientIP(`10.0.0.0/8`))
     entryPoints:
       - websecure
 

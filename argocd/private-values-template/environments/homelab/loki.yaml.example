@@ -29,7 +29,7 @@ loki:
     # S3/MinIO configuration (for production)
     # storage_config:
     #   aws:
-    #     s3: s3://access_key:secret_key@minio.vectorweight.com/loki
+    #     s3: s3://access_key:secret_key@minio.example.com/loki
     #     s3forcepathstyle: true
     
     # Retention settings

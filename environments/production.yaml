@@ -1,0 +1,19 @@
+# =============================================================================
+# Production Environment Values
+# =============================================================================
+# Configuration for production environment
+# =============================================================================
+
+global:
+  domain: autogit.io
+  clusterIssuer: letsencrypt-prod
+  storageClass: "fast-ssd"
+
+resources:
+  profile: large
+
+features:
+  monitoring: true
+  logging: true
+  tracing: true
+  registry: true

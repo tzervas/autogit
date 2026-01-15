@@ -71,13 +71,18 @@ cp .env.example .env
 docker compose up -d
 ```
 
-### Kubernetes/Helm (Production) - ⚠️ Planned, Not Yet Implemented
+### Kubernetes/Helm (Production) - ✅ Available via ArgoCD
 
 ```bash
-# Kubernetes deployment is planned for future releases
-# Currently, use Docker Compose for all deployments
-# See DEPLOYMENT_READINESS.md for current status
+# Option 1: ArgoCD (Recommended)
+# Add repository to ArgoCD, create secrets, then deploy:
+kubectl apply -f argocd/apps/root.yaml
+
+# Option 2: Helmfile
+helmfile -e homelab sync
 ```
+
+See [Kubernetes Installation Guide](docs/installation/kubernetes.md) for detailed instructions.
 
 See [Installation Guide](docs/installation/README.md) and
 [DEPLOYMENT_READINESS.md](DEPLOYMENT_READINESS.md) for detailed instructions and current feature

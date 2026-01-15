@@ -1,0 +1,22 @@
+# =============================================================================
+# Default Environment Values
+# =============================================================================
+# Base configuration inherited by all environments
+# =============================================================================
+
+# Global settings
+global:
+  domain: autogit.local
+  clusterIssuer: letsencrypt-staging
+  storageClass: ""
+
+# Resource profiles
+resources:
+  profile: minimal  # minimal, standard, large
+
+# Feature flags
+features:
+  monitoring: true
+  logging: true
+  tracing: false
+  registry: false

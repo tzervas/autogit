@@ -1,0 +1,48 @@
+# =============================================================================
+# Runner Coordinator Application
+# =============================================================================
+# Deploys the AutoGit Runner Coordinator using the custom Helm chart
+# Values are loaded from charts/runner-coordinator/values.yaml
+# Private/sensitive values should come from a separate private repository
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-runner-coordinator
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-runner-coordinator
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: runner-coordinator
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/tzervas/autogit.git
+    targetRevision: main
+    path: charts/runner-coordinator
+    helm:
+      releaseName: runner-coordinator
+      valueFiles:
+        - values.yaml
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-system
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

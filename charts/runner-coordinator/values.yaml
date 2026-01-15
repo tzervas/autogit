@@ -1,0 +1,219 @@
+# =============================================================================
+# AutoGit Runner Coordinator - Default Values
+# =============================================================================
+# Documentation: https://github.com/tzervas/autogit/blob/main/docs/runners/
+# =============================================================================
+
+# -- Number of replicas (only 1 supported for SQLite backend)
+replicaCount: 1
+
+image:
+  # -- Container image repository
+  repository: ghcr.io/tzervas/autogit/runner-coordinator
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag (default: chart appVersion)
+  tag: ""
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override chart name
+nameOverride: ""
+# -- Override full name
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create service account
+  create: true
+  # -- Annotations for service account
+  annotations: {}
+  # -- Service account name (auto-generated if not set)
+  name: ""
+  # -- Automount service account token
+  automount: true
+
+# -- Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+# -- Pod labels
+podLabels:
+  app.kubernetes.io/component: runner-coordinator
+
+# -- Pod security context
+podSecurityContext:
+  fsGroup: 1000
+
+# -- Container security context
+securityContext:
+  # Note: May need root for Docker socket access
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port
+  port: 8080
+  # -- Target port
+  targetPort: 8080
+
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: "traefik"
+  # -- Ingress annotations
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  # -- Ingress hosts
+  hosts:
+    - host: runner-coordinator.autogit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration
+  tls: []
+
+# -- Resource limits and requests
+resources:
+  limits:
+    cpu: "4"
+    memory: 4Gi
+  requests:
+    cpu: "1"
+    memory: 1Gi
+
+# -- Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# -- Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# -- Node selector
+nodeSelector: {}
+
+# -- Tolerations
+tolerations: []
+
+# -- Affinity rules
+affinity: {}
+
+# =============================================================================
+# Runner Coordinator Configuration
+# =============================================================================
+
+config:
+  # -- GitLab URL for runner registration
+  gitlabUrl: "https://gitlab.example.com"
+  # -- Runner cooldown period in minutes before cleanup
+  cooldownMinutes: 5
+  # -- Maximum number of idle runners to keep
+  maxIdleRunners: 0
+  # -- Docker network for spawned runners
+  runnerNetwork: "autogit-network"
+  # -- Log level (DEBUG, INFO, WARNING, ERROR)
+  logLevel: "INFO"
+
+# -- Existing secret containing GitLab tokens
+# Must have keys: GITLAB_TOKEN, GITLAB_RUNNER_REGISTRATION_TOKEN
+existingSecret: ""
+
+# -- GitLab token (only used if existingSecret is not set)
+# Use secrets management in production!
+gitlabToken: ""
+
+# -- Runner registration token (only used if existingSecret is not set)
+# Use secrets management in production!
+runnerRegistrationToken: ""
+
+# =============================================================================
+# Runner Executor Configuration
+# =============================================================================
+
+executor:
+  # -- Executor type: docker or kubernetes
+  type: "kubernetes"
+  
+  docker:
+    # -- Enable Docker-in-Docker mode
+    enabled: false
+    # -- Docker socket path (for DinD sidecar or host mount)
+    socketPath: "/var/run/docker.sock"
+  
+  kubernetes:
+    # -- Enable Kubernetes executor
+    enabled: true
+    # -- Namespace for runner pods
+    namespace: "autogit-runners"
+    # -- Service account for runner pods
+    serviceAccount: "gitlab-runner"
+    # -- Default CPU request for runner pods
+    cpuRequest: "500m"
+    # -- Default memory request for runner pods
+    memoryRequest: "512Mi"
+    # -- Default CPU limit for runner pods
+    cpuLimit: "2"
+    # -- Default memory limit for runner pods
+    memoryLimit: "2Gi"
+    # -- Pull policy for runner images
+    pullPolicy: "IfNotPresent"
+
+# =============================================================================
+# Persistence Configuration
+# =============================================================================
+
+persistence:
+  # -- Enable persistent storage for SQLite database
+  enabled: true
+  # -- Storage class (empty = default)
+  storageClass: ""
+  # -- Access modes
+  accessModes:
+    - ReadWriteOnce
+  # -- Volume size
+  size: 1Gi
+  # -- Annotations for PVC
+  annotations: {}
+
+# =============================================================================
+# Metrics Configuration
+# =============================================================================
+
+metrics:
+  # -- Enable Prometheus metrics
+  enabled: true
+  serviceMonitor:
+    # -- Create ServiceMonitor for Prometheus Operator
+    enabled: false
+    # -- ServiceMonitor namespace (defaults to release namespace)
+    namespace: ""
+    # -- Additional labels
+    labels: {}
+    # -- Scrape interval
+    interval: 30s
+    # -- Scrape timeout
+    scrapeTimeout: 10s

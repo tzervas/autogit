@@ -1,0 +1,19 @@
+# =============================================================================
+# cert-manager Private Values - Homelab Environment
+# =============================================================================
+# Copy to cert-manager.yaml and fill in your actual values
+# =============================================================================
+
+# Additional DNS providers for ACME DNS-01 challenges
+# Useful when HTTP-01 challenges aren't possible (internal services, wildcards)
+
+# Cloudflare DNS provider example
+# extraArgs:
+#   - --dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53
+#   - --dns01-recursive-nameservers-only
+
+# For webhook-based DNS providers, you may need additional configuration
+# See: https://cert-manager.io/docs/configuration/acme/dns01/
+
+# Note: ClusterIssuers are defined in argocd/base/cluster-issuers.yaml
+# Update that file with your actual email address

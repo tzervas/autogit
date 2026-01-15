@@ -1,0 +1,56 @@
+{{- if and .Values.serviceAccount.create .Values.executor.kubernetes.enabled }}
+---
+# ClusterRole for runner-coordinator to manage runner pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "runner-coordinator.fullname" . }}
+  labels:
+    {{- include "runner-coordinator.labels" . | nindent 4 }}
+rules:
+  # Pod management for spawning runners
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  # Secrets for runner configuration
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "delete"]
+  # ConfigMaps for runner configuration
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "create", "delete"]
+  # ServiceAccounts for runner pods
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list"]
+  # Events for monitoring
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch"]
+  # Namespaces for multi-namespace runner support
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "runner-coordinator.fullname" . }}
+  labels:
+    {{- include "runner-coordinator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "runner-coordinator.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "runner-coordinator.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

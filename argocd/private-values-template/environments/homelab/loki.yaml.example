@@ -1,0 +1,59 @@
+# =============================================================================
+# Loki Stack Private Values - Homelab Environment
+# =============================================================================
+# Copy to loki.yaml and fill in your actual values
+# =============================================================================
+
+loki:
+  config:
+    # Storage backend configuration
+    # For production, consider using S3/MinIO/GCS
+    schema_config:
+      configs:
+        - from: 2024-01-01
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v12
+          index:
+            prefix: index_
+            period: 24h
+    
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /data/loki/boltdb-shipper-active
+        cache_location: /data/loki/boltdb-shipper-cache
+        shared_store: filesystem
+      filesystem:
+        directory: /data/loki/chunks
+    
+    # S3/MinIO configuration (for production)
+    # storage_config:
+    #   aws:
+    #     s3: s3://access_key:secret_key@minio.vectorweight.com/loki
+    #     s3forcepathstyle: true
+    
+    # Retention settings
+    compactor:
+      working_directory: /data/loki/compactor
+      shared_store: filesystem
+      retention_enabled: true
+      retention_delete_delay: 2h
+    
+    limits_config:
+      retention_period: 720h  # 30 days
+
+promtail:
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    
+    scrape_configs:
+      # Scrape Kubernetes pod logs
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace

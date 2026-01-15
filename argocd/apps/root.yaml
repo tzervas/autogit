@@ -1,0 +1,63 @@
+# =============================================================================
+# AutoGit Root Application (App-of-Apps)
+# =============================================================================
+# This is the root ArgoCD Application that manages all other applications.
+# Deploy this single application to bootstrap the entire AutoGit platform.
+#
+# Usage:
+#   kubectl apply -f argocd/apps/root.yaml
+#
+# Or via ArgoCD CLI:
+#   argocd app create autogit \
+#     --repo https://github.com/tzervas/autogit.git \
+#     --path argocd/apps \
+#     --dest-server https://kubernetes.default.svc \
+#     --dest-namespace argocd \
+#     --sync-policy automated
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit
+    app.kubernetes.io/part-of: autogit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/tzervas/autogit.git
+    targetRevision: main
+    path: argocd/apps
+    directory:
+      recurse: false
+      include: "*.yaml"
+      exclude: "root.yaml"  # Don't include self
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Health assessment
+  revisionHistoryLimit: 10

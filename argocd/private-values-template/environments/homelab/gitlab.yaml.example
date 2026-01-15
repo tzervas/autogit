@@ -1,0 +1,59 @@
+# =============================================================================
+# GitLab Private Values - Homelab Environment
+# =============================================================================
+# Copy to gitlab.yaml and fill in your actual values
+# =============================================================================
+
+global:
+  hosts:
+    # Your actual domain
+    domain: vectorweight.com
+    https: true
+    gitlab:
+      name: gitlab.vectorweight.com
+    registry:
+      name: registry.vectorweight.com
+    minio:
+      name: minio.vectorweight.com
+  
+  # SMTP configuration for email notifications
+  smtp:
+    enabled: true
+    address: smtp.gmail.com
+    port: 587
+    user_name: your-email@gmail.com
+    # Password should be stored in Kubernetes Secret
+    # password: use-kubernetes-secret
+    authentication: login
+    starttls_auto: true
+  
+  # Email settings
+  email:
+    from: gitlab@vectorweight.com
+    display_name: GitLab
+    reply_to: noreply@vectorweight.com
+
+  # OAuth providers (optional)
+  appConfig:
+    omniauth:
+      enabled: false
+      # providers:
+      #   - name: google_oauth2
+      #     app_id: "your-client-id"
+      #     app_secret: use-kubernetes-secret
+      #     args:
+      #       access_type: offline
+      #       approval_prompt: ""
+
+# Let's Encrypt certificate issuer
+certmanager-issuer:
+  email: your-real-email@example.com
+
+# GitLab Runner registration (if using integrated runners)
+gitlab-runner:
+  runners:
+    config: |
+      [[runners]]
+        [runners.kubernetes]
+        image = "ubuntu:22.04"
+        # privileged = true  # Only if needed for Docker-in-Docker

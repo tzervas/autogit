@@ -1,0 +1,48 @@
+# =============================================================================
+# Default Values - Traefik
+# =============================================================================
+# Reference: https://artifacthub.io/packages/helm/traefik/traefik
+# =============================================================================
+
+deployment:
+  replicas: 1
+
+service:
+  type: LoadBalancer
+
+ports:
+  web:
+    port: 8000
+    exposedPort: 80
+  websecure:
+    port: 8443
+    exposedPort: 443
+    tls:
+      enabled: true
+  metrics:
+    port: 9100
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+metrics:
+  prometheus:
+    entryPoint: metrics
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+rbac:
+  enabled: true

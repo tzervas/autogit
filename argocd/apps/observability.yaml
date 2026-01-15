@@ -1,0 +1,64 @@
+# =============================================================================
+# Observability Stack Application
+# =============================================================================
+# Deploys Prometheus, Grafana using kube-prometheus-stack
+# Values are loaded from charts/values/ - no inline overrides
+# =============================================================================
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: autogit-observability
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: autogit-observability
+    app.kubernetes.io/part-of: autogit
+    app.kubernetes.io/component: observability
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  sources:
+    # Primary source: kube-prometheus-stack Helm chart
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "65.1.0"
+      helm:
+        releaseName: prometheus
+        valueFiles:
+          - $values/charts/values/prometheus.yaml
+    
+    # Values source: This repository
+    - repoURL: https://github.com/tzervas/autogit.git
+      targetRevision: main
+      ref: values
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: autogit-observability
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m
+  
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle

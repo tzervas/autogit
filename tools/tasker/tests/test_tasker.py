@@ -5,7 +5,7 @@ Unit tests for the tasker tool.
 import unittest
 from pathlib import Path
 
-from tools.tasker.models import Priority, TaskStatus
+from tools.tasker.models import TaskStatus
 from tools.tasker.parser import TaskTrackerParser
 
 

@@ -54,7 +54,8 @@ class RunnerManager:
         self.default_mem_limit = os.getenv("RUNNER_MEMORY_LIMIT", "6g")
 
         logger.info(
-            f"RunnerManager initialized: {self.default_cpu_limit} CPUs, {self.default_mem_limit} RAM per runner"
+            f"RunnerManager initialized: {self.default_cpu_limit} CPUs, "
+            f"{self.default_mem_limit} RAM per runner"
         )
         logger.info(f"Cooldown: {self.cooldown_minutes} minutes, Max idle: {self.max_idle_runners}")
         if self.runner_registration_token:

@@ -28,7 +28,8 @@ class GitLabClient:
 
         if not self.token:
             raise ValueError(
-                "GitLab API token is required. Set GITLAB_TOKEN env var or pass it to the constructor."
+                "GitLab API token is required. Set GITLAB_TOKEN env var "
+                "or pass it to the constructor."
             )
 
         self.headers = {"PRIVATE-TOKEN": self.token, "Content-Type": "application/json"}

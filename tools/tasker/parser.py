@@ -108,7 +108,6 @@ class TaskTrackerParser:
         milestone = Milestone(id=f"milestone-{milestone_num}", title=milestone_title, status=status)
 
         i = start_idx
-        current_section = None
 
         # Parse until we hit the next milestone or section
         while i < len(lines):

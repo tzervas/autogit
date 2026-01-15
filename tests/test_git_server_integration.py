@@ -4,10 +4,10 @@ import time
 import unittest
 from unittest.mock import MagicMock, patch
 
+from gitlab_client import GitLabClient
+
 # Add tools directory to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../tools")))
-
-from gitlab_client import GitLabApiError, GitLabClient
 
 
 class TestGitServerIntegration(unittest.TestCase):

@@ -1,5 +1,4 @@
 import logging
-import os
 import secrets
 from typing import Any, Dict
 

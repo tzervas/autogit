@@ -5,52 +5,49 @@
 use autogit_core::{
     config::Config,
     credentials::CredentialStore,
-    gitlab::{CreateTokenRequest, CreateUserRequest, GitLabClient, TokenScope},
+    gitlab::{
+        CreateTokenRequest, CreateUserRequest, GitLabClient, TokenScope,
+    },
     Result,
 };
 use tracing::{error, info, warn};
 
-/// Service account definitions
-const SERVICE_ACCOUNTS: &[(&str, &str, &str, &[TokenScope])] = &[
-    (
-        "autogit-ci",
-        "ci@vectorweight.com",
-        "CI Service",
-        &[
-            TokenScope::Api,
-            TokenScope::ReadRepository,
-            TokenScope::WriteRepository,
-        ],
-    ),
-    (
-        "autogit-api",
-        "api@vectorweight.com",
-        "API Service",
-        &[TokenScope::Api, TokenScope::ReadApi],
-    ),
-    (
-        "autogit-backup",
-        "backup@vectorweight.com",
-        "Backup Service",
-        &[
-            TokenScope::Api,
-            TokenScope::ReadRepository,
-            TokenScope::Sudo,
-        ],
-    ),
-];
+/// Service account definitions (loaded from environment)
+fn get_service_accounts() -> Vec<(String, String, String, Vec<TokenScope>)> {
+    let base_domain = std::env::var("BASE_DOMAIN").unwrap_or_else(|_| "example.com".to_string());
 
-/// Human user definitions
-const HUMAN_USERS: &[(&str, &str, &str, bool)] = &[
-    (
-        "sysadmin",
-        "sysadmin@vectorweight.com",
-        "System Admin",
-        true,
-    ),
-    ("kang", "kang@vectorweight.com", "Kang", false),
-    ("dev", "dev@vectorweight.com", "Developer", false),
-];
+    vec![
+        (
+            "autogit-ci".to_string(),
+            format!("ci@{}", base_domain),
+            "CI Service".to_string(),
+            vec![TokenScope::Api, TokenScope::ReadRepository, TokenScope::WriteRepository],
+        ),
+        (
+            "autogit-api".to_string(),
+            format!("api@{}", base_domain),
+            "API Service".to_string(),
+            vec![TokenScope::Api, TokenScope::ReadApi],
+        ),
+        (
+            "autogit-backup".to_string(),
+            format!("backup@{}", base_domain),
+            "Backup Service".to_string(),
+            vec![TokenScope::Api, TokenScope::ReadRepository, TokenScope::Sudo],
+        ),
+    ]
+}
+
+/// Human user definitions (loaded from environment)
+fn get_human_users() -> Vec<(String, String, String, bool)> {
+    let base_domain = std::env::var("BASE_DOMAIN").unwrap_or_else(|_| "example.com".to_string());
+
+    vec![
+        ("sysadmin".to_string(), format!("sysadmin@{}", base_domain), "System Admin".to_string(), true),
+        ("kang".to_string(), format!("kang@{}", base_domain), "Kang".to_string(), false),
+        ("dev".to_string(), format!("dev@{}", base_domain), "Developer".to_string(), false),
+    ]
+}
 
 /// Generate secure password
 fn generate_password() -> String {
@@ -111,21 +108,19 @@ async fn main() -> Result<()> {
     info!("");
     info!("👥 Creating human users...");
 
-    for (username, email, name, is_admin) in HUMAN_USERS {
+    for (username, email, name, is_admin) in get_human_users() {
         if client.user_exists(username).await? {
             info!("  ⏭️  User '{}' exists", username);
             continue;
         }
 
         let password = generate_password();
-        let request = CreateUserRequest::new(*username, *email, *name, &password).admin(*is_admin);
+        let request = CreateUserRequest::new(*username, *email, *name, &password)
+            .admin(*is_admin);
 
         match client.create_user(&request).await {
             Ok(user) => {
-                info!(
-                    "  ✅ Created {} (id={}, admin={})",
-                    username, user.id, is_admin
-                );
+                info!("  ✅ Created {} (id={}, admin={})", username, user.id, is_admin);
                 creds.set(format!("GITLAB_PASSWORD_{}", username), password);
             }
             Err(e) => {
@@ -143,15 +138,14 @@ async fn main() -> Result<()> {
         .checked_add_days(chrono::Days::new(365))
         .expect("valid date");
 
-    for (username, email, name, scopes) in SERVICE_ACCOUNTS {
+    for (username, email, name, scopes) in get_service_accounts() {
         if client.user_exists(username).await? {
             info!("  ⏭️  Service '{}' exists", username);
             continue;
         }
 
         let password = generate_password();
-        let request =
-            CreateUserRequest::new(*username, *email, format!("{} (Service)", name), &password);
+        let request = CreateUserRequest::new(*username, *email, format!("{} (Service)", name), &password);
 
         match client.create_user(&request).await {
             Ok(user) => {
@@ -162,8 +156,8 @@ async fn main() -> Result<()> {
                 );
 
                 // Create token
-                let token_request =
-                    CreateTokenRequest::new("autogit-token", scopes.to_vec()).expires_at(expiry);
+                let token_request = CreateTokenRequest::new("autogit-token", scopes.to_vec())
+                    .expires_at(expiry);
 
                 match client.create_user_token(user.id, &token_request).await {
                     Ok(pat) => {
@@ -187,8 +181,7 @@ async fn main() -> Result<()> {
     }
 
     // Save credentials
-    let creds_path =
-        std::env::var("CREDS_FILE").unwrap_or_else(|_| "gitlab-credentials.env".into());
+    let creds_path = std::env::var("CREDS_FILE").unwrap_or_else(|_| "gitlab-credentials.env".into());
     creds.save(&creds_path)?;
 
     info!("");

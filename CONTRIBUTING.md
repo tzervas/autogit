@@ -16,8 +16,8 @@ the development workflow.
 ## Branching Strategy
 
 AutoGit follows a structured branching model to maintain code quality and enable parallel
-development. Please read our complete [Branching Strategy Guide](development/branching-strategy.md)
-for detailed information.
+development. Please read our complete
+[Branching Strategy Guide](docs/development/branching-strategy.md) for detailed information.
 
 ### Quick Reference
 
@@ -144,7 +144,7 @@ docker-compose up
 # [Test commands will be added as features are implemented]
 ```
 
-See [Testing Guide](development/testing.md) for comprehensive testing guidelines.
+See [Testing Guide](docs/development/testing.md) for comprehensive testing guidelines.
 
 ## Code Review
 
@@ -174,12 +174,12 @@ Documentation is as important as code:
 - Update INDEX.md if adding new docs
 - Create ADRs for architecture decisions
 
-See [Documentation Guide](development/documentation.md) for details.
+See [Documentation Guide](docs/development/documentation.md) for details.
 
 ## Questions?
 
-- Check [FAQ.md](../FAQ.md) for common questions
-- Review [docs/INDEX.md](INDEX.md) for navigation
+- Check [FAQ](docs/FAQ.md) for common questions
+- Review [Documentation Index](docs/INDEX.md) for navigation
 - Open an issue for discussion
 - Ask in GitHub Discussions
 

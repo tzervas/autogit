@@ -109,14 +109,14 @@ async fn main() -> Result<()> {
     info!("👥 Creating human users...");
 
     for (username, email, name, is_admin) in get_human_users() {
-        if client.user_exists(username).await? {
+        if client.user_exists(&username).await? {
             info!("  ⏭️  User '{}' exists", username);
             continue;
         }
 
         let password = generate_password();
-        let request = CreateUserRequest::new(*username, *email, *name, &password)
-            .admin(*is_admin);
+        let request = CreateUserRequest::new(username.clone(), email, name, &password)
+            .admin(is_admin);
 
         match client.create_user(&request).await {
             Ok(user) => {
@@ -139,13 +139,13 @@ async fn main() -> Result<()> {
         .expect("valid date");
 
     for (username, email, name, scopes) in get_service_accounts() {
-        if client.user_exists(username).await? {
+        if client.user_exists(&username).await? {
             info!("  ⏭️  Service '{}' exists", username);
             continue;
         }
 
         let password = generate_password();
-        let request = CreateUserRequest::new(*username, *email, format!("{} (Service)", name), &password);
+        let request = CreateUserRequest::new(username.clone(), email, format!("{} (Service)", name), &password);
 
         match client.create_user(&request).await {
             Ok(user) => {

@@ -2,7 +2,7 @@
 # This Dockerfile is for ARM64 (aarch64) architecture
 # Used when running on ARM64 hosts or runners (Phase 2+)
 
-FROM gitlab/gitlab-ce:18.7.0-ce.0
+FROM gitlab/gitlab-ce:18.7.1-ce.0
 
 # Metadata
 LABEL maintainer="AutoGit Team"

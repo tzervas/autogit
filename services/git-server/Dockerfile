@@ -7,7 +7,7 @@
 # Image: ghcr.io/tzervas/autogit/git-server:{version}-{arch}-{variant}
 # Docs:  https://github.com/tzervas/autogit/blob/main/docs/git-server/README.md
 # =============================================================================
-FROM gitlab/gitlab-ce:18.7.1-ce.0
+FROM gitlab/gitlab-ce:18.8.3-ce.0
 
 # =============================================================================
 # Build Arguments for Dynamic Labeling

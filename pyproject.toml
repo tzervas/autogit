@@ -18,3 +18,6 @@ dependencies = [
 dev = [
     "pre-commit>=4.5.1",
 ]
+
+[tool.setuptools.packages.find]
+exclude = ["config*", "argocd*", "charts*", "services*", "environments*", "observability*", "infrastructure*", "homelab-migration*", "scripts*", "tests*", "tools*", "docs*", "autogit-core*"]

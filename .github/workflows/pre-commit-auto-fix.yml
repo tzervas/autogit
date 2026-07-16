@@ -5,14 +5,9 @@ name: Pre-commit Auto-fix
 # When fixes are needed, it commits them back to the PR branch
 # This ensures all code meets quality standards before merge
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
-      - dev
-      - 'feature/**'
-
+  workflow_dispatch:
 permissions:
   contents: write
   pull-requests: write

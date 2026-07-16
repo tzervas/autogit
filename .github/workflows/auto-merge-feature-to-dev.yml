@@ -1,12 +1,9 @@
 ---
 name: Auto Merge Feature to Dev
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request_review:
-    types: [submitted]
-  pull_request:
-    types: [labeled]
-
+  workflow_dispatch:
 permissions:
   contents: write
   pull-requests: write

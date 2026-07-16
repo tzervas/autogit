@@ -1,10 +1,8 @@
 ---
 name: Sync Dev to Feature Branches
 
+# Manual only — no push/pull_request CI triggers
 on:
-  push:
-    branches:
-      - dev
   workflow_dispatch:
     inputs:
       target_branch:

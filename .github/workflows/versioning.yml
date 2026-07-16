@@ -8,13 +8,9 @@ name: Automated Versioning
 #
 # Only triggers if there are actual code changes (excludes docs-only changes)
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - dev
-
+  workflow_dispatch:
 jobs:
   check-changes:
     name: Check for Code Changes

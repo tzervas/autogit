@@ -1,10 +1,9 @@
 ---
 name: Auto Label PRs
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request:
-    types: [opened, reopened]
-
+  workflow_dispatch:
 jobs:
   label-pr:
     name: Auto Label PR

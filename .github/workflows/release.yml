@@ -23,11 +23,8 @@ name: Release
 #
 # For testing builds without releasing, use the "Release Test Build" workflow
 
+# Manual only — no push/pull_request CI triggers
 on:
-  push:
-    tags:
-      - 'v*.*.*'      # Production releases (e.g., v0.3.0)
-      - 'v*.*.*-dev.*' # Development pre-releases (e.g., v0.3.1-dev.20241224)
   workflow_dispatch:
     inputs:
       source_branch:

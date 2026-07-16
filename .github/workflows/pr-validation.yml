@@ -1,13 +1,8 @@
 ---
 name: PR Validation
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request:
-    types: [opened, edited, synchronize, reopened]
-    branches:
-      - main
-      - dev
-      - 'feature/**'
   workflow_dispatch:
 
 permissions:

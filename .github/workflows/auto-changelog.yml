@@ -5,12 +5,8 @@ name: Automated Changelog Generator
 # Updates CHANGELOG.md and tracks version history
 # Runs on self-hosted runners for consistency
 
+# Manual only — no push/pull_request CI triggers
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - dev
   workflow_dispatch:
     inputs:
       target_version:

@@ -1,5 +1,10 @@
 # AutoGit
 
+<!-- FLEET-BADGES:BEGIN -->
+[![CI](https://github.com/tzervas/autogit/actions/workflows/fleet-ci.yml/badge.svg?branch=main)](https://github.com/tzervas/autogit/actions/workflows/fleet-ci.yml?query=branch%3Amain)
+[![Security](https://github.com/tzervas/autogit/actions/workflows/fleet-security.yml/badge.svg?branch=main)](https://github.com/tzervas/autogit/actions/workflows/fleet-security.yml?query=branch%3Amain)
+<!-- FLEET-BADGES:END -->
+
 <div align="center">
 
 **Self-Hosted GitOps Platform with Dynamic Multi-Architecture Runner Management**
